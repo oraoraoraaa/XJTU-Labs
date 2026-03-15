@@ -1,3 +1,3 @@
-# XJTU-Computer-Networking-Lab
+# Computer Networking
 
-The lab contents of XJTU Computer Networking course in 2026 Spring.
+The lab work for the course computer networking in 2026 Spring.
