@@ -1,0 +1,30 @@
+USED DATASET DOWNLOAD LINK: https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
+
+Mnist:
+手写数字数据集，图片只有灰度值一个通道，规模很小，复杂度低。
+包含60000张训练图像和10000张测试图像，每张图像是28x28的灰度图像，代表数字0到9
+Download: http://yann.lecun.com/exdb/mnist/
+
+Cifar10:
+图片分类任务常用的数据集，一共有60000张图片，包括10个生活中常见的不同物品类别。
+每个类别有6000张32x32彩色图像，分为5000张训练图片和1000张测试图片
+Cifar100: (USED)
+一共有60000张图片，包括100个类别，每个类别有600张32x32彩色图像，这些类别被分为20个大类和5个子类。
+每个大类下有5个子类，总共100个细分类
+Download: https://www.cs.toronto.edu/~kriz/cifar.html
+
+ImageNet:
+ImageNet有超过1400万张图片，超过2万个分类。
+最常见的ImageNet数据集一般是指它的子集ILSVRC2012，一共约135万张图片，1000个类别，每个类别有约1300张训练图像和50张验证图像。
+Download: https://www.image-net.org/
+ImageNet的下载需要用教育邮箱注册账号。
+数据集规模较大，下载时需要检查机器是否有足够空间。
+BibTex:
+@inproceedings{deng2009imagenet,
+  title={Imagenet: A large-scale hierarchical image database},
+  author={Deng, Jia and Dong, Wei and Socher, Richard and Li, Li-Jia and Li, Kai and Fei-Fei, Li},
+  booktitle={2009 IEEE conference on computer vision and pattern recognition},
+  pages={248--255},
+  year={2009},
+  organization={IEEE}
+}

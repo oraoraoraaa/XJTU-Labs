@@ -7,3 +7,6 @@ venv
 
 # Rust
 target
+
+# Machine Learning Dataset
+Machine-Learning/lab-preprocess/cifar-10-batches-py
