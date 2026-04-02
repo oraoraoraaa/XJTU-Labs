@@ -1,4 +1,5 @@
 import argparse
+import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -60,7 +61,10 @@ def main():
         "--sample-index", type=int, default=123, help="Index for task 2 visualization"
     )
     parser.add_argument(
-        "--show-count", type=int, default=10, help="Number of images shown in task 1"
+        "--show-count",
+        type=int,
+        default=None,
+        help="Number of images shown in task 1 (default: full batch)",
     )
     args = parser.parse_args()
 
@@ -90,11 +94,17 @@ def main():
 
     # Task 1: read one batch and print a grid image.
     images, _ = next(iter(trainloader))
-    show_count = min(args.show_count, images.size(0))
-    selected_images = images[:show_count]
-    grid = torchvision.utils.make_grid(selected_images, nrow=show_count, padding=2)
+    if args.show_count is None:
+        show_count = images.size(0)
+    else:
+        show_count = max(1, min(args.show_count, images.size(0)))
 
-    plt.figure(figsize=(15, 2.5))
+    nrow = min(10, show_count)
+    nrows = math.ceil(show_count / nrow)
+    selected_images = images[:show_count]
+    grid = torchvision.utils.make_grid(selected_images, nrow=nrow, padding=2)
+
+    plt.figure(figsize=(15, max(2.5, 2.2 * nrows)))
     plt.imshow(to_numpy_chw(grid))
     plt.axis("off")
     plt.title("Task 1: One Batch From CIFAR-10 (Unified Size)")
