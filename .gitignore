@@ -9,5 +9,4 @@ venv
 target
 
 # Machine Learning Lab Preprocessing
-Machine-Learning/lab-preprocess/cifar-10-batches-py
-Machine-Learning/lab-preprocess/results
+cifar-10-batches-py
