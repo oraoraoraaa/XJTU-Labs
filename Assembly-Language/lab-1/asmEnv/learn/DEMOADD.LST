@@ -1,0 +1,66 @@
+Microsoft (R) Macro Assembler Version 5.00                  4/12/26 00:57:34
+how to use add instruction                                  Page     1-1
+
+
+       1				; use full segment definition 
+       2				 
+       3				title how to use add instruction 
+       4				 
+       5 0000				data segment 
+       6 0000  11			    X  db  11H 
+       7 0001  22			    Y  db  22H 
+       8 0002  ??			    Z  db  ? 
+       9 0003				data ends 
+      10				 
+      11 0000				code segment 
+      12				    assume cs:code, ds:data 
+      13 0000				    main    proc 
+      14				        ; assign the data segment base 
+					address to DS 
+      15 0000  B8 ---- R		        mov   ax, data 
+      16 0003  8E D8			        mov   ds, ax 
+      17				         
+      18 0005  A0 0000 R		        mov   al,  X 
+      19 0008  02 06 0001 R		        add   al,  Y 
+      20 000C  A2 0002 R		        mov   Z,   al 
+      21				         
+      22				        ; method 2: return to dos 
+      23 000F  B8 4C00			        mov   ax, 4c00h 
+      24 0012  CD 21			        int   21h 
+      25 0014				    main    endp 
+      26 0014				code ends 
+      27				end main  
+Microsoft (R) Macro Assembler Version 5.00                  4/12/26 00:57:34
+how to use add instruction                                  Symbols-1
+
+
+Segments and Groups:
+
+                N a m e         	Length	 Align	Combine Class
+
+CODE . . . . . . . . . . . . . .  	0014	PARA	NONE	
+DATA . . . . . . . . . . . . . .  	0003	PARA	NONE	
+
+Symbols:            
+
+                N a m e         	Type	 Value	 Attr
+
+MAIN . . . . . . . . . . . . . .  	N PROC	0000	CODE	Length = 0014
+
+X  . . . . . . . . . . . . . . .  	L BYTE	0000	DATA
+
+Y  . . . . . . . . . . . . . . .  	L BYTE	0001	DATA
+
+Z  . . . . . . . . . . . . . . .  	L BYTE	0002	DATA
+
+@FILENAME  . . . . . . . . . . .  	TEXT  demoadd		
+
+
+     27 Source  Lines
+     27 Total   Lines
+      8 Symbols
+
+  50564 + 465884 Bytes symbol space free
+
+      0 Warning Errors
+      0 Severe  Errors

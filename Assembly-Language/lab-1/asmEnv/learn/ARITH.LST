@@ -1,0 +1,93 @@
+Microsoft (R) Macro Assembler Version 5.00                  4/12/26 01:52:40
+I love asm                                                  Page     1-1
+
+
+       1				; empty asm file 
+       2				 
+       3				title I love asm 
+       4				 
+       5 0000				data segment 
+       6 0000  32 32 33 34 34 31 32	    stu db  "2234412799" 
+       7       37 39 39			
+       8 000A  05			    X   db  5 
+       9 000B  06			    Y   db  6 
+      10 000C  00			    Z   db  0 
+      11 000D  14			    W   db  20 
+      12 000E				data ends 
+      13				 
+      14 0000				code segment 
+      15				    assume cs:code, ds:data 
+      16 0000				    main    proc 
+      17				        ; assign the data segment base 
+					address to DS 
+      18 0000  B8 ---- R		        mov   ax, data 
+      19 0003  8E D8			        mov   ds, ax 
+      20				         
+      21				        ; TODO ... 
+      22						; | add your code betwe
+					en arrows | 
+      23						; v -------------------
+					--------- v 
+      24 0005  A0 000D R		        mov   al, W 
+      25 0008  2A 06 000A R		        sub   al, X 
+      26 000C  98			        cbw 
+      27				 
+      28 000D  B3 05			        mov   bl, 5 
+      29 000F  F6 FB			        idiv  bl 
+      30				 
+      31 0011  F6 2E 000B R		        imul  Y 
+      32				 
+      33 0015  B3 02			        mov   bl, 2 
+      34 0017  F6 FB			        idiv  bl 
+      35				 
+      36 0019  A2 000C R		        mov   Z, al 
+      37				         
+      38				        ; ^ ---------------------------
+					- ^ 
+      39						; |          The END   
+					          | 
+      40				         
+      41				        ; method 2: return to dos 
+      42 001C  B8 4C00			        mov   ax, 4c00h 
+      43 001F  CD 21			        int   21h 
+      44 0021				    main    endp 
+      45 0021				code ends 
+      46				end main  
+Microsoft (R) Macro Assembler Version 5.00                  4/12/26 01:52:40
+I love asm                                                  Symbols-1
+
+
+Segments and Groups:
+
+                N a m e         	Length	 Align	Combine Class
+
+CODE . . . . . . . . . . . . . .  	0021	PARA	NONE	
+DATA . . . . . . . . . . . . . .  	000E	PARA	NONE	
+
+Symbols:            
+
+                N a m e         	Type	 Value	 Attr
+
+MAIN . . . . . . . . . . . . . .  	N PROC	0000	CODE	Length = 0021
+
+STU  . . . . . . . . . . . . . .  	L BYTE	0000	DATA
+
+W  . . . . . . . . . . . . . . .  	L BYTE	000D	DATA
+
+X  . . . . . . . . . . . . . . .  	L BYTE	000A	DATA
+
+Y  . . . . . . . . . . . . . . .  	L BYTE	000B	DATA
+
+Z  . . . . . . . . . . . . . . .  	L BYTE	000C	DATA
+
+@FILENAME  . . . . . . . . . . .  	TEXT  arith		
+
+
+     45 Source  Lines
+     45 Total   Lines
+     10 Symbols
+
+  50582 + 465866 Bytes symbol space free
+
+      0 Warning Errors
+      0 Severe  Errors
