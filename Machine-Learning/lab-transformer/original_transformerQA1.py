@@ -1,7 +1,6 @@
 import json
 import torch
 import torch.nn as nn
-from torch.amp import GradScaler, autocast
 from torch.utils.data import Dataset, DataLoader
 from torch.optim import AdamW
 import argparse
@@ -26,21 +25,6 @@ class Config:
         self.dropout = 0.1
         self.num_layers = 7
         self.vocab_size = 30522
-        self.num_workers = max(1, (os.cpu_count() or 1) - 1)
-        self.pin_memory = torch.cuda.is_available()
-        self.prefetch_factor = 4
-        self.use_amp = torch.cuda.is_available()
-        # torch.compile may be slower/noisier on smaller GPUs; keep it opt-in.
-        self.use_compile = False
-
-
-def optimize_runtime(config):
-    if torch.cuda.is_available():
-        torch.backends.cuda.matmul.allow_tf32 = True
-        torch.backends.cudnn.allow_tf32 = True
-        torch.backends.cudnn.benchmark = True
-    if hasattr(torch, "set_float32_matmul_precision"):
-        torch.set_float32_matmul_precision("high")
 
 
 class SQuADProcessor:
@@ -137,7 +121,6 @@ class TransformerQA(nn.Module):
             nhead=config.nhead,
             dim_feedforward=config.dim_feedforward,
             dropout=config.dropout,
-            batch_first=True,
         )
         self.encoder = nn.TransformerEncoder(encoder_layer, config.num_layers)
         self.start_fc = nn.Linear(config.d_model, 1)
@@ -147,8 +130,10 @@ class TransformerQA(nn.Module):
     def forward(self, input_ids, attention_mask):
         x = self.embedding(input_ids) + self.pos_encoder[: input_ids.size(1)]
         x = self.dropout(x)
+        x = x.permute(1, 0, 2)  # [seq_len, bs, dim]
 
         output = self.encoder(x, src_key_padding_mask=~attention_mask.bool())
+        output = output.permute(1, 0, 2)  # [bs, seq_len, dim]
 
         start_logits = self.start_fc(output).squeeze(-1)
         end_logits = self.end_fc(output).squeeze(-1)
@@ -162,34 +147,25 @@ class QATrainer:
         self.train_loader = train_loader
         self.dev_loader = dev_loader
         self.optimizer = AdamW(model.parameters(), lr=config.learning_rate)
-        self.criterion = nn.CrossEntropyLoss()
-        self.scaler = GradScaler("cuda", enabled=(config.use_amp and config.device.type == "cuda"))
-
-        if config.use_compile:
-            try:
-                self.model = torch.compile(self.model)
-            except Exception as e:
-                print(f"torch.compile disabled: {e}")
-                self.config.use_compile = False
 
     def train_epoch(self):
         self.model.train()
         total_loss = 0
         for batch in tqdm(self.train_loader, desc="Training"):
-            input_ids = batch["input_ids"].to(self.config.device, non_blocking=True)
-            mask = batch["attention_mask"].to(self.config.device, non_blocking=True)
-            start = batch["start_pos"].to(self.config.device, non_blocking=True)
-            end = batch["end_pos"].to(self.config.device, non_blocking=True)
+            input_ids = batch["input_ids"].to(self.config.device)
+            mask = batch["attention_mask"].to(self.config.device)
+            start = batch["start_pos"].to(self.config.device)
+            end = batch["end_pos"].to(self.config.device)
 
             self.optimizer.zero_grad()
+            s_logits, e_logits = self.model(input_ids, mask)
 
-            with autocast("cuda", enabled=(self.config.use_amp and self.config.device.type == "cuda")):
-                s_logits, e_logits = self.model(input_ids, mask)
-                loss = self.criterion(s_logits, start) + self.criterion(e_logits, end)
+            loss = nn.CrossEntropyLoss()(s_logits, start) + nn.CrossEntropyLoss()(
+                e_logits, end
+            )
 
-            self.scaler.scale(loss).backward()
-            self.scaler.step(self.optimizer)
-            self.scaler.update()
+            loss.backward()
+            self.optimizer.step()
             total_loss += loss.item()
         return total_loss / len(self.train_loader)
 
@@ -198,16 +174,17 @@ class QATrainer:
         total_loss = 0.0
         total_start_acc = 0.0
         total_end_acc = 0.0
-        with torch.inference_mode():
-            for batch in tqdm(self.dev_loader, desc="Evaluating"):
-                input_ids = batch["input_ids"].to(self.config.device, non_blocking=True)
-                mask = batch["attention_mask"].to(self.config.device, non_blocking=True)
-                start = batch["start_pos"].to(self.config.device, non_blocking=True)
-                end = batch["end_pos"].to(self.config.device, non_blocking=True)
+        criterion = nn.CrossEntropyLoss()
 
-                with autocast("cuda", enabled=(self.config.use_amp and self.config.device.type == "cuda")):
-                    s_logits, e_logits = self.model(input_ids, mask)
-                    loss = self.criterion(s_logits, start) + self.criterion(e_logits, end)
+        with torch.no_grad():
+            for batch in tqdm(self.dev_loader, desc="Evaluating"):
+                input_ids = batch["input_ids"].to(self.config.device)
+                mask = batch["attention_mask"].to(self.config.device)
+                start = batch["start_pos"].to(self.config.device)
+                end = batch["end_pos"].to(self.config.device)
+
+                s_logits, e_logits = self.model(input_ids, mask)
+                loss = criterion(s_logits, start) + criterion(e_logits, end)
                 total_loss += loss.item()
 
                 pred_start = torch.argmax(s_logits, dim=-1)
@@ -233,19 +210,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=["train", "test"], required=True)
     parser.add_argument("--model_path", type=str)
-    parser.add_argument(
-        "--compile",
-        action="store_true",
-        help="Enable torch.compile (may help on powerful GPUs, but can be slower on small GPUs).",
-    )
     args = parser.parse_args()
 
     # 训练命令：python script.py --mode train
     # 测试命令：python script.py --mode test --model_path /path/to/model
 
     config = Config()
-    config.use_compile = args.compile or os.environ.get("USE_TORCH_COMPILE", "0") == "1"
-    optimize_runtime(config)
     processor = SQuADProcessor(config)
 
     if args.mode == "train":
@@ -254,29 +224,16 @@ def main():
         train_examples = processor.process(train_data)
         train_features = processor.create_features(train_examples)
         train_dataset = SQuADDataset(train_features)
-        train_loader_kwargs = {
-            "batch_size": config.batch_size,
-            "shuffle": True,
-            "num_workers": config.num_workers,
-            "pin_memory": config.pin_memory,
-        }
-        if config.num_workers > 0:
-            train_loader_kwargs["persistent_workers"] = True
-            train_loader_kwargs["prefetch_factor"] = config.prefetch_factor
-        train_loader = DataLoader(train_dataset, **train_loader_kwargs)
+        train_loader = DataLoader(
+            train_dataset, batch_size=config.batch_size, shuffle=True
+        )
 
         dev_data = processor.load_data(config.dev_path)
         dev_examples = processor.process(dev_data)
         dev_features = processor.create_features(dev_examples)
-        dev_loader_kwargs = {
-            "batch_size": config.batch_size,
-            "num_workers": config.num_workers,
-            "pin_memory": config.pin_memory,
-        }
-        if config.num_workers > 0:
-            dev_loader_kwargs["persistent_workers"] = True
-            dev_loader_kwargs["prefetch_factor"] = config.prefetch_factor
-        dev_loader = DataLoader(SQuADDataset(dev_features), **dev_loader_kwargs)
+        dev_loader = DataLoader(
+            SQuADDataset(dev_features), batch_size=config.batch_size
+        )
 
         model = TransformerQA(config)
         trainer = QATrainer(config, model, train_loader, dev_loader)
@@ -297,15 +254,9 @@ def main():
         dev_data = processor.load_data(config.dev_path)
         dev_examples = processor.process(dev_data)
         dev_features = processor.create_features(dev_examples)
-        dev_loader_kwargs = {
-            "batch_size": config.batch_size,
-            "num_workers": config.num_workers,
-            "pin_memory": config.pin_memory,
-        }
-        if config.num_workers > 0:
-            dev_loader_kwargs["persistent_workers"] = True
-            dev_loader_kwargs["prefetch_factor"] = config.prefetch_factor
-        dev_loader = DataLoader(SQuADDataset(dev_features), **dev_loader_kwargs)
+        dev_loader = DataLoader(
+            SQuADDataset(dev_features), batch_size=config.batch_size
+        )
 
         model = TransformerQA(config)
         trainer = QATrainer(config, model, None, dev_loader)
