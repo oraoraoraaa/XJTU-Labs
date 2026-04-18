@@ -3,9 +3,12 @@
 title I love asm
 
 data segment
-    ; Student ID string: first 10 chars are 2234412799, then additional chars for testing
-    STR db '22344127990012345678901234567890'  ; length > 20
-    COUNT db 10 dup(0)  ; count for 0-9
+    ; Student ID based string (length > 20)
+    STR    db  '223441279901399999990831'
+    STRLEN equ $ - STR
+
+    ; COUNT[0]..COUNT[9] store occurrences for character '0'..'9'
+    COUNT  db  10 dup(0)
 data ends
 
 code segment
@@ -18,57 +21,72 @@ code segment
         ; TODO ...
 		; | add your code between arrows |
 		; v ---------------------------- v
-        
-        ; Count occurrences of 0-9 in STR
-        lea si, STR
-        lea di, COUNT
-        mov cx, 30  ; length of STR
-        
-count_loop:
-        lodsb       ; AL = [si], si++
-        cmp al, '0'
-        jb not_digit
-        cmp al, '9'
-        ja not_digit
-        sub al, '0' ; AL = digit 0-9
-        mov bl, al
-        mov bh, 0
-        inc byte ptr [di + bx]
-not_digit:
-        loop count_loop
-        
-        ; Find the digit with max count, if tie, largest digit
-        mov al, 9   ; start from '9'
-        mov bl, 0   ; max count
-        mov cl, al  ; current max digit
-        
-find_max:
-        cmp al, 0
-        jl find_end
-        mov bh, 0
-        mov bl, al
-        mov dl, [di + bx]  ; DL = count
-        cmp dl, bl  ; BL is max count so far
-        jle not_max
-        mov bl, dl  ; update max count
-        mov cl, al  ; update max digit
-not_max:
-        dec al
-        jmp find_max
-find_end:
-        
-        ; Output: digit, count
-        mov dl, cl
-        add dl, '0' ; to ASCII
-        mov ah, 2
-        int 21h     ; output digit
-        
-        mov dl, ','
-        int 21h
-        
-        mov dl, bl
-        add dl, '0' ; assume count < 10
-        int 21h
+        ; Count each digit's occurrences into COUNT array
+        lea   si, STR
+        mov   cx, STRLEN
+    count_loop:
+        mov   al, [si]
+        cmp   al, '0'
+        jb    next_char
+        cmp   al, '9'
+        ja    next_char
+        sub   al, '0'
+        xor   ah, ah
+        mov   di, offset COUNT
+        add   di, ax
+        inc   byte ptr [di]
+    next_char:
+        inc   si
+        loop  count_loop
+
+        ; Find the digit with maximum count.
+        ; If counts are equal, keep the larger digit.
+        mov   si, offset COUNT
+        mov   cx, 10
+        xor   bl, bl        ; max count
+        xor   bh, bh        ; max digit (0..9)
+        xor   dl, dl        ; current digit index
+    find_max:
+        mov   al, [si]
+        cmp   al, bl
+        ja    update_max
+        jb    skip_update
+        cmp   dl, bh
+        jbe   skip_update
+    update_max:
+        mov   bl, al
+        mov   bh, dl
+    skip_update:
+        inc   si
+        inc   dl
+        loop  find_max
+
+        ; Output format: digit,count   (example: 9,9)
+        mov   dl, bh
+        add   dl, '0'
+        mov   ah, 02h
+        int   21h
+
+        mov   dl, ','
+        mov   ah, 02h
+        int   21h
+
+        ; Print count in decimal (0..99)
+        mov   al, bl
+        xor   ah, ah
+        mov   cl, 10
+        div   cl            ; AL = tens, AH = ones
+        cmp   al, 0
+        je    print_ones
+        add   al, '0'
+        mov   dl, al
+        mov   ah, 02h
+        int   21h
+    print_ones:
+        mov   dl, ah
+        add   dl, '0'
+        mov   ah, 02h
+        int   21h
         
         ; ^ ---------------------------- ^
 		; |          The END             |
