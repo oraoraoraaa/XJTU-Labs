@@ -1,0 +1,77 @@
+Microsoft (R) Macro Assembler Version 5.00                  4/12/26 02:15:00
+I love asm                                                  Page     1-1
+
+
+       1				; empty asm file 
+       2				 
+       3				title I love asm 
+       4				 
+       5 0000				data segment 
+       6 0000  11			    X  db  11H 
+       7 0001				data ends 
+       8				 
+       9 0000				code segment 
+      10				    assume cs:code, ds:data 
+      11 0000				    main    proc 
+      12				        ; assign the data segment base 
+					address to DS 
+      13 0000  B8 ---- R		        mov   ax, data 
+      14 0003  8E D8			        mov   ds, ax 
+      15				         
+      16				        ; TODO ... 
+      17						; | add your code betwe
+					en arrows | 
+      18						; v -------------------
+					--------- v 
+      19 0005  B3 1C			        mov   bl, 28 
+      20 0007  B1 05			        mov   cl, 5 
+      21				 
+      22 0009  32 E4			        xor   ah, ah 
+      23 000B  8A C3			        mov   al, bl 
+      24 000D  F6 F1			        div   cl 
+      25				 
+      26 000F  32 E4			        xor   ah, ah 
+      27 0011  D1 E0			        shl   ax, 1 
+      28 0013  8B D0			        mov   dx, ax 
+      29				         
+      30				        ; ^ ---------------------------
+					- ^ 
+      31						; |          The END   
+					          | 
+      32				         
+      33				        ; method 2: return to dos 
+      34 0015  B8 4C00			        mov   ax, 4c00h 
+      35 0018  CD 21			        int   21h 
+      36 001A				    main    endp 
+      37 001A				code ends 
+      38				end main  
+Microsoft (R) Macro Assembler Version 5.00                  4/12/26 02:15:00
+I love asm                                                  Symbols-1
+
+
+Segments and Groups:
+
+                N a m e         	Length	 Align	Combine Class
+
+CODE . . . . . . . . . . . . . .  	001A	PARA	NONE	
+DATA . . . . . . . . . . . . . .  	0001	PARA	NONE	
+
+Symbols:            
+
+                N a m e         	Type	 Value	 Attr
+
+MAIN . . . . . . . . . . . . . .  	N PROC	0000	CODE	Length = 001A
+
+X  . . . . . . . . . . . . . . .  	L BYTE	0000	DATA
+
+@FILENAME  . . . . . . . . . . .  	TEXT  reg		
+
+
+     38 Source  Lines
+     38 Total   Lines
+      6 Symbols
+
+  50600 + 465848 Bytes symbol space free
+
+      0 Warning Errors
+      0 Severe  Errors
