@@ -13,5 +13,5 @@ target
 cifar-10-batches-py
 
 # Machine Learning Lab Transformer
-Machine-Learning/lab-transformer/model
-Machine-Learning/lab-transformer/transformer_seq2seq.pt
+Machine-Learning/lab-3-transformer/model
+Machine-Learning/lab-3-transformer/transformer_seq2seq.pt
