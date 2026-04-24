@@ -1,0 +1,12 @@
+WinDLX流水线实验环境使用说明：
+1、安装安装VirtualBox
+    a) 建议VirtualBox，下载地址https://www.virtualbox.org/wiki/Downloads；
+	b) 2023年3月更新，目前的版本是7.0.6，可以正常使用；
+	c) 使用其它版本的话欢迎给我一个反馈。
+2、启动Virtualox;
+3、管理-->导入虚拟电脑，选择Win31D.ova；
+4、启动Win31；
+5、课程实验环境位于C:\WinDLX 目录下，双击文件管理器，双击windlx.exe启动模拟程序；
+6、环境配置完毕，开始学习吧。
+7、认真阅读wdlx tutorial.pdf文档，充分熟悉该模拟软件的操作
+8、按要求完成第1次上机的任务。
