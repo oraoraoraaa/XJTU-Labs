@@ -11,6 +11,7 @@ LW    $r3,0($r10)
 ADD   $r7,$r0,$r0
 ADD   $r4,$r1,$r2
 ADD   $r5,$r2,$r3
+ADD   $r7,$r0,$r0
 SW    $r4,0($r11)
 SW    $r5,0($r12)
 TEQ   $r0,$r0

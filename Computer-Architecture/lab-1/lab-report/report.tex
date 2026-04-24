@@ -82,7 +82,7 @@ Forwarding 功能通过在硬件中增加特殊的通路，允许指令在计算
 \begin{itemize}
 	\item 前5条\texttt{ADDIU}把数据标签地址装入\texttt{\$r8\textasciitilde\$r12}。
 	\item 三条\texttt{LW}将\texttt{A,B,C}读入寄存器。
-	\item 两条\texttt{ADD}计算\texttt{A+B}和\texttt{B+C}，再用\texttt{SW}写回结果。
+	\item 两条\texttt{ADD}计算\texttt{A+B}和\texttt{B+C}，再用\texttt{SW}写回结果。中间加入无关指令有意地拉开距离。
 	\item 末尾\texttt{TEQ \$r0,\$r0}作为程序停止标记。
 \end{itemize}
 
@@ -169,9 +169,8 @@ Forwarding 功能通过在硬件中增加特殊的通路，允许指令在计算
 
 观察与分析：
 \begin{itemize}
-	\item 执行周期总数为12，出现RAW停顿1次（均为load停顿，占所有RAW停顿100\%）。
-	\item 控制停顿1次，总停顿周期3（占25\%）。
-	\item 周期图中可见\texttt{ADD}前后存在明显插入停顿，符合load-use冲突机理。
+	\item 执行周期总数为14，出现RAW停顿4次（2次为load停顿，占所有RAW停顿50\%）。
+	\item 周期图中可见\texttt{ADD}和\texttt{SW}前后存在明显停顿，符合load-use冲突机理。
 \end{itemize}
 
 \subsection{MIPSsim结果：分支跳转场景}
