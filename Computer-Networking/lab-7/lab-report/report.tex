@@ -1,0 +1,414 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!70!black},
+  commentstyle=\color{green!40!black},
+  stringstyle=\color{orange!60!black},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  tabsize=4
+}
+
+\title{计算机网络专题实验七报告\\\large 基于规则增强OCR的停车场车牌识别与计费系统}
+\author{姓名：李祥熙\quad 班级：计算机2301 \\
+姓名：简辰轩\quad 班级：计算机2302}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{一、实验名称}
+基于Flask与EasyOCR的停车场车牌识别系统设计与实现（规则增强版）。
+
+\section*{二、实验原理}
+本实验围绕“图像上传—车牌识别—业务判定—费用计算—前后端反馈”这一完整链路展开，核心思想是在通用OCR能力之上叠加中国车牌的先验规则，从而降低误识别率并提升系统鲁棒性。系统原理可以分为网络通信原理、图像识别原理、规则推理原理与业务状态机原理四个层面。
+
+第一，网络通信层面，系统采用浏览器作为客户端，Flask作为HTTP服务端。用户通过移动端网页上传车牌图片，浏览器使用\texttt{fetch}提交\texttt{multipart/form-data}请求，服务端在\texttt{/upload}接口接收文件并返回JSON结果。该方式具备跨平台、低部署成本的优点，且天然支持局域网内多终端访问。HTTP请求与响应采用无状态交互，系统通过数据库持久化车辆状态，保证服务端重启后仍可继续计费。
+
+第二，图像识别层面，系统使用EasyOCR作为文字识别引擎，并结合OpenCV进行预处理。预处理流程包括双三次插值放大、双边滤波降噪、灰度化、CLAHE对比度增强。相比直接识别原图，该流程有助于提升字符边缘清晰度，尤其在夜间拍摄、压缩图像和移动端截图等低质量输入场景下效果明显。由于车牌区域通常只占整图很小比例，系统先利用HSV颜色阈值粗定位候选区域，再对候选区域进行OCR，减少背景干扰。
+
+第三，规则推理层面，本实验重点实现了“先验规则驱动识别”。中国普通机动车号牌普遍满足“省份简称+城市字母+字母数字序列”这一结构。系统将该结构显式编码为规则：首位必须为省份汉字，第二位必须为英文字母，后缀只能由字母数字组成。进一步考虑蓝牌和绿牌差异，系统引入颜色条件约束：蓝牌后缀长度必须为5，绿牌后缀长度必须为6。规则约束能显著过滤OCR噪声结果。例如OCR把“B”误读成“8”时，通过城市位映射表可纠偏为“B”；又如识别到长度不匹配的串，会被直接判为无效结果，避免错误写库。
+
+第四，业务状态机层面，系统将车辆状态抽象为“在场”和“离场”两种状态。识别出车牌后，若数据库中不存在该车牌且状态为在场的记录，则判定为入场并插入新记录；若存在在场记录，则判定为出场，计算停留时长并更新费用。费用采用按小时线性计费模型（每小时5元），其中时长由\texttt{total\_seconds()}计算，避免跨天与分钟换算误差。
+
+综上，本系统不是简单“调一个OCR接口”，而是把网络服务、图像算法、规则系统、数据库状态管理结合成可运行的工程闭环，具备一定工程完整性和可扩展性。
+
+\section*{三、实验目的}
+本实验的目标不仅是“识别车牌”，更强调“在网络服务环境下构建可靠业务系统”。具体目的如下：
+
+\begin{enumerate}
+  \item 掌握基于HTTP的客户端/服务端交互流程，理解文件上传、JSON返回和错误状态码设计。
+  \item 掌握Flask基础开发流程，能够组织路由、模板渲染、异常处理与日志输出。
+  \item 掌握SQLite在轻量业务场景中的应用，包括建表、查询、插入、更新与数据持久化。
+  \item 理解OCR在真实图片场景中的误识别机理，学习通过预处理与规则后处理提高准确率。
+  \item 将中国车牌业务知识转化为程序规则，形成可解释、可调优的识别管线。
+  \item 通过多样化测试样本（入场、出场、不同角度、不同图片尺寸）验证系统稳定性。
+  \item 在移动端界面提供清晰反馈，提升交互体验和可用性。
+\end{enumerate}
+
+\section*{四、实验内容}
+\subsection*{1. 基本功能}
+系统实现了如下基础能力：
+\begin{enumerate}
+  \item 在局域网内启动Web服务，移动端浏览器可访问上传页面。
+  \item 接收用户上传车牌图片并进行OCR识别。
+  \item 根据识别结果自动判断入场或出场。
+  \item 记录入场时间、出场时间和费用，并保存在SQLite数据库中。
+  \item 在前端以弹窗方式展示识别结果、当前时间和费用信息。
+\end{enumerate}
+
+\subsection*{2. 高级功能}
+在基本功能基础上，系统新增并强化了以下高级功能：
+\begin{enumerate}
+  \item 引入车牌颜色检测（蓝牌、绿牌、未知）并执行差异化规则约束。
+  \item 自动定位车牌候选区域，减少整图识别的噪声干扰。
+  \item 采用两阶段OCR：整体OCR优先，失败时执行省份/城市/后缀分区OCR回退。
+  \item 针对城市位常见误识别引入映射与打分机制，如\texttt{8->B}、\texttt{1->I}。
+  \item 增加服务端纯文本\texttt{INFO}日志，记录每一步处理路径，便于复现实验与调试。
+  \item 优化前端UI：移动端自适应、状态区域展示、结果弹窗确认按钮、错误高亮提示。
+\end{enumerate}
+
+\section*{五、实验实现}
+\subsection*{1. 人员分工}
+根据实验分工约定：
+\begin{itemize}
+  \item 简辰轩：主要负责系统代码编写与接口联调，包括Flask服务、OCR流程、数据库逻辑与前端交互功能。
+  \item 李祥熙：主要负责测试优化与实验报告撰写，重点参与识别规则调优、样例测试与结果分析。
+\end{itemize}
+
+\subsection*{2. 实验设计}
+\subsubsection*{（一）协议设计}
+客户端与服务端通过HTTP协议通信。首页\texttt{/}用于返回上传页面模板，识别接口\texttt{/upload}使用\texttt{POST}接收图片。请求体为表单文件字段\texttt{image}。返回体统一为JSON，成功时包含\texttt{plate}、\texttt{type}、\texttt{time}，出场时额外包含\texttt{fee}。错误场景返回\texttt{400}并附带\texttt{msg}文本说明。该设计实现了“业务语义+状态码”的双重表达，便于前端展示与自动化测试。
+
+\subsubsection*{（二）UI设计}
+页面采用卡片式布局，顶部展示系统标题与说明，中部包含文件选择器和上传按钮，底部显示最近一次JSON响应。识别完成后弹出模态框，集中展示车牌号、处理结果、时间、费用，并提供“确定”按钮关闭。该交互方式相比在页面角落显示文本更容易被用户感知，尤其适合手机端。按钮在上传期间会进入禁用状态并显示“识别中”，可以避免重复提交造成并发写库风险。
+
+\subsubsection*{（三）框架结构}
+系统采用单进程Flask开发服务器实现。其优点是结构简单、开发效率高，适合实验演示。服务端核心流程如下：
+\begin{enumerate}
+  \item 解析上传文件并进行基础合法性校验；
+  \item OpenCV解码图像并保存原图；
+  \item 基于颜色与形态学操作提取候选车牌区域；
+  \item 对候选区域执行规则增强OCR识别；
+  \item 写入/更新SQLite数据库并返回JSON响应。
+\end{enumerate}
+由于本实验数据库访问量较低，采用SQLite即可满足需求。若后续升级到高并发场景，可迁移至MySQL/PostgreSQL并使用连接池。开发服务器不建议直接用于生产，生产环境建议部署Gunicorn/uWSGI并配合Nginx。
+
+\subsubsection*{（四）错误处理与日志设计}
+系统在关键节点均进行错误处理：缺失文件、空文件、非法文件名、图片解码失败、OCR异常、规则不匹配都会返回可读错误信息。同时，服务端通过\texttt{log\_info()}输出纯文本日志，记录候选区域数量、颜色判断、OCR中间结果、最终匹配结果、计费数据等。该日志直接支持“定位误识别来源—调整规则参数—复测验证”的闭环调优过程。
+
+\subsection*{3. 关键代码描述}
+本节选取最关键的实现片段进行说明，源文件为\texttt{app.py}与\texttt{templates/index.html}。
+
+\subsubsection*{（一）颜色约束与车牌规则}
+系统将车牌规则显式编码，作为后处理的硬约束。
+
+\begin{lstlisting}
+PROVINCE_CHARS = "京津沪渝冀晋辽吉黑苏浙皖闽赣鲁豫鄂湘粤琼川贵云陕甘青蒙桂宁新藏"
+CITY_CHAR_MAP = {"0": "O", "1": "I", "2": "Z", "5": "S", "8": "B"}
+PLATE_REGEX = re.compile(rf"^[{PROVINCE_CHARS}][A-Z][A-Z0-9]{{5,6}}$")
+
+PLATE_HSV_RANGES = {
+    "blue": (np.array([90, 60, 50]), np.array([140, 255, 255])),
+    "green": (np.array([35, 40, 40]), np.array([95, 255, 255]))
+}
+\end{lstlisting}
+
+上述代码的意义在于把“业务认知”转成“程序约束”。其中城市位映射是实验调优中的关键点，能修复OCR对相似字符的误读。颜色阈值将蓝牌与绿牌区分开来，为后续长度约束提供依据。
+
+\subsubsection*{（二）候选区域定位与图像增强}
+系统先定位再识别，避免整图OCR直接被背景干扰。
+
+\begin{lstlisting}
+def preprocess_plate_image(img):
+    resized = cv2.resize(img, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_CUBIC)
+    denoised = cv2.bilateralFilter(resized, 9, 75, 75)
+    gray = cv2.cvtColor(denoised, cv2.COLOR_BGR2GRAY)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    enhanced = clahe.apply(gray)
+    return cv2.cvtColor(enhanced, cv2.COLOR_GRAY2BGR)
+
+def find_plate_regions(img, max_regions=5):
+    # 对蓝色和绿色分别做HSV掩码，提取轮廓并按得分排序
+    # 返回 top-k 候选区域
+\end{lstlisting}
+
+在测试中，候选区域定位显著降低了错误区域的OCR触发频率。对于大图（如\texttt{test3}）尤为明显：系统可先尝试多个候选框，若首个候选失败会自动切换到第二候选，最终得到正确识别结果。
+
+\subsubsection*{（三）分阶段OCR与规则融合}
+该部分是本实验改进的核心。其流程为：先整块OCR，如果未通过规则，再做分区OCR回退。
+
+\begin{lstlisting}
+def staged_plate_recognition(crop, plate_color="unknown"):
+    if plate_color == "blue":
+        tail_lengths = (5,)
+    elif plate_color == "green":
+        tail_lengths = (6,)
+    else:
+        tail_lengths = (6, 5)
+
+    p_crop = preprocess_plate_image(crop)
+    result_allow = reader.readtext(p_crop, detail=0, allowlist=OCR_ALLOWLIST)
+    result_open = reader.readtext(p_crop, detail=0)
+
+    plate = extract_plate_from_ocr(result_allow + result_open, tail_lengths=tail_lengths)
+    if plate:
+        return plate
+
+    # 回退到省份/城市/后缀分区识别
+    # 并对城市位执行打分选择
+\end{lstlisting}
+
+该设计的优势在于：
+\begin{itemize}
+  \item 整体识别成功时速度快；
+  \item 整体识别失败时仍有分区补救路径；
+  \item 蓝绿牌长度差异被强约束，可有效过滤伪匹配结果；
+  \item 城市位打分策略可缓解\texttt{B/8}、\texttt{I/1}混淆。
+\end{itemize}
+
+\subsubsection*{（四）业务判定与计费逻辑}
+识别成功后，系统按数据库状态决定入场/出场。
+
+\begin{lstlisting}
+c.execute("SELECT * FROM cars WHERE plate=? AND status='在场'", (plate,))
+car = c.fetchone()
+
+if car is None:
+    c.execute("INSERT INTO cars VALUES(?,?,?,?,?)", (plate, str(now), "", 0, "在场"))
+else:
+    enter_time = datetime.strptime(car[1], "%Y-%m-%d %H:%M:%S.%f")
+    hours = (now - enter_time).total_seconds() / 3600
+    fee = round(hours * 5, 2)
+    c.execute("""
+        UPDATE cars
+        SET exit_time=?, fee=?, status='离场'
+        WHERE plate=? AND status='在场'
+    """, (str(now), fee, plate))
+\end{lstlisting}
+
+这里采用了最小可行状态机思想。以\texttt{status='在场'}作为唯一“活跃记录”标识，能避免重复出场结算；费用计算使用\texttt{total\_seconds()}提高了时间计算精度。
+
+\subsubsection*{（五）前端反馈与交互}
+前端通过异步请求上传图片，并在弹窗中显示处理结果。
+
+\begin{lstlisting}
+const res = await fetch("/upload", { method: "POST", body: formData });
+const data = await res.json();
+
+if (data.plate) detailLines.push(`车牌号: ${data.plate}`);
+if (data.type) detailLines.push(`结果: ${data.type}`);
+if (data.time) detailLines.push(`时间: ${data.time}`);
+if (data.fee !== undefined) detailLines.push(`费用: ${data.fee} 元`);
+
+openModal(res.ok ? "处理完成" : "处理失败", detailLines, !res.ok);
+\end{lstlisting}
+
+这一交互保证了用户在手机端能够第一时间获得明确反馈，且保留了最近一次JSON响应用于调试核对。
+
+\section*{六、测试及结果分析}
+本实验按照“初始化+三组车牌样本，每组入场与出场各一次”的方式进行测试，并将服务端日志与移动端界面同时截图记录。
+
+\subsection*{0. 系统启动与界面检查}
+图\ref{fig:init}展示了服务端启动过程。可以看到数据库初始化、监听地址和端口信息均正常，说明系统已具备对外提供服务的条件。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{images/init.png}
+  \caption{服务端启动与初始化日志}
+  \label{fig:init}
+\end{figure}
+
+图\ref{fig:webui}为移动端首页。界面展示正常，上传控件、按钮、最近响应区均可见，说明前端适配满足手机浏览器访问要求。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.44\textwidth]{images/webui.png}
+  \caption{移动端首页UI}
+  \label{fig:webui}
+\end{figure}
+
+\subsection*{1. 测试一：样本1（苏B92912）入场与出场}
+\textbf{测试目标：}验证规则增强OCR在“省份汉字+城市字母+数字后缀”典型蓝牌场景下的稳定性。
+
+\textbf{入场过程与结果：}图\ref{fig:t1-entry-server}显示服务端检测到候选区域后，经过OCR与规则筛选得到\texttt{苏B92912}，并写入入场记录；图\ref{fig:t1-entry-ui}显示前端弹窗反馈“入场成功”。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{images/test_1_entry_server.png}
+  \caption{测试一入场：服务端日志（识别并写入在场记录）}
+  \label{fig:t1-entry-server}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.44\textwidth]{images/test_1_entry_webui.png}
+  \caption{测试一入场：前端弹窗结果}
+  \label{fig:t1-entry-ui}
+\end{figure}
+
+\textbf{出场过程与结果：}图\ref{fig:t1-exit-server}显示再次上传同一车牌后，系统匹配在场记录并完成出场结算，返回费用0.34元；图\ref{fig:t1-exit-ui}显示前端准确展示费用字段。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{images/test_1_exit_server.png}
+  \caption{测试一出场：服务端日志（匹配在场记录并计费）}
+  \label{fig:t1-exit-server}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.44\textwidth]{images/test_1_exit_webui.png}
+  \caption{测试一出场：前端弹窗结果（含费用）}
+  \label{fig:t1-exit-ui}
+\end{figure}
+
+\textbf{分析：}测试一验证了规则增强策略对“\texttt{B/8}混淆”问题的修正能力。日志中的中间结果可以看到城市位OCR曾出现数字，但最终经过映射和打分后得到正确城市字母，说明改进逻辑有效。
+
+\subsection*{2. 测试二：样本2（京YCB666）入场与出场}
+\textbf{测试目标：}验证包含字母+字母+数字混合后缀的蓝牌样本识别能力。
+
+\textbf{入场过程与结果：}图\ref{fig:t2-entry-server}显示系统在首个候选区域即识别到\texttt{京YCB666}并写入入场；图\ref{fig:t2-entry-ui}显示前端弹窗与日志一致。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{images/test_2_entry_server.png}
+  \caption{测试二入场：服务端日志（字母数字混合后缀识别）}
+  \label{fig:t2-entry-server}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.44\textwidth]{images/test_2_entry_webui.png}
+  \caption{测试二入场：前端弹窗结果}
+  \label{fig:t2-entry-ui}
+\end{figure}
+
+\textbf{出场过程与结果：}图\ref{fig:t2-exit-server}显示系统能够从数据库中查找到在场记录并完成费用计算，金额为0.27元；图\ref{fig:t2-exit-ui}给出一致反馈。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{images/test_2_exit_server.png}
+  \caption{测试二出场：服务端日志（正常计费）}
+  \label{fig:t2-exit-server}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.44\textwidth]{images/test_2_exit_webui.png}
+  \caption{测试二出场：前端弹窗结果（含费用）}
+  \label{fig:t2-exit-ui}
+\end{figure}
+
+\textbf{分析：}测试二说明系统不仅能识别“纯数字尾号”类型，也能正确处理字母与数字混合尾号。该能力来自于后缀允许字符集\texttt{[A-Z0-9]}和长度规则共同约束。
+
+\subsection*{3. 测试三：样本3（京A00001）入场与出场}
+\textbf{测试目标：}验证在大图、多候选区域情况下的鲁棒性与回退机制。
+
+\textbf{入场过程与结果：}图\ref{fig:t3-entry-server}显示此样本分辨率较高，系统检测到5个候选区域，首候选失败后自动尝试次候选并成功识别\texttt{京A00001}；图\ref{fig:t3-entry-ui}显示前端反馈入场成功。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{images/test_3_entry_server.png}
+  \caption{测试三入场：服务端日志（多候选回退后识别成功）}
+  \label{fig:t3-entry-server}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.44\textwidth]{images/test_3_entry_webui.png}
+  \caption{测试三入场：前端弹窗结果}
+  \label{fig:t3-entry-ui}
+\end{figure}
+
+\textbf{出场过程与结果：}图\ref{fig:t3-exit-server}可见系统再次走多候选流程并最终识别成功，完成出场计费0.28元；图\ref{fig:t3-exit-ui}显示结果一致。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{images/test_3_exit_server.png}
+  \caption{测试三出场：服务端日志（多候选+计费）}
+  \label{fig:t3-exit-server}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.44\textwidth]{images/test_3_exit_webui.png}
+  \caption{测试三出场：前端弹窗结果（含费用）}
+  \label{fig:t3-exit-ui}
+\end{figure}
+
+\textbf{分析：}测试三是最有代表性的复杂场景。图中可见系统并非“单次识别失败即终止”，而是依赖候选区域排序与逐个尝试策略，在第二候选成功匹配规则。这说明改进方案具有工程上的容错能力。
+
+\subsection*{4. 综合结果分析}
+综合三组测试共六次业务请求（每组入场+出场），系统均返回\texttt{200}并完成正确业务流转。结合日志分析，可得到以下结论：
+\begin{enumerate}
+  \item 候选区域定位显著降低整图背景干扰，尤其对高分辨率图像有明显收益。
+  \item 规则过滤能有效抑制“可读但不合法”的OCR字符串，减少误入库风险。
+  \item 城市位纠偏机制对\texttt{B/8}、\texttt{I/1}等混淆问题有实用价值。
+  \item 颜色约束与后缀长度约束提升了结果可解释性：蓝牌5位尾号、绿牌6位尾号。
+  \item 前端弹窗反馈与日志信息一致，用户可清晰感知系统状态。
+\end{enumerate}
+
+同时也观察到一个与平台相关但不影响正确性的提示：在Apple芯片MPS环境下，PyTorch会输出\texttt{pin\_memory}警告，该告警不影响识别结果，可在后续通过运行配置进一步优化。
+
+\section*{七、实验结论}
+本实验完成了一个可在局域网中运行的停车场车牌识别与计费系统，满足了“上传图片—识别车牌—自动判定入场/出场—返回结果与费用”的核心需求。与基础版本相比，规则增强版在鲁棒性和工程可用性方面均有明显提升：
+
+\begin{itemize}
+  \item 在识别策略上，实现了“颜色候选定位+两阶段OCR+规则融合”的完整管线；
+  \item 在业务规则上，实现了符合中国车牌结构的硬约束，并支持蓝牌/绿牌差异化处理；
+  \item 在系统工程上，实现了可追踪日志、错误状态码、移动端友好界面与弹窗反馈；
+  \item 在测试结果上，三组样本入场出场流程均正确完成，说明系统闭环运行稳定。
+\end{itemize}
+
+总体而言，本实验达到了预期教学目标，具备继续扩展为课程项目或小型演示系统的基础。
+
+\section*{八、总结及心得体会}
+通过本次实验，我们对“算法正确”与“系统可用”之间的差异有了更直观的理解。最初的想法是直接把图片送入OCR并取第一段文本，但在真实测试中很快暴露出多个问题：背景干扰、字符混淆、区域偏移、格式不一致等。这些问题说明，视觉识别在工程场景里往往不是单模型即可解决，而是需要“模型能力+先验知识+流程控制”共同作用。
+
+在调试过程中，服务端日志发挥了决定性作用。我们通过观察每一次请求的候选区域数量、OCR原始输出、分区OCR结果、规则匹配路径，能够快速定位是“定位失败”“识别失败”还是“规则过严/过松”。例如城市位误识别的修正，就是基于日志发现“\texttt{8}频繁出现在城市位”这一现象后，有针对性加入映射和打分策略完成的。这个过程让我们认识到：可观测性是工程系统迭代的前提。
+
+另外，前端交互细节同样影响整体体验。实验中如果只在控制台输出JSON，普通用户难以理解系统状态。加入弹窗、结果分行展示和确认按钮后，用户可以直观看到“车牌号、入/出场状态、时间、费用”，系统可用性明显提高。移动端测试也让我们意识到，课程项目不应只在PC端可用，良好的响应式布局是基本工程要求。
+
+从知识融合角度看，本实验同时涉及网络编程、数据库、图像处理和规则系统，体现了跨模块协同的重要性。未来若继续优化，我们计划：
+\begin{enumerate}
+  \item 增加更丰富样本集，评估不同光照、角度、遮挡条件下的识别性能；
+  \item 引入按车型、停车时段的差异化计费策略；
+  \item 将开发服务器迁移到生产级WSGI部署，增强并发处理能力；
+  \item 增加历史记录查询页面，支持按车牌检索与统计导出。
+\end{enumerate}
+
+总的来说，本实验不仅完成了功能实现，更重要的是建立了“问题发现—日志定位—规则修正—回归测试”的工程思维路径，这对后续课程设计与实际项目开发都具有长期价值。
+
+\section*{附件}
+\subsection*{1. 源码文件说明}
+实验核心源码包括：
+\begin{itemize}
+  \item \texttt{app.py}：服务端主程序，包含OCR识别、规则过滤、数据库读写与接口逻辑。
+  \item \texttt{templates/index.html}：前端页面，包含上传交互、结果展示和弹窗。
+  \item \texttt{parking.db}：SQLite数据库文件。
+\end{itemize}
+
+\subsection*{2. 关键附件嵌入示例（日志片段）}
+\begin{lstlisting}
+INFO ... Detected 2 plate region candidate(s)
+INFO ... Plate-crop OCR (allowlist): ['8929121']
+INFO ... ROI OCR province=['苏'], city=['8','8'], tail=['929121']
+INFO ... Plate matched in region #1: 苏B92912
+INFO ... Entry recorded: plate=苏B92912, time=...
+\end{lstlisting}
+
+以上日志片段展示了“候选区域定位—分区OCR—规则纠偏—业务写库”的完整链路。
+
+\end{document}
