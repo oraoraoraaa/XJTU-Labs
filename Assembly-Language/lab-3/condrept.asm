@@ -1,16 +1,13 @@
-; Task 2: conditional assembly + repeat assembly
-
 title Conditional And Repeat Assembly Demo
 
 data segment
-    ID      db  '2186123456'      ; replace with your own student ID if needed
+    ID      db  '2234412799'
 
-    ; Test scenario: only change the definition content of X.
-    ; X db ''            ; scenario 1: empty string
-    ; X db 'abcde'       ; scenario 2: length = 5
-    X       db  '2186123456'      ; scenario 3: length = 10
+    ;X db 0                 ; scenario 1: empty string
+    X db 'abcde',0       ; scenario 2: length = 5
+    ; X db '2234412799',0  ; scenario 3: length = 10
 
-    X_LEN   equ ($ - X)
+    X_LEN   equ ($ - X - 1)
     RESULT  dw  0
 data ends
 

@@ -1,9 +1,7 @@
-; Task 1: subroutine to count score ranges for 10 students
-
 title Score Range Statistics
 
 data segment
-    ID      db  '2186123456'      ; replace with your own student ID if needed
+    ID      db  '2234412799'
     array   db  76,69,84,90,73,88,99,63,100,80
 
     S6      db  0                 ; 60~69
@@ -15,16 +13,17 @@ data ends
 
 code segment
     assume cs:code, ds:data
-
     main    proc
+        ; assign the data segment base address to DS
         mov   ax, data
         mov   ds, ax
-
+        
+        ; TODO ...
+		; | add your code between arrows |
+		; v ---------------------------- v
+        
+        
         call  STAT_SCORE
-
-        mov   ax, 4c00h
-        int   21h
-    main    endp
 
     ; Count values in array into S6/S7/S8/S9/S10
     STAT_SCORE  proc
@@ -82,6 +81,13 @@ code segment
 
         ret
     STAT_SCORE  endp
-
+        
+        ; ^ ---------------------------- ^
+		; |          The END             |
+        
+        ; method 2: return to dos
+        mov   ax, 4c00h
+        int   21h
+    main    endp
 code ends
 end main

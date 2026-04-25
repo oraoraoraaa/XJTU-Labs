@@ -26,4 +26,4 @@ code segment
         int   21h
     main    endp
 code ends
-end main 
+end main
