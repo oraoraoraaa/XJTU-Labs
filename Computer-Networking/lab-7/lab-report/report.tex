@@ -1,3 +1,5 @@
+%! TEX program = xelatex
+
 \documentclass[12pt,a4paper]{ctexart}
 \usepackage[margin=2.2cm]{geometry}
 \usepackage{graphicx}
@@ -109,10 +111,10 @@
 系统在关键节点均进行错误处理：缺失文件、空文件、非法文件名、图片解码失败、OCR异常、规则不匹配都会返回可读错误信息。同时，服务端通过\texttt{log\_info()}输出纯文本日志，记录候选区域数量、颜色判断、OCR中间结果、最终匹配结果、计费数据等。该日志直接支持“定位误识别来源—调整规则参数—复测验证”的闭环调优过程。
 
 \subsection*{3. 关键代码描述}
-本节选取最关键的实现片段进行说明，源文件为\texttt{app.py}与\texttt{templates/index.html}。
+本节选取最关键的实现片段进行说明，重点对应\texttt{app.py}中的车牌规则、候选区域定位、分阶段OCR、数据库状态机与接口返回逻辑。
 
 \subsubsection*{（一）颜色约束与车牌规则}
-系统将车牌规则显式编码，作为后处理的硬约束。
+系统首先把“什么样的字符串才算车牌”编码为显式规则，而不是把OCR输出原样交给后续业务逻辑处理。这样做的目的，是在识别阶段就尽量筛掉明显不合法的结果，减少错误写库的概率。
 
 \begin{lstlisting}
 PROVINCE_CHARS = "京津沪渝冀晋辽吉黑苏浙皖闽赣鲁豫鄂湘粤琼川贵云陕甘青蒙桂宁新藏"
@@ -125,10 +127,12 @@ PLATE_HSV_RANGES = {
 }
 \end{lstlisting}
 
-上述代码的意义在于把“业务认知”转成“程序约束”。其中城市位映射是实验调优中的关键点，能修复OCR对相似字符的误读。颜色阈值将蓝牌与绿牌区分开来，为后续长度约束提供依据。
+其中，\texttt{PROVINCE\_CHARS}限定了车牌首位可出现的省份简称，\texttt{CITY\_CHAR\_MAP}用于修正城市位常见误识别，例如把\texttt{8}映射为\texttt{B}、把\texttt{1}映射为\texttt{I}。\texttt{PLATE\_REGEX}进一步规定了整体格式必须满足“省份汉字 + 英文字母 + 5或6位字母数字”的结构。
+
+颜色部分使用HSV阈值分离蓝牌和绿牌：\texttt{detect\_plate\_color()}和\texttt{find\_plate\_regions()}都会依赖这组阈值做候选筛选。这样一来，系统不必在整张图片上盲目搜索，而是先从颜色层面缩小范围，再进入OCR阶段。
 
 \subsubsection*{（二）候选区域定位与图像增强}
-系统先定位再识别，避免整图OCR直接被背景干扰。
+系统在正式识别前，会先对整图做颜色分割和轮廓筛选，再把可能的车牌区域单独截出来。这个步骤对应\texttt{find\_plate\_regions()}，其核心思想是“先找候选，再做OCR”，避免背景文字、路面反光和车身纹理直接干扰识别结果。
 
 \begin{lstlisting}
 def preprocess_plate_image(img):
@@ -140,46 +144,52 @@ def preprocess_plate_image(img):
     return cv2.cvtColor(enhanced, cv2.COLOR_GRAY2BGR)
 
 def find_plate_regions(img, max_regions=5):
-    # 对蓝色和绿色分别做HSV掩码，提取轮廓并按得分排序
-    # 返回 top-k 候选区域
+    # Build HSV masks for blue/green plates, rank contours by score.
+    # Return top-k candidate regions.
 \end{lstlisting}
 
-在测试中，候选区域定位显著降低了错误区域的OCR触发频率。对于大图（如\texttt{test3}）尤为明显：系统可先尝试多个候选框，若首个候选失败会自动切换到第二候选，最终得到正确识别结果。
+预处理部分先做双三次插值放大，再使用双边滤波降低噪声，随后灰度化并用CLAHE增强局部对比度。这样做的直接收益是让字符边缘更清楚，尤其适合手机拍照后压缩过的图片。
+
+轮廓筛选时，代码会计算每个候选框的面积和长宽比，过滤掉过小或形状明显不符合车牌比例的区域，然后给剩余候选打分。打分同时考虑颜色覆盖比例和区域面积，因此更接近“像车牌的候选框”会排在前面。若前几个候选都失败，程序还会回退到整图和中间区域作为补救。
 
 \subsubsection*{（三）分阶段OCR与规则融合}
-该部分是本实验改进的核心。其流程为：先整块OCR，如果未通过规则，再做分区OCR回退。
+该部分是本实验最关键的识别逻辑。系统不是只调用一次OCR，而是采用“整体识别优先、分区识别兜底”的两阶段策略：先尽量一次性读出完整车牌；如果结果不满足规则，再拆成省份、城市和后缀三个区域分别识别，并根据规则拼接回合法结果。
 
 \begin{lstlisting}
 def staged_plate_recognition(crop, plate_color="unknown"):
-    if plate_color == "blue":
-        tail_lengths = (5,)
-    elif plate_color == "green":
-        tail_lengths = (6,)
-    else:
-        tail_lengths = (6, 5)
+  if plate_color == "blue":
+    tail_lengths = (5,)
+  elif plate_color == "green":
+    tail_lengths = (6,)
+  else:
+    tail_lengths = (6, 5)
 
-    p_crop = preprocess_plate_image(crop)
-    result_allow = reader.readtext(p_crop, detail=0, allowlist=OCR_ALLOWLIST)
-    result_open = reader.readtext(p_crop, detail=0)
+  p_crop = preprocess_plate_image(crop)
+  result_allow = reader.readtext(p_crop, detail=0, allowlist=OCR_ALLOWLIST)
+  result_open = reader.readtext(p_crop, detail=0)
 
-    plate = extract_plate_from_ocr(result_allow + result_open, tail_lengths=tail_lengths)
-    if plate:
-        return plate
+  plate = extract_plate_from_ocr(result_allow + result_open, tail_lengths=tail_lengths)
+  if plate:
+    return plate
 
-    # 回退到省份/城市/后缀分区识别
-    # 并对城市位执行打分选择
+  # Fallback to province/city/tail segmented OCR.
+  # Apply scoring strategy for city-position correction.
 \end{lstlisting}
 
-该设计的优势在于：
+这里的逻辑细节比较重要：
 \begin{itemize}
-  \item 整体识别成功时速度快；
-  \item 整体识别失败时仍有分区补救路径；
-  \item 蓝绿牌长度差异被强约束，可有效过滤伪匹配结果；
-  \item 城市位打分策略可缓解\texttt{B/8}、\texttt{I/1}混淆。
+  \item \texttt{allowlist}版本优先用于限制可输出字符范围，能减少无关符号和噪声文本。
+  \item \texttt{result\_allow + result\_open}表示系统会同时参考“受限字符集OCR”和“开放字符集OCR”，从两路结果中共同抽取候选串。
+  \item \texttt{extract\_plate\_from\_ocr()}会把多个OCR片段进行单独尝试、整体拼接和相邻段拼接，再用规则逐一筛选。
+  \item 若整体识别仍失败，就会按车牌结构切分区域，分别调用\texttt{pick\_province\_char()}、\texttt{pick\_city\_char()}和\texttt{pick\_tail\_text()}做回退。
 \end{itemize}
 
+颜色信息会进一步影响尾号长度约束：蓝牌只接受5位后缀，绿牌只接受6位后缀，未知颜色则同时尝试两种长度。这样的设计把“车牌类型”与“合法格式”绑定起来，能明显降低误识别后仍被误写入数据库的风险。
+
+其中，\texttt{pick\_city\_char()}并不是简单取第一位字母，而是对所有候选字符打分后再选择最优项。数字字符会先通过\texttt{CITY\_CHAR\_MAP}映射为字母，再参与排序，从而缓解\texttt{B/8}、\texttt{I/1}这类高频混淆。
+
 \subsubsection*{（四）业务判定与计费逻辑}
-识别成功后，系统按数据库状态决定入场/出场。
+识别成功后，系统会把车牌号当作主键条件之一去查询数据库，并通过\texttt{status}字段判断这是一辆“在场车辆”还是“已经离场的历史车辆”。这部分逻辑决定了系统是否新增记录、是否结束一次停车计费，以及是否返回费用信息。
 
 \begin{lstlisting}
 c.execute("SELECT * FROM cars WHERE plate=? AND status='在场'", (plate,))
@@ -192,30 +202,32 @@ else:
     hours = (now - enter_time).total_seconds() / 3600
     fee = round(hours * 5, 2)
     c.execute("""
-        UPDATE cars
-        SET exit_time=?, fee=?, status='离场'
-        WHERE plate=? AND status='在场'
+    UPDATE cars
+    SET exit_time=?, fee=?, status='OUT'
+    WHERE plate=? AND status='在场'
     """, (str(now), fee, plate))
 \end{lstlisting}
 
-这里采用了最小可行状态机思想。以\texttt{status='在场'}作为唯一“活跃记录”标识，能避免重复出场结算；费用计算使用\texttt{total\_seconds()}提高了时间计算精度。
+数据库表\texttt{cars}在\texttt{init\_db()}中创建，字段依次是车牌、入场时间、出场时间、费用和状态。入场时写入一条状态为“在场”的记录；再次识别到同一车牌时，系统把它视为出场请求，读取最早的入场时间，按\texttt{(now - enter\_time).total\_seconds() / 3600}换算出停车小时数，再乘以每小时5元得到费用。
+
+这里的状态设计比较简洁，但足以构成一个最小闭环：只有“在场”状态才允许进入出场结算分支，避免重复扣费或重复写出场信息。也就是说，业务规则不是依赖前端按钮，而是由数据库中的状态字段来保证。
 
 \subsubsection*{（五）前端反馈与交互}
-前端通过异步请求上传图片，并在弹窗中显示处理结果。
+虽然这一部分在\texttt{templates/index.html}中实现，但它与\texttt{app.py}的接口返回是直接配套的：前端通过异步请求把图片上传到\texttt{/upload}，后端返回JSON后，页面再根据字段内容组织弹窗展示。
 
 \begin{lstlisting}
 const res = await fetch("/upload", { method: "POST", body: formData });
 const data = await res.json();
 
-if (data.plate) detailLines.push(`车牌号: ${data.plate}`);
-if (data.type) detailLines.push(`结果: ${data.type}`);
-if (data.time) detailLines.push(`时间: ${data.time}`);
-if (data.fee !== undefined) detailLines.push(`费用: ${data.fee} 元`);
+if (data.plate) detailLines.push(`Plate: ${data.plate}`);
+if (data.type) detailLines.push(`Result: ${data.type}`);
+if (data.time) detailLines.push(`Time: ${data.time}`);
+if (data.fee !== undefined) detailLines.push(`Fee: ${data.fee} CNY`);
 
-openModal(res.ok ? "处理完成" : "处理失败", detailLines, !res.ok);
+openModal(res.ok ? "Done" : "Failed", detailLines, !res.ok);
 \end{lstlisting}
 
-这一交互保证了用户在手机端能够第一时间获得明确反馈，且保留了最近一次JSON响应用于调试核对。
+从接口契约看，\texttt{plate}、\texttt{type}、\texttt{time}和\texttt{fee}分别对应识别结果、业务类型、时间戳和费用。成功时返回\texttt{200}，失败时返回\texttt{400}并携带可读错误信息，因此前端既能展示业务结果，也能把失败原因直接反馈给用户。这种设计使手机端交互比较清晰，同时也方便在浏览器开发者工具中核对返回数据。
 
 \section*{六、测试及结果分析}
 本实验按照“初始化+三组车牌样本，每组入场与出场各一次”的方式进行测试，并将服务端日志与移动端界面同时截图记录。
@@ -404,9 +416,9 @@ openModal(res.ok ? "处理完成" : "处理失败", detailLines, !res.ok);
 \begin{lstlisting}
 INFO ... Detected 2 plate region candidate(s)
 INFO ... Plate-crop OCR (allowlist): ['8929121']
-INFO ... ROI OCR province=['苏'], city=['8','8'], tail=['929121']
-INFO ... Plate matched in region #1: 苏B92912
-INFO ... Entry recorded: plate=苏B92912, time=...
+INFO ... ROI OCR province=['SU'], city=['8','8'], tail=['929121']
+INFO ... Plate matched in region #1: SU-B92912
+INFO ... Entry recorded: plate=SU-B92912, time=...
 \end{lstlisting}
 
 以上日志片段展示了“候选区域定位—分区OCR—规则纠偏—业务写库”的完整链路。
