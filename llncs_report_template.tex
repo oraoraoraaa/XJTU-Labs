@@ -1,0 +1,188 @@
+\documentclass[runningheads]{ctexart}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+
+% --- 中文支持 / Chinese Support ---
+\renewcommand{\abstractname}{摘要}
+\renewcommand{\contentsname}{目录}
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+\renewcommand{\refname}{参考文献}
+\newcommand{\keywordsname}{关键词}
+% ---------------------------------
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue!70!black},
+    commentstyle=\color{green!40!black},
+    stringstyle=\color{orange!60!black},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    tabsize=4
+}
+
+\begin{document}
+
+\title{报告标题}
+\author{作者姓名}
+
+\maketitle
+
+\begin{abstract}
+摘要应简要总结论文内容，字数通常在 150--250 字之间。
+
+\vspace{10pt} % 增加间距
+\noindent \textbf{\keywordsname：} 第一个关键词 \and 第二个关键词 \and 其他关键词
+\end{abstract}
+
+% --- 正文部分 ---
+\section{实验目的}
+本实验的目标如下：
+\begin{itemize}
+    \item 目标一：\textbf{【请填入实验第一个目标】}
+    \item 目标二：\textbf{【请填入实验第二个目标】}
+    \item 目标三：\textbf{【请填入实验第三个目标】}
+\end{itemize}
+
+请注意，章节或子节的第一段通常不缩进。在表格、插图、公式等之后的段落也不需要缩进。但随后的后续段落则需要缩进。
+
+\section{实验过程}
+\subsection{实验环境}
+\begin{itemize}
+    \item 操作系统：\textbf{【如 Linux、Windows、MacOS】}
+    \item 编程语言：Python 3
+    \item 深度学习框架（可选）：\textbf{【如 PyTorch、TensorFlow】}
+    \item 其他关键工具（可选）：\textbf{【如 NumPy、Matplotlib、scikit-learn】}
+\end{itemize}
+
+\subsection{数据集与预处理}
+\begin{itemize}
+    \item \textbf{【填入数据集名称与规模】}
+    \item 数据特征：\textbf{【输入维度、输出类别、数据格式等】}
+    \item 预处理步骤：\textbf{【标准化、增强、分割等】}
+\end{itemize}
+
+\subsubsection{三级标题示例}
+只有前两个级别的标题会进行编号。较低级别的标题不编号，格式为行内标题。
+
+\paragraph{四级标题示例}
+论文通常不应超过四个层级的标题。多级标题的字号和格式会在排版时自动处理。
+
+\section{实验内容}
+\subsection{任务一：【任务一的名称】}
+\textbf{【对任务的详细描述，包括方法、参数、公式等】}
+
+关于参考文献的引用，我们倾向于使用方括号和连续数字。例如：单篇引用~\cite{ref_article1}，多篇组合引用~\cite{ref_article1,ref_lncs1,ref_book1}。
+
+\noindent 居中公式独立成行示例如下：
+\begin{equation}
+    y = f(x) + \alpha \sum_{i=1}^{n} x_i
+\end{equation}
+
+\begin{theorem}
+这是一个定理示例。行内标题设为粗体，随后的文本为斜体。定义、引理、命题和推论的样式相同。
+\end{theorem}
+\begin{proof}
+证明、示例和备注的首词为斜体，随后的文本为正体。这是 LNCS 标准中的常见格式。
+\end{proof}
+
+\subsection{任务二：【任务二的名称】}
+\textbf{【对任务的详细描述】}
+\begin{itemize}
+    \item 关键实现点一
+    \item 关键实现点二
+\end{itemize}
+
+
+\section{实验结果}
+\subsection{任务一结果：【结果名称】}
+对于线条图和示意图，请尽量避免使用位图。尽可能使用矢量图形（见图~\ref{fig:task1}）。
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{images/【图像文件名】}
+    \caption{图题总是放在插图下方。短标题居中，长标题会自动两端对齐。}
+    \label{fig:task1}
+\end{figure}
+
+\subsection{任务二结果：【结果名称】}
+表~\ref{tab:task2} 总结了不同变量的实验指标对比。
+
+\begin{table}[H]
+    \centering
+    \caption{表题应放在表格上方。}\label{tab:task2}
+    \begin{tabular}{lccc}
+        \toprule
+        指标 & 值1 & 值2 & 值3 \\
+        \midrule
+        指标A & 值 & 值 & 值 \\
+        指标B & 值 & 值 & 值 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\section{总结}
+本实验成功完成了【主要任务总结】：
+\begin{itemize}
+    \item 完成内容一
+    \item 完成内容二
+    \item 完成内容三
+\end{itemize}
+\textbf{【可选：经验或建议】}
+
+
+% --- 附录部分 ---
+\section*{附录：实验源代码}
+\subsection*{A.1 主要源码：【源文件名.py】}
+\begin{lstlisting}
+# 【粘贴完整源代码】
+import numpy as np
+
+def experiment_task():
+    print("Running task...")
+    return True
+\end{lstlisting}
+
+\subsection*{A.2 运行命令}
+\begin{verbatim}
+# 任务一运行命令
+python script1.py --arg1 value1 --arg2 value2
+
+# 任务二运行命令
+python script2.py --arg1 value1
+\end{verbatim}
+
+关于参考文献的引用，我们倾向于使用方括号和连续数字。例如：单篇引用~\cite{ref_article1}，多篇组合引用~\cite{ref_article1,ref_lncs1,ref_book1}。
+
+% ---- 参考文献 ----
+\begin{thebibliography}{8}
+\bibitem{ref_article1}
+作者, A.: 文章标题. 期刊名称 \textbf{2}(5), 99--110 (2016)
+
+\bibitem{ref_lncs1}
+作者, B.: 会议论文标题. 见: 编辑, E. (编) CONFERENCE 2016, LNCS, 卷 9999, 页 1--13. Springer, Heidelberg (2016).
+
+\bibitem{ref_book1}
+作者, C.: 书名. 第2版. 出版社, 地点 (1999)
+
+\bibitem{ref_url1}
+LNCS 主页, \url{http://www.springer.com/lncs}, 最后访问日期 2023/10/25
+\end{thebibliography}
+
+\end{document}
+
+% ===== 使用说明 =====
+% 1. 修改顶部的 \newcommand 部分填入实验基本信息
+% 2. 替换所有【】括号内的占位符为实际内容
+% 3. 在 images/ 目录下放置实验结果图像
+% 4. 在附录中粘贴完整源代码
+% 5. 使用 xelatex report.tex 进行编译
+% ====================
