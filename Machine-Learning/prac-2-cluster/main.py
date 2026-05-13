@@ -1,3 +1,5 @@
+import csv
+import os
 import time
 import numpy as np
 import matplotlib.pyplot as plt
@@ -74,6 +76,63 @@ def print_report(title, metrics, train_time, exec_time, note=None):
         f"train={train_time:.4f}s, "
         f"exec={exec_time:.4f}s{note_text}"
     )
+
+
+def format_metrics_table(rows):
+    headers = [
+        "Algorithm",
+        "Accuracy",
+        "Precision",
+        "Recall",
+        "F1",
+        "Coverage",
+        "Train(s)",
+        "Exec(s)",
+        "Note",
+    ]
+    col_widths = [len(h) for h in headers]
+    for row in rows:
+        for idx, cell in enumerate(row):
+            col_widths[idx] = max(col_widths[idx], len(cell))
+
+    def fmt_line(cells):
+        return " | ".join(cell.ljust(col_widths[idx]) for idx, cell in enumerate(cells))
+
+    sep = "-+-".join("-" * w for w in col_widths)
+    lines = [fmt_line(headers), sep]
+    for row in rows:
+        lines.append(fmt_line(row))
+    return "\n".join(lines)
+
+
+def write_metrics_table(rows, output_dir):
+    os.makedirs(output_dir, exist_ok=True)
+    table_text = format_metrics_table(rows)
+    table_path = os.path.join(output_dir, "metrics_table.txt")
+    with open(table_path, "w", encoding="utf-8") as f:
+        f.write(table_text)
+
+    csv_path = os.path.join(output_dir, "metrics_table.csv")
+    with open(csv_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(
+            [
+                "Algorithm",
+                "Accuracy",
+                "Precision",
+                "Recall",
+                "F1",
+                "Coverage",
+                "TrainSeconds",
+                "ExecSeconds",
+                "Note",
+            ]
+        )
+        writer.writerows(rows)
+
+    print("\nDetailed metrics table:\n" + table_text)
+    print(f"Saved metrics table to {table_path}")
+    print(f"Saved metrics CSV to {csv_path}")
 
 
 class CustomKMeans:
@@ -228,6 +287,9 @@ class CustomSOM:
         return labels
 
 def main():
+    output_dir = os.path.join("result")
+    os.makedirs(output_dir, exist_ok=True)
+
     print("Generating dataset...")
     X, y = make_blobs(n_samples=300, centers=3, cluster_std=0.60, random_state=0)
 
@@ -256,7 +318,7 @@ def main():
         sk_kmeans_labels,
         f"Custom KMeans ({custom_kmeans_train:.4f}s)",
         f"Sklearn KMeans ({sk_kmeans_train:.4f}s)",
-        "kmeans_comparison.png",
+        os.path.join(output_dir, "kmeans_comparison.png"),
     )
     print_report("Custom KMeans", custom_kmeans_metrics, custom_kmeans_train, custom_kmeans_exec)
     print_report("Sklearn KMeans", sk_kmeans_metrics, sk_kmeans_train, sk_kmeans_exec)
@@ -272,8 +334,12 @@ def main():
     custom_clique_metrics = evaluate_clustering(y, custom_clique_labels)
 
     start_t = time.time()
-    clique_instance = pyclique(X.tolist(), 10, 3)
-    clique_instance.process()
+    try:
+        clique_instance = pyclique(X.tolist(), 10, 3)
+        clique_instance.process()
+    except OSError:
+        clique_instance = pyclique(X.tolist(), 10, 3, ccore=False)
+        clique_instance.process()
     clique_clusters = clique_instance.get_clusters()
     sk_clique_train = time.time() - start_t
 
@@ -291,7 +357,7 @@ def main():
         clique_labels,
         f"Custom CLIQUE ({custom_clique_train:.4f}s)",
         f"Pyclustering CLIQUE ({sk_clique_train:.4f}s)",
-        "clique_comparison.png",
+        os.path.join(output_dir, "clique_comparison.png"),
     )
     print_report(
         "Custom CLIQUE",
@@ -333,7 +399,7 @@ def main():
         sk_dbscan_labels,
         f"Custom DBSCAN ({custom_dbscan_train:.4f}s)",
         f"Sklearn DBSCAN ({sk_dbscan_train:.4f}s)",
-        "dbscan_comparison.png",
+        os.path.join(output_dir, "dbscan_comparison.png"),
     )
     print_report(
         "Custom DBSCAN",
@@ -380,12 +446,103 @@ def main():
         sk_som_labels,
         f"Custom SOM ({custom_som_train:.4f}s)",
         f"MiniSom ({sk_som_train:.4f}s)",
-        "som_comparison.png",
+        os.path.join(output_dir, "som_comparison.png"),
     )
     print_report("Custom SOM", custom_som_metrics, custom_som_train, custom_som_exec)
     print_report("MiniSom", sk_som_metrics, sk_som_train, sk_som_exec)
+    rows = [
+        [
+            "Custom KMeans",
+            f"{custom_kmeans_metrics['accuracy']:.4f}",
+            f"{custom_kmeans_metrics['precision']:.4f}",
+            f"{custom_kmeans_metrics['recall']:.4f}",
+            f"{custom_kmeans_metrics['f1']:.4f}",
+            f"{custom_kmeans_metrics['coverage']:.2f}",
+            f"{custom_kmeans_train:.4f}",
+            f"{custom_kmeans_exec:.4f}",
+            "",
+        ],
+        [
+            "Sklearn KMeans",
+            f"{sk_kmeans_metrics['accuracy']:.4f}",
+            f"{sk_kmeans_metrics['precision']:.4f}",
+            f"{sk_kmeans_metrics['recall']:.4f}",
+            f"{sk_kmeans_metrics['f1']:.4f}",
+            f"{sk_kmeans_metrics['coverage']:.2f}",
+            f"{sk_kmeans_train:.4f}",
+            f"{sk_kmeans_exec:.4f}",
+            "",
+        ],
+        [
+            "Custom CLIQUE",
+            f"{custom_clique_metrics['accuracy']:.4f}",
+            f"{custom_clique_metrics['precision']:.4f}",
+            f"{custom_clique_metrics['recall']:.4f}",
+            f"{custom_clique_metrics['f1']:.4f}",
+            f"{custom_clique_metrics['coverage']:.2f}",
+            f"{custom_clique_train:.4f}",
+            f"{custom_clique_exec:.4f}",
+            "labels computed in fit",
+        ],
+        [
+            "Pyclustering CLIQUE",
+            f"{sk_clique_metrics['accuracy']:.4f}",
+            f"{sk_clique_metrics['precision']:.4f}",
+            f"{sk_clique_metrics['recall']:.4f}",
+            f"{sk_clique_metrics['f1']:.4f}",
+            f"{sk_clique_metrics['coverage']:.2f}",
+            f"{sk_clique_train:.4f}",
+            f"{sk_clique_exec:.4f}",
+            "labels computed in process",
+        ],
+        [
+            "Custom DBSCAN",
+            f"{custom_dbscan_metrics['accuracy']:.4f}",
+            f"{custom_dbscan_metrics['precision']:.4f}",
+            f"{custom_dbscan_metrics['recall']:.4f}",
+            f"{custom_dbscan_metrics['f1']:.4f}",
+            f"{custom_dbscan_metrics['coverage']:.2f}",
+            f"{custom_dbscan_train:.4f}",
+            f"{custom_dbscan_exec:.4f}",
+            "labels computed in fit",
+        ],
+        [
+            "Sklearn DBSCAN",
+            f"{sk_dbscan_metrics['accuracy']:.4f}",
+            f"{sk_dbscan_metrics['precision']:.4f}",
+            f"{sk_dbscan_metrics['recall']:.4f}",
+            f"{sk_dbscan_metrics['f1']:.4f}",
+            f"{sk_dbscan_metrics['coverage']:.2f}",
+            f"{sk_dbscan_train:.4f}",
+            f"{sk_dbscan_exec:.4f}",
+            "labels computed in fit",
+        ],
+        [
+            "Custom SOM",
+            f"{custom_som_metrics['accuracy']:.4f}",
+            f"{custom_som_metrics['precision']:.4f}",
+            f"{custom_som_metrics['recall']:.4f}",
+            f"{custom_som_metrics['f1']:.4f}",
+            f"{custom_som_metrics['coverage']:.2f}",
+            f"{custom_som_train:.4f}",
+            f"{custom_som_exec:.4f}",
+            "",
+        ],
+        [
+            "MiniSom",
+            f"{sk_som_metrics['accuracy']:.4f}",
+            f"{sk_som_metrics['precision']:.4f}",
+            f"{sk_som_metrics['recall']:.4f}",
+            f"{sk_som_metrics['f1']:.4f}",
+            f"{sk_som_metrics['coverage']:.2f}",
+            f"{sk_som_train:.4f}",
+            f"{sk_som_exec:.4f}",
+            "",
+        ],
+    ]
+    write_metrics_table(rows, output_dir)
 
-    print("Done! Check the *_comparison.png files.")
+    print("Done! Check the result folder for outputs.")
 
 if __name__ == "__main__":
     main()
