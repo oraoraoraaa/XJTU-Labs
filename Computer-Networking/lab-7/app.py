@@ -1,20 +1,57 @@
 from flask import Flask, request, jsonify, render_template
 import sqlite3
 import os
+import threading
 from datetime import datetime
 import easyocr
 import numpy as np
 import cv2
 import re
 from werkzeug.utils import secure_filename
+from PIL import Image
+import io
+
+try:
+    import certifi
+    os.environ.setdefault('SSL_CERT_FILE', certifi.where())
+    os.environ.setdefault('REQUESTS_CA_BUNDLE', certifi.where())
+except Exception:
+    certifi = None
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp'}
 
-# OCR识别器
-reader = easyocr.Reader(['ch_sim', 'en'])
+_reader = None
+_reader_error = None
+_reader_lock = threading.Lock()
+
+
+def get_ocr_reader():
+    global _reader, _reader_error
+    if _reader is not None:
+        return _reader
+
+    if _reader_error is not None:
+        raise RuntimeError(_reader_error)
+
+    with _reader_lock:
+        if _reader is not None:
+            return _reader
+        if _reader_error is not None:
+            raise RuntimeError(_reader_error)
+
+        try:
+            _reader = easyocr.Reader(['ch_sim', 'en'])
+            return _reader
+        except Exception as exc:
+            _reader_error = (
+                f"OCR初始化失败: {exc}. 可能是证书链或模型下载失败。"
+                "请检查网络、证书配置，或提前下载 easyocr 模型。"
+            )
+            raise RuntimeError(_reader_error) from exc
 
 # 中国车牌规则: 省份简称 + 城市字母 + 5或6位字母数字
 PROVINCE_CHARS = "京津沪渝冀晋辽吉黑苏浙皖闽赣鲁豫鄂湘粤琼川贵云陕甘青蒙桂宁新藏"
@@ -39,6 +76,13 @@ def log_info(message):
     print(f"INFO {now_str} {message}", flush=True)
 
 
+def allowed_file(filename):
+    if '.' not in filename:
+        return False
+    ext = filename.rsplit('.', 1)[1].lower()
+    return ext in ALLOWED_EXTENSIONS
+
+
 def normalize_ocr_text(text):
     # 保留中文、省份简称、英文字母和数字，去掉空格及其他符号
     cleaned = re.sub(r"[^\u4e00-\u9fffA-Za-z0-9]", "", text)
@@ -52,6 +96,59 @@ def preprocess_plate_image(img):
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     enhanced = clahe.apply(gray)
     return cv2.cvtColor(enhanced, cv2.COLOR_GRAY2BGR)
+
+
+def pil_decode_image(image_bytes):
+    try:
+        im = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+        arr = np.array(im)
+        bgr = arr[:, :, ::-1].copy()
+        return bgr
+    except Exception as e:
+        log_info(f"Pillow decode failed: {e}")
+        return None
+
+
+def generate_plate_variants(crop):
+    variants = []
+    try:
+        base = preprocess_plate_image(crop)
+        variants.append(("base", base))
+
+        try:
+            gaussian = cv2.GaussianBlur(base, (0, 0), 3)
+            unsharp = cv2.addWeighted(base, 1.5, gaussian, -0.5, 0)
+            variants.append(("sharpen", unsharp))
+        except Exception:
+            pass
+
+        try:
+            gray = cv2.cvtColor(base, cv2.COLOR_BGR2GRAY)
+            clahe = cv2.createCLAHE(clipLimit=3.5, tileGridSize=(8, 8))
+            enhanced = clahe.apply(gray)
+            variants.append(("clahe_strong", cv2.cvtColor(enhanced, cv2.COLOR_GRAY2BGR)))
+        except Exception:
+            pass
+
+        try:
+            lab = cv2.cvtColor(base, cv2.COLOR_BGR2LAB)
+            l, a, b = cv2.split(lab)
+            l = cv2.equalizeHist(l)
+            merged = cv2.merge((l, a, b))
+            variants.append(("lab_eq", cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)))
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+    seen = set()
+    unique = []
+    for name, v in variants:
+        key = v.shape if hasattr(v, 'shape') else None
+        if key not in seen:
+            seen.add(key)
+            unique.append((name, v))
+    return unique
 
 
 def detect_plate_color(crop):
@@ -235,6 +332,8 @@ def staged_plate_recognition(crop, plate_color="unknown"):
     if h < 10 or w < 10:
         return None
 
+    reader = get_ocr_reader()
+
     if plate_color == "blue":
         tail_lengths = (5,)
     elif plate_color == "green":
@@ -242,31 +341,35 @@ def staged_plate_recognition(crop, plate_color="unknown"):
     else:
         tail_lengths = (6, 5)
 
-    p_crop = preprocess_plate_image(crop)
-    ph, pw = p_crop.shape[:2]
+    # 尝试多个预处理变体以提高识别率
+    variants = generate_plate_variants(crop)
+    ph = pw = 0
+    for vname, variant_img in variants:
+        ph, pw = variant_img.shape[:2]
+        try:
+            result_allow = reader.readtext(variant_img, detail=0, allowlist=OCR_ALLOWLIST)
+            result_open = reader.readtext(variant_img, detail=0)
+            log_info(f"Plate-crop OCR ({vname}) allow={result_allow} open={result_open}")
+        except Exception as exc:
+            log_info(f"OCR on variant {vname} failed: {exc}")
+            continue
 
-    # 路径1: 整体OCR + 规则筛选
-    result_allow = reader.readtext(p_crop, detail=0, allowlist=OCR_ALLOWLIST)
-    result_open = reader.readtext(p_crop, detail=0)
-    log_info(f"Plate-crop OCR (allowlist): {result_allow}")
-    log_info(f"Plate-crop OCR (open): {result_open}")
-
-    plate = extract_plate_from_ocr(result_allow + result_open, tail_lengths=tail_lengths)
-    if plate:
-        return plate
+        plate = extract_plate_from_ocr(result_allow + result_open, tail_lengths=tail_lengths)
+        if plate:
+            return plate
 
     # 路径2: 分段OCR(省份/城市/后缀)
     # 注意: 分段必须基于放大后的宽度 pw，而不是原图 w
     part1_end = max(int(pw * 0.20), 1)
     part2_end = max(int(pw * 0.32), part1_end + 1)
 
-    roi_province = p_crop[:, :part1_end]
-    roi_city = p_crop[:, part1_end:part2_end]
-    roi_tail = p_crop[:, part2_end:]
+    roi_province = variants[0][1][:, :part1_end]
+    roi_city = variants[0][1][:, part1_end:part2_end]
+    roi_tail = variants[0][1][:, part2_end:]
 
     # 左侧扩展区域作为省份/城市识别回退，提升 "苏B" 一类识别率
-    roi_left_wide = p_crop[:, :max(int(pw * 0.40), part2_end)]
-    roi_city_wide = p_crop[:, part1_end:max(int(pw * 0.38), part2_end + 1)]
+    roi_left_wide = variants[0][1][:, :max(int(pw * 0.40), part2_end)]
+    roi_city_wide = variants[0][1][:, part1_end:max(int(pw * 0.38), part2_end + 1)]
 
     province_raw = reader.readtext(roi_province, detail=0, allowlist=PROVINCE_CHARS)
     province_raw += reader.readtext(roi_left_wide, detail=0, allowlist=PROVINCE_CHARS)
@@ -320,9 +423,15 @@ def upload():
     client_ip = request.remote_addr or "unknown"
     log_info(f"POST /upload received from {client_ip}")
 
+    # 支持指定通道: entry / exit / auto(默认)
+    channel = (request.form.get('channel') or request.args.get('channel') or request.headers.get('X-Channel') or 'auto').lower()
+    if channel not in {'entry', 'exit', 'auto'}:
+        log_info(f"Invalid channel param: {channel}")
+        return jsonify({"error": "invalid_channel", "msg": "通道参数无效，仅允许: entry, exit, auto"}), 400
+
     if 'image' not in request.files:
         log_info("Upload rejected: missing 'image' field")
-        return jsonify({"msg": "没有文件"}), 400
+        return jsonify({"error": "no_file", "msg": "没有上传文件"}), 400
 
     file = request.files['image']
 
@@ -333,21 +442,29 @@ def upload():
     filename = secure_filename(file.filename)
     if not filename:
         log_info("Upload rejected: invalid filename after secure_filename")
-        return jsonify({"msg": "文件名无效"}), 400
+        return jsonify({"error": "invalid_filename", "msg": "文件名无效"}), 400
+
+    # 检查文件扩展名是否被允许
+    if not allowed_file(filename):
+        log_info(f"Upload rejected: unsupported file extension for {filename}")
+        return jsonify({"error": "unsupported_format", "msg": "图片格式不支持，仅支持 png/jpg/jpeg/bmp/gif"}), 415
 
     # 先在内存里解码，避免无效图片导致 OCR 内部崩溃
     image_bytes = file.read()
     if not image_bytes:
         log_info(f"Upload rejected: empty file content, filename={filename}")
-        return jsonify({"msg": "空文件"}), 400
+        return jsonify({"error": "empty_file", "msg": "空文件"}), 400
 
     log_info(f"Upload file accepted: filename={filename}, bytes={len(image_bytes)}")
 
     img_array = np.frombuffer(image_bytes, dtype=np.uint8)
     img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
     if img is None or img.size == 0:
-        log_info(f"Upload rejected: invalid image decoding, filename={filename}")
-        return jsonify({"msg": "上传的不是有效图片"}), 400
+        log_info(f"cv2 failed to decode image, trying Pillow for {filename}")
+        img = pil_decode_image(image_bytes)
+        if img is None or img.size == 0:
+            log_info(f"Upload rejected: invalid image decoding, filename={filename}")
+            return jsonify({"error": "invalid_image", "msg": "上传的不是有效图片或图片已损坏"}), 400
 
     log_info(f"Image decoded successfully: shape={img.shape}")
 
@@ -362,7 +479,7 @@ def upload():
         log_info(f"Detected {len(regions)} plate region candidate(s)")
     except Exception as exc:
         log_info(f"Plate region detection exception: {exc}")
-        regions = [{"image": img, "color": "unknown"}]
+        return jsonify({"error": "detection_error", "msg": "车牌定位出错，可能是图片过于模糊或格式异常"}), 502
 
     plate = None
     for idx, region_info in enumerate(regions, start=1):
@@ -373,62 +490,93 @@ def upload():
             plate = staged_plate_recognition(region, plate_color=detected_color)
         except Exception as exc:
             log_info(f"Region #{idx} OCR exception: {exc}")
-            continue
+            return jsonify({"error": "ocr_error", "msg": "OCR识别过程出错，请稍后重试"}), 502
         if plate:
             log_info(f"Plate matched in region #{idx}: {plate}")
             break
 
     if not plate:
-        log_info("OCR text does not match China plate rules")
-        return jsonify({"msg": "车牌格式不符合规则，请上传更清晰的正向车牌图片"}), 400
+        log_info("OCR text does not match China plate rules or OCR returned no candidate")
+        return jsonify({"error": "ocr_no_plate", "msg": "OCR识别失败或车牌不符合规则，请上传更清晰的正向车牌图片"}), 422
 
     log_info(f"Plate recognized after rule filter: {plate}")
 
-    conn = sqlite3.connect("parking.db")
-    c = conn.cursor()
-
-    # 查是否在场
-    c.execute("SELECT * FROM cars WHERE plate=? AND status='在场'", (plate,))
-    car = c.fetchone()
-
+    # 按通道强制入场或出场，'auto' 保持原行为
     now = datetime.now()
+    try:
+        conn = sqlite3.connect("parking.db", timeout=10)
+        c = conn.cursor()
+    except Exception as exc:
+        log_info(f"DB connection error: {exc}")
+        return jsonify({"error": "db_unavailable", "msg": "数据库不可用，请稍后重试"}), 503
 
-    # ---------- 入场 ----------
-    if car is None:
-        c.execute("INSERT INTO cars VALUES(?,?,?,?,?)",
-                  (plate, str(now), "", 0, "在场"))
-        conn.commit()
-        conn.close()
-        log_info(f"Entry recorded: plate={plate}, time={now}")
+    try:
+        c.execute("SELECT * FROM cars WHERE plate=? AND status='在场'", (plate,))
+        car = c.fetchone()
 
-        return jsonify({
-            "plate": plate,
-            "type": "入场成功",
-            "time": str(now)
-        })
+        # 强制入场通道
+        if channel == 'entry':
+            if car is not None:
+                log_info(f"Duplicate entry attempt: plate={plate}")
+                return jsonify({"error": "duplicate_entry", "msg": "重复入场：车辆已在场"}), 409
 
-    # ---------- 出场 ----------
-    else:
-        enter_time = datetime.strptime(car[1], "%Y-%m-%d %H:%M:%S.%f")
-        hours = (now - enter_time).total_seconds() / 3600
-        fee = round(hours * 5, 2)   # 每小时5元
+            c.execute("INSERT INTO cars VALUES(?,?,?,?,?)", (plate, str(now), "", 0, "在场"))
+            conn.commit()
+            log_info(f"Entry recorded (entry channel): plate={plate}, time={now}")
+            return jsonify({"plate": plate, "type": "入场成功", "time": str(now)})
 
-        c.execute("""
-            UPDATE cars
-            SET exit_time=?, fee=?, status='离场'
-            WHERE plate=? AND status='在场'
-        """, (str(now), fee, plate))
+        # 强制出场通道
+        if channel == 'exit':
+            if car is None:
+                log_info(f"Exit-before-entry attempt: plate={plate}")
+                return jsonify({"error": "exit_before_entry", "msg": "未入场先出场：找不到在场记录"}), 409
 
-        conn.commit()
-        conn.close()
-        log_info(f"Exit recorded: plate={plate}, enter={enter_time}, exit={now}, fee={fee}")
+            enter_time = datetime.strptime(car[1], "%Y-%m-%d %H:%M:%S.%f")
+            hours = (now - enter_time).total_seconds() / 3600
+            fee = round(hours * 5, 2)
 
-        return jsonify({
-            "plate": plate,
-            "type": "出场成功",
-            "fee": fee,
-            "time": str(now)
-        })
+            c.execute("""
+                UPDATE cars
+                SET exit_time=?, fee=?, status='离场'
+                WHERE plate=? AND status='在场'
+            """, (str(now), fee, plate))
+            conn.commit()
+            log_info(f"Exit recorded (exit channel): plate={plate}, enter={enter_time}, exit={now}, fee={fee}")
+            return jsonify({"plate": plate, "type": "出场成功", "fee": fee, "time": str(now)})
+
+        # 自动模式：保持原有语义（在场->出场，否则入场）
+        if channel == 'auto':
+            if car is None:
+                c.execute("INSERT INTO cars VALUES(?,?,?,?,?)", (plate, str(now), "", 0, "在场"))
+                conn.commit()
+                log_info(f"Entry recorded (auto): plate={plate}, time={now}")
+                return jsonify({"plate": plate, "type": "入场成功", "time": str(now)})
+
+            else:
+                enter_time = datetime.strptime(car[1], "%Y-%m-%d %H:%M:%S.%f")
+                hours = (now - enter_time).total_seconds() / 3600
+                fee = round(hours * 5, 2)
+
+                c.execute("""
+                    UPDATE cars
+                    SET exit_time=?, fee=?, status='离场'
+                    WHERE plate=? AND status='在场'
+                """, (str(now), fee, plate))
+                conn.commit()
+                log_info(f"Exit recorded (auto): plate={plate}, enter={enter_time}, exit={now}, fee={fee}")
+                return jsonify({"plate": plate, "type": "出场成功", "fee": fee, "time": str(now)})
+
+    except sqlite3.OperationalError as exc:
+        log_info(f"SQLite operational error: {exc}")
+        return jsonify({"error": "db_error", "msg": "数据库操作失败，请稍后重试"}), 503
+    except Exception as exc:
+        log_info(f"Unhandled processing error: {exc}")
+        return jsonify({"error": "internal_error", "msg": "处理请求时发生未预期错误"}), 500
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 if __name__ == '__main__':
     init_db()

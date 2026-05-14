@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+</body>
+</html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -233,10 +236,13 @@ input[type="file"] {
     </div>
 
     <div class="main">
-        <label class="field-label" for="img">车牌图片</label>
+        <label class="field-label" for="file">车牌图片</label>
         <div class="input-wrap">
-            <input type="file" id="img" accept="image/*">
-            <button class="upload-btn" id="upload-btn" onclick="upload()">上传识别</button>
+            <input type="file" id="file" accept="image/*">
+            <div style="display:flex;gap:8px">
+                <button class="upload-btn" id="entry">入场</button>
+                <button class="upload-btn secondary" id="exit">出场</button>
+            </div>
         </div>
         <p class="hint" id="file-hint">请上传清晰、正向拍摄的车牌图片。</p>
 
@@ -259,8 +265,9 @@ input[type="file"] {
 
 
 <script>
-const fileInput = document.getElementById("img");
-const uploadBtn = document.getElementById("upload-btn");
+const fileInput = document.getElementById("file");
+const entryBtn = document.getElementById("entry");
+const exitBtn = document.getElementById("exit");
 const resultEl = document.getElementById("result");
 const fileHint = document.getElementById("file-hint");
 
@@ -293,7 +300,7 @@ function closeModal(){
     document.getElementById("msg-modal").classList.remove("show");
 }
 
-async function upload(){
+async function upload(channel='auto'){
 
     const file = fileInput.files[0];
     if (!file) {
@@ -301,11 +308,15 @@ async function upload(){
         return;
     }
 
-    uploadBtn.disabled = true;
-    uploadBtn.textContent = "识别中...";
+    // disable both action buttons while processing
+    entryBtn.disabled = true;
+    exitBtn.disabled = true;
+    entryBtn.textContent = '识别中...';
+    exitBtn.textContent = '识别中...';
 
     const formData = new FormData();
     formData.append("image", file);
+    formData.append("channel", channel || 'auto');
 
     try {
         const res = await fetch("/upload", {
@@ -341,8 +352,10 @@ async function upload(){
         resultEl.textContent = `请求异常: ${err}`;
         openModal("网络异常", ["请求未成功，请确认服务器正在运行并重试。"], true);
     } finally {
-        uploadBtn.disabled = false;
-        uploadBtn.textContent = "上传识别";
+        entryBtn.disabled = false;
+        exitBtn.disabled = false;
+        entryBtn.textContent = '入场';
+        exitBtn.textContent = '出场';
     }
 }
 
@@ -351,6 +364,10 @@ document.addEventListener("keydown", (evt) => {
         closeModal();
     }
 });
+
+// bind top-style action buttons to trigger upload with channel
+entryBtn.addEventListener('click', ()=> upload('entry'));
+exitBtn.addEventListener('click', ()=> upload('exit'));
 </script>
 
 </body>
