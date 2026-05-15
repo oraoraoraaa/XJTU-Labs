@@ -1,7 +1,7 @@
 import argparse
 import shlex
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 
 @dataclass
@@ -69,7 +69,9 @@ class MIPSPipelineSim:
         self.regs = [0] * 32
         self.mem: Dict[int, int] = {}
         self.program: List[Instruction] = []
-        self.labels: Dict[str, int] = {}
+        self.text_labels: Dict[str, int] = {}
+        self.data_labels: Dict[str, int] = {}
+        self.halt = False
         self.pc = 0
         self.ifid = IFID(Instruction.nop(), 0)
         self.idex = IDEX(Instruction.nop(), 0, 0, 0, 0, 0, 0, 0)
@@ -83,40 +85,79 @@ class MIPSPipelineSim:
     def load_program(self, text: str) -> None:
         self.reset()
         lines = text.splitlines()
-        self.labels = self._collect_labels(lines)
+        self._first_pass(lines)
         self.program = self._parse_instructions(lines)
 
-    def _collect_labels(self, lines: List[str]) -> Dict[str, int]:
-        labels: Dict[str, int] = {}
+    def _first_pass(self, lines: List[str]) -> None:
+        section = "text"
         pc = 0
+        data_addr = 0
         for raw in lines:
             line = raw.split("#", 1)[0].strip()
             if not line:
                 continue
-            if ":" in line:
-                parts = [p.strip() for p in line.split(":")]
-                label = parts[0]
-                if label:
-                    labels[label] = pc
-                if parts[1]:
-                    pc += 1
-            else:
-                pc += 1
-        return labels
+            if line.lower() == ".text":
+                section = "text"
+                continue
+            if line.lower() == ".data":
+                section = "data"
+                continue
 
-    def _parse_instructions(self, lines: List[str]) -> List[Instruction]:
-        program: List[Instruction] = []
-        for raw in lines:
-            line = raw.split("#", 1)[0].strip()
-            if not line:
-                continue
+            label = None
             if ":" in line:
                 label, rest = [p.strip() for p in line.split(":", 1)]
                 line = rest
+                if label:
+                    if section == "text":
+                        self.text_labels[label] = pc
+                    else:
+                        self.data_labels[label] = data_addr
                 if not line:
                     continue
-            instr = self._parse_instruction(line)
-            program.append(instr)
+
+            if section == "text":
+                if not line.startswith("."):
+                    pc += 1
+            else:
+                if line.lower().startswith(".word"):
+                    values = self._split_args(line[5:])
+                    data_addr += 4 * len(values)
+                else:
+                    raise ValueError(f"Unsupported data directive: {line}")
+
+    def _parse_instructions(self, lines: List[str]) -> List[Instruction]:
+        program: List[Instruction] = []
+        section = "text"
+        data_addr = 0
+        for raw in lines:
+            line = raw.split("#", 1)[0].strip()
+            if not line:
+                continue
+            if line.lower() == ".text":
+                section = "text"
+                continue
+            if line.lower() == ".data":
+                section = "data"
+                continue
+            if ":" in line:
+                _, rest = [p.strip() for p in line.split(":", 1)]
+                line = rest
+                if not line:
+                    continue
+            if section == "text":
+                if line.startswith("."):
+                    continue
+                instr = self._parse_instruction(line)
+                program.append(instr)
+            else:
+                if line.lower().startswith(".word"):
+                    values = self._split_args(line[5:])
+                    for val in values:
+                        word = self._parse_imm(val)
+                        self._write_mem_word(data_addr, word)
+                        data_addr += 4
+                else:
+                    raise ValueError(f"Unsupported data directive: {line}")
         return program
 
     def _parse_instruction(self, line: str) -> Instruction:
@@ -124,6 +165,11 @@ class MIPSPipelineSim:
         if not tokens:
             return Instruction.nop()
         op = tokens[0].lower()
+        if op in ("addiu", "addi"):
+            rt = self._parse_reg(tokens[1])
+            rs = self._parse_reg(tokens[2])
+            imm = self._parse_imm(tokens[3])
+            return Instruction("addiu", (rt, rs, imm), line)
         if op == "add":
             rd = self._parse_reg(tokens[1])
             rs = self._parse_reg(tokens[2])
@@ -133,13 +179,25 @@ class MIPSPipelineSim:
             rt = self._parse_reg(tokens[1])
             offset, rs = self._parse_mem(tokens[2])
             return Instruction(op, (rt, rs, offset), line)
+        if op == "beq":
+            rs = self._parse_reg(tokens[1])
+            rt = self._parse_reg(tokens[2])
+            label = tokens[3]
+            if label not in self.text_labels:
+                raise ValueError(f"Unknown label: {label}")
+            target = self.text_labels[label]
+            return Instruction(op, (rs, rt, target), line)
         if op == "beqz":
             rs = self._parse_reg(tokens[1])
             label = tokens[2]
-            if label not in self.labels:
+            if label not in self.text_labels:
                 raise ValueError(f"Unknown label: {label}")
-            target = self.labels[label]
+            target = self.text_labels[label]
             return Instruction(op, (rs, target), line)
+        if op == "teq":
+            rs = self._parse_reg(tokens[1])
+            rt = self._parse_reg(tokens[2])
+            return Instruction(op, (rs, rt), line)
         if op == "nop":
             return Instruction.nop()
         raise ValueError(f"Unsupported op: {op}")
@@ -147,6 +205,8 @@ class MIPSPipelineSim:
     def _parse_reg(self, token: str) -> int:
         token = token.strip().lower()
         if token.startswith("$"):
+            token = token[1:]
+        if token.startswith("r") and token[1:].isdigit():
             token = token[1:]
         if token.isdigit():
             reg = int(token)
@@ -159,9 +219,18 @@ class MIPSPipelineSim:
             raise ValueError(f"Invalid memory operand: {token}")
         offset_str, rest = token.split("(", 1)
         rs_str = rest.replace(")", "")
-        offset = int(offset_str, 0)
+        offset = self._parse_imm(offset_str)
         rs = self._parse_reg(rs_str)
         return offset, rs
+
+    def _parse_imm(self, token: str) -> int:
+        token = token.strip()
+        if token in self.data_labels:
+            return self.data_labels[token]
+        return int(token, 0)
+
+    def _split_args(self, text: str) -> List[str]:
+        return [t.strip() for t in text.replace(",", " ").split() if t.strip()]
 
     def _read_mem_word(self, addr: int) -> int:
         if addr % 4 != 0:
@@ -187,6 +256,8 @@ class MIPSPipelineSim:
         return 0 <= pc < len(self.program)
 
     def is_done(self) -> bool:
+        if self.halt:
+            return True
         if self.pc < len(self.program):
             return False
         return self.ifid.instr.is_nop() and self.idex.instr.is_nop() and self.exmem.instr.is_nop() and self.memwb.instr.is_nop()
@@ -203,9 +274,10 @@ class MIPSPipelineSim:
         old_memwb = self.memwb
 
         # WB
-        if old_memwb.reg_write and not old_memwb.instr.is_nop():
-            value = old_memwb.mem_data if old_memwb.mem_to_reg else old_memwb.alu_result
-            self._reg_write(old_memwb.dest, value)
+        if not old_memwb.instr.is_nop():
+            if old_memwb.reg_write:
+                value = old_memwb.mem_data if old_memwb.mem_to_reg else old_memwb.alu_result
+                self._reg_write(old_memwb.dest, value)
             self.completed += 1
 
         # MEM
@@ -235,6 +307,7 @@ class MIPSPipelineSim:
         mem_to_reg = False
         rt_forward_val = old_idex.rt_val
 
+        halt_now = False
         if not old_idex.instr.is_nop():
             rs_val, rt_val = self._apply_forwarding(old_idex)
             rt_forward_val = rt_val
@@ -242,6 +315,11 @@ class MIPSPipelineSim:
                 rd, _, _ = old_idex.instr.args
                 alu_result = (rs_val + rt_val) & 0xFFFFFFFF
                 dest = rd
+                reg_write = True
+            elif old_idex.instr.op == "addiu":
+                rt, _, imm = old_idex.instr.args
+                alu_result = (rs_val + imm) & 0xFFFFFFFF
+                dest = rt
                 reg_write = True
             elif old_idex.instr.op == "lw":
                 rt, _, offset = old_idex.instr.args
@@ -254,11 +332,20 @@ class MIPSPipelineSim:
                 _, _, offset = old_idex.instr.args
                 alu_result = (rs_val + offset) & 0xFFFFFFFF
                 mem_write = True
+            elif old_idex.instr.op == "beq":
+                rs, rt, target = old_idex.instr.args
+                if rs_val == rt_val:
+                    branch_taken = True
+                    branch_target = target
             elif old_idex.instr.op == "beqz":
                 rs, target = old_idex.instr.args
                 if rs_val == 0:
                     branch_taken = True
                     branch_target = target
+            elif old_idex.instr.op == "teq":
+                rs, rt = old_idex.instr.args
+                if rs_val == rt_val:
+                    halt_now = True
             elif old_idex.instr.op == "nop":
                 pass
             else:
@@ -293,6 +380,10 @@ class MIPSPipelineSim:
             next_pc = branch_target
             flush = True
             self.flushes += 1
+        elif halt_now:
+            next_pc = len(self.program)
+            flush = True
+            self.halt = True
         elif not stall:
             next_pc = self.pc + 1
 
@@ -305,6 +396,7 @@ class MIPSPipelineSim:
 
         if flush:
             new_ifid = IFID(Instruction.nop(), next_pc)
+            new_idex = IDEX(Instruction.nop(), 0, 0, 0, 0, 0, 0, 0)
 
         self.pc = next_pc
         self.ifid = new_ifid
@@ -319,10 +411,16 @@ class MIPSPipelineSim:
         rs = rt = rd = imm = 0
         if instr.op == "add":
             rd, rs, rt = instr.args
+        elif instr.op == "addiu":
+            rt, rs, imm = instr.args
         elif instr.op in ("lw", "sw"):
             rt, rs, imm = instr.args
+        elif instr.op == "beq":
+            rs, rt, _ = instr.args
         elif instr.op == "beqz":
             rs, _ = instr.args
+        elif instr.op == "teq":
+            rs, rt = instr.args
         else:
             raise ValueError(f"Unsupported op in ID: {instr.op}")
         return IDEX(instr, ifid.pc, rs, rt, rd, imm, self._reg_read(rs), self._reg_read(rt))
@@ -377,7 +475,7 @@ class MIPSPipelineSim:
     def _writes_reg(self, instr: Instruction) -> bool:
         if instr.is_nop():
             return False
-        if instr.op in ("add", "lw"):
+        if instr.op in ("add", "addiu", "lw"):
             return True
         return False
 
@@ -387,6 +485,9 @@ class MIPSPipelineSim:
         if instr.op == "add":
             rd, _, _ = instr.args
             return rd
+        if instr.op == "addiu":
+            rt, _, _ = instr.args
+            return rt
         if instr.op == "lw":
             rt, _, _ = instr.args
             return rt
@@ -396,15 +497,24 @@ class MIPSPipelineSim:
         if instr.op == "add":
             _, rs, rt = instr.args
             return rs, rt
+        if instr.op == "addiu":
+            _, rs, _ = instr.args
+            return rs, 0
         if instr.op == "lw":
             _, rs, _ = instr.args
             return rs, 0
         if instr.op == "sw":
             rt, rs, _ = instr.args
             return rs, rt
+        if instr.op == "beq":
+            rs, rt, _ = instr.args
+            return rs, rt
         if instr.op == "beqz":
             rs, _ = instr.args
             return rs, 0
+        if instr.op == "teq":
+            rs, rt = instr.args
+            return rs, rt
         return 0, 0
 
     def dump_pipeline(self) -> str:
@@ -435,6 +545,19 @@ class MIPSPipelineSim:
             f"Flushes: {self.flushes}\n"
             f"CPI: {cpi:.2f}"
         )
+
+    def dump_source(self, start: int = 0, count: int = 0) -> str:
+        if count <= 0:
+            count = max(0, len(self.program) - start)
+        end = min(len(self.program), start + count)
+        lines = []
+        for i in range(start, end):
+            addr = i * 4
+            marker = "->" if i == self.pc else "  "
+            lines.append(f"{marker} {i:04d} (0x{addr:08x}): {self.program[i].text}")
+        if not lines:
+            return "<no instructions>"
+        return "\n".join(lines)
 
 
 class CLI:
@@ -478,6 +601,8 @@ class CLI:
                     self._cmd_clear(args)
                 elif cmd == "regs":
                     print(self.sim.dump_regs())
+                elif cmd == "list":
+                    self._cmd_list(args)
                 elif cmd == "pipe":
                     print(self.sim.dump_pipeline())
                 elif cmd == "mem":
@@ -508,6 +633,7 @@ class CLI:
             "  breaks                List breakpoints\n"
             "  clear <pc|all>        Clear breakpoint\n"
             "  regs                  Show registers\n"
+            "  list [start] [count]  Show source with addresses\n"
             "  mem <addr> <count>    Dump memory words\n"
             "  memset <addr> <value> Set one memory word\n"
             "  pipe                  Show pipeline registers\n"
@@ -544,6 +670,7 @@ class CLI:
                 break
             self.sim.step()
         print(f"PC={self.sim.pc}, cycles={self.sim.cycles}")
+        print(self.sim.dump_source(self.sim.pc, 5))
 
     def _cmd_run(self) -> None:
         while not self.sim.is_done():
@@ -600,6 +727,13 @@ class CLI:
             val = self.sim.mem.get(a, 0)
             print(f"0x{a:08x}: 0x{val:08x}")
 
+    def _cmd_list(self, args: List[str]) -> None:
+        if len(args) > 2:
+            raise ValueError("Usage: list [start] [count]")
+        start = int(args[0], 0) if len(args) >= 1 else 0
+        count = int(args[1], 0) if len(args) == 2 else 0
+        print(self.sim.dump_source(start, count))
+
     def _cmd_memset(self, args: List[str]) -> None:
         if len(args) != 2:
             raise ValueError("Usage: memset <addr> <value>")
@@ -622,8 +756,8 @@ class CLI:
     def _resolve_target(self, token: str) -> int:
         if token.isdigit():
             return int(token)
-        if token in self.sim.labels:
-            return self.sim.labels[token]
+        if token in self.sim.text_labels:
+            return self.sim.text_labels[token]
         raise ValueError(f"Unknown target: {token}")
 
 
