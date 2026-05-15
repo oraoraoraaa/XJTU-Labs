@@ -1,11 +1,7 @@
 import argparse
-import json
 import shlex
-import webbrowser
 from dataclasses import dataclass
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Dict, List, Tuple
-from urllib.parse import urlparse
+from typing import Dict, List, Optional, Tuple
 
 
 @dataclass
