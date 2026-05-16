@@ -1,0 +1,7 @@
+[package]
+name = "task3_inventory_postgres"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+postgres = "0.19"

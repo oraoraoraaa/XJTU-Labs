@@ -8,9 +8,11 @@ __pycache__
 
 # Rust
 target
+users.db
 
-# Machine Learning Lab Preprocessing
+# Machine Learning Datasets
 cifar-10-batches-py
+cifar-10-python.tar.gz
 
 # Machine Learning Lab Transformer
 Machine-Learning/lab-3-transformer/model
