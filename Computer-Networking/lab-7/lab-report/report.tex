@@ -1,6 +1,6 @@
-%! TEX program = xelatex
+% !TEX program = xelatex
 
-\documentclass[12pt,a4paper]{ctexart}
+\documentclass[12pt,a4paper]{article}
 \usepackage[margin=2.2cm]{geometry}
 \usepackage{graphicx}
 \usepackage{booktabs}
@@ -21,6 +21,9 @@
   frame=single,
   tabsize=4
 }
+
+% XeLaTeX 中文支持，使用 TeX Live 内置的 Fandol 字体集
+\usepackage[fontset=fandol]{ctex}
 
 \title{计算机网络专题实验七报告\\\large 基于规则增强OCR的停车场车牌识别与计费系统}
 \author{姓名：李祥熙\quad 班级：计算机2301 \\
@@ -85,7 +88,7 @@
 \subsection*{1. 人员分工}
 根据实验分工约定：
 \begin{itemize}
-  \item 简辰轩：主要负责系统代码编写与接口联调，包括Flask服务、OCR流程、数据库逻辑与前端交互功能。
+  \item 简辰轩：主要负责系统代码编写与接口联调，包括Flask服务、OCR流程、数据库逻辑与前端交互功能，并修改验收后的功能改进与修复。
   \item 李祥熙：主要负责测试优化与实验报告撰写，重点参与识别规则调优、样例测试与结果分析。
 \end{itemize}
 
@@ -250,6 +253,60 @@ openModal(res.ok ? "Done" : "Failed", detailLines, !res.ok);
   \caption{移动端首页UI}
   \label{fig:webui}
 \end{figure}
+\subsection*{附：新增UI与异常处理}
+为提升操作清晰度与容错性，本次更新对前端和后端进行了两项重要补充：
+
+\subsubsection*{（一）UI：入场/出场按钮分离}
+页面顶部新增独立的“入场”和“出场”按钮，用户可在不改变下方主上传区的情况下直接选择操作类型。该交互把上传文件选择与业务意图显式分离，避免用户误操作导致错误计费。顶部控件与下方上传控件联动——在顶部选择文件会自动填入下方的上传输入框，点击顶部按钮即可触发带有 \texttt{channel} 参数的上传请求。图\ref{fig:new-ui} 展示了新增后的页面布局与按钮位置。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{images/new_ui.png}
+  \caption{新增UI：顶部入场/出场按钮与主上传控件联动（示意）}
+  \label{fig:New_web_ui}
+\end{figure}
+
+\subsubsection*{（二）异常处理：用户友好的错误提示与后端保护}
+针对常见业务与识别异常，系统在服务端实现了统一错误码与可读提示，并由前端弹窗友好展示。新增的两类典型错误如下：
+
+\begin{enumerate}
+  \item \textbf{new\_error1：未入场先出场（exit\_before\_entry）}\\
+    场景：用户上传一张车牌图片并选择“出场”，但数据库中不存在该车牌的在场记录。
+    后端检测到此类请求会返回 HTTP 409，并给出错误码 \texttt{exit\_before\_entry} 及中文提示“未入场先出场：找不到在场记录”。前端在弹窗中展示该提示，避免用户误以为计费成功。图\ref{fig:new-error1-ui} 为前端提示示意，图\ref{fig:new-error1-term} 为后端日志/终端输出示意。
+
+  \item \textbf{new\_error2：识别无效（ocr\_no\_plate）}\\
+    场景：上传的图片无法识别出符合车牌规则的文本（例如模糊、角度不对或非车牌图片）。后端会返回 HTTP 422，并返回错误码 \texttt{ocr\_no\_plate} 以及提示“OCR识别失败或车牌不符合规则，请上传更清晰的正向车牌图片”。前端将该提示以弹窗形式告知用户，建议重拍或更换图片。图\ref{fig:new-error2-ui} 为前端提示示意，图\ref{fig:new-error2-term} 为后端日志/终端输出示意。
+\end{enumerate}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.44\textwidth]{images/New_error1.png}
+  \caption{异常提示示例：未入场先出场（前端弹窗）}
+  \label{fig:New_error1}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{images/New_error1_terminal.png}
+  \caption{终端日志（示意）：未入场先出场被拦截并返回 409}
+  \label{fig:New_error1_terminal}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.44\textwidth]{images/New_error2.png}
+  \caption{异常提示示例：OCR无法匹配车牌（前端弹窗）}
+  \label{fig:New_error2}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{images/New_error2_terminal.png}
+  \caption{终端日志（示意）：OCR初始化/识别失败返回 422 或 502，便于定位问题}
+  \label{fig:New_error2_terminal}
+\end{figure}
+
+以上异常处理在代码中使用明确的错误码与 HTTP 状态码进行区分（见 \texttt{app.py} 中的返回分支），这既便于前端按类型展示不同的交互，也方便自动化测试断言错误类型，提升系统可维护性。
 
 \subsection*{1. 测试一：样本1（苏B92912）入场与出场}
 \textbf{测试目标：}验证规则增强OCR在“省份汉字+城市字母+数字后缀”典型蓝牌场景下的稳定性。
