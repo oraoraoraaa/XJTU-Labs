@@ -1,0 +1,14 @@
+# Example 1: expression grammar
+E -> E + T | T
+T -> T * F | F
+F -> ( E ) | id
+
+# Example 2: simple assignment grammar
+S -> id = E
+E -> E + T | T
+T -> T * F | F
+F -> ( E ) | id | num
+
+# Example 3: classic CC grammar
+S -> C C
+C -> c C | d

@@ -1,0 +1,200 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+
+\lstset{
+	language=C,
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{blue!70!black},
+	commentstyle=\color{green!40!black},
+	stringstyle=\color{orange!60!black},
+	showstringspaces=false,
+	breaklines=true,
+	frame=single,
+	tabsize=4
+}
+
+% ===== 实验信息 =====
+\newcommand{\reporttitle}{实验三：LR(0) 项目集规范族构建}
+\newcommand{\subtask}{闭包、Goto 与 LR(0) 冲突检测}
+\newcommand{\authname}{姓名}
+\newcommand{\authid}{学号}
+% =====================
+
+\title{\reporttitle}
+\author{\authname：\underline{\hspace{3cm}} \quad \authid：\underline{\hspace{3cm}}}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{实验目的}
+本实验的目标如下：
+\begin{itemize}
+	\item 构建给定文法的 LR(0) 项目集规范族，理解闭包与 Goto 的构造过程。
+	\item 输出每个状态的项目集与状态转移关系，形成规范族的完整视图。
+	\item 检测移进-归约与归约-归约冲突，判断文法是否为 LR(0)。
+\end{itemize}
+
+\section{实验过程}
+\subsection{实验环境}
+\begin{itemize}
+	\item 操作系统：Linux
+	\item 编程语言：C（C11）
+	\item 编译工具：GCC
+	\item 其他工具：LaTeX（ctexart），VS Code
+\end{itemize}
+
+\subsection{数据集与输入形式}
+本实验的输入为文法规则文件 \texttt{grammar.txt}，支持扩展巴科斯范式（\texttt{|}）与空产生式（\texttt{epsilon}）。
+同一文件中包含多个示例文法，便于在同一程序中复用读取逻辑。
+
+\paragraph{输入文法：}
+\lstinputlisting[language=]{../grammar.txt}
+
+\textbf{说明：}该文件包含三个文法片段，分别是表达式文法、赋值语句文法与经典 \texttt{CC} 文法。
+程序默认将第一条产生式左侧视作起始符号（本次为 \texttt{E}），也支持在命令行指定起始符号。
+
+\subsection{实现步骤}
+\begin{enumerate}
+	\item 解析输入文法，分离非终结符与终结符，构建产生式集合并自动增广文法。
+	\item 基于增广起始项目生成初始项目集，计算闭包（Closure）。
+	\item 对每个项目集与符号计算 Goto，生成新的项目集并编号。
+	\item 输出项目集、状态转移图，并检测 LR(0) 冲突。
+\end{enumerate}
+
+\section{实验内容}
+\subsection{任务一：文法解析与增广}
+程序支持形如 \texttt{E -> E + T | T} 的规则，并允许多行输入。
+读取阶段先收集非终结符集合，再解析右部符号序列，最后自动构造增广产生式 \texttt{S' -> S}。
+
+\subsection{任务二：闭包与 Goto 构造}
+闭包过程：对于形如 $A \rightarrow \alpha \cdot B \beta$ 的项目，加入 \texttt{B} 的全部产生式项目 $B \rightarrow \cdot \gamma$，直到不再变化。
+Goto 过程：对项目集中点后为某符号的项目进行移点，形成新项目集并计算其闭包。
+
+以下代码片段展示了闭包与 Goto 的核心实现：
+\begin{lstlisting}
+static void
+closure (ItemSet *set, const Production *prods, const int *nonterm_first,
+				 const int *nonterm_count, const int *symbol_is_nonterm)
+{
+	int changed = 1;
+	while (changed)
+		{
+			changed = 0;
+			for (int i = 0; i < set->count; ++i)
+				{
+					Item it = set->items[i];
+					const Production *p = &prods[it.prod];
+					if (it.dot >= p->rhs_len)
+						{
+							continue;
+						}
+					int sym = p->rhs[it.dot];
+					if (!symbol_is_nonterm[sym])
+						{
+							continue;
+						}
+					int nt_index = sym;
+					int start = nonterm_first[nt_index];
+					int cnt = nonterm_count[nt_index];
+					if (start < 0 || cnt <= 0)
+						{
+							continue;
+						}
+					for (int k = 0; k < cnt; ++k)
+						{
+							Item new_item;
+							new_item.prod = start + k;
+							new_item.dot = 0;
+							if (!itemset_contains (set, &new_item))
+								{
+									itemset_add (set, &new_item);
+									changed = 1;
+								}
+						}
+				}
+		}
+}
+
+static void
+goto_set (const ItemSet *src, int symbol, ItemSet *dst,
+					const Production *prods, int prod_count, const int *nonterm_first,
+					const int *nonterm_count, int nonterm_total,
+					const int *symbol_is_nonterm)
+{
+	dst->count = 0;
+	for (int i = 0; i < src->count; ++i)
+		{
+			Item it = src->items[i];
+			const Production *p = &prods[it.prod];
+			if (it.dot < p->rhs_len && p->rhs[it.dot] == symbol)
+				{
+					Item moved;
+					moved.prod = it.prod;
+					moved.dot = it.dot + 1;
+					itemset_add (dst, &moved);
+				}
+		}
+	(void)prod_count;
+	(void)nonterm_total;
+	closure (dst, prods, nonterm_first, nonterm_count, symbol_is_nonterm);
+	itemset_sort (dst);
+}
+\end{lstlisting}
+
+\textbf{说明：}闭包函数按“能扩展就扩展”的方式迭代加入新项目；Goto 函数负责点向右移动并调用闭包，形成完整的新状态。
+
+\section{实验结果}
+\subsection{任务一结果：程序运行截图}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{images/compile_and_run.png}
+\caption{程序编译与运行截图}
+\label{fig:run}
+\end{figure}
+
+结果分析：
+\begin{itemize}
+	\item 程序能够成功读取文法并输出增广文法与项目集状态。
+	\item 屏幕输出与预期格式一致，便于对照状态编号与转移。
+\end{itemize}
+
+\subsection{任务二结果：项目集与冲突检测输出}
+\lstinputlisting[language=]{../output.txt}
+
+\textbf{说明：}输出包含四部分：增广文法、LR(0) 规范族、状态转移图与冲突检测结论。
+从结果可以看出该文法存在多处移进-归约与归约-归约冲突，因此整体不是 LR(0) 文法。
+这也符合将多个示例文法合并在同一文件中时的预期现象。
+
+\section{总结}
+本实验完成了 LR(0) 项目集规范族构建与冲突检测：
+\begin{itemize}
+	\item 实现了文法解析与自动增广，支持扩展巴科斯范式输入。
+	\item 输出了项目集闭包与状态转移图，能够直接观察规范族结构。
+	\item 通过冲突检查给出 LR(0) 判定结论，为后续 SLR(1) 表构造奠定基础。
+\end{itemize}
+
+\section*{附录：实验源代码}
+\subsection*{A.1 主要源码：main.c}
+\lstinputlisting{../main.c}
+
+\subsection*{A.2 运行命令}
+\begin{verbatim}
+cd /home/rin/Local/Github/XJTU-Labs/Compiler/lab-3
+gcc -std=c11 -Wall -Wextra -O2 main.c -o lr0
+
+# 默认起始符号为第一条产生式左侧（本次为 E）
+./lr0 grammar.txt
+
+# 显式指定起始符号
+./lr0 grammar.txt E
+\end{verbatim}
+
+\end{document}

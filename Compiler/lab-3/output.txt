@@ -1,0 +1,195 @@
+./lr0 grammar.txt                                                                                   ─╯
+========================================
+Augmented Grammar
+========================================
+0: E' -> E
+1: E -> E + T
+2: E -> T
+3: T -> T * F
+4: T -> F
+5: F -> ( E )
+6: F -> id
+7: S -> id = E
+8: E -> E + T
+9: E -> T
+10: T -> T * F
+11: T -> F
+12: F -> ( E )
+13: F -> id
+14: F -> num
+15: S -> C C
+16: C -> c C
+17: C -> d
+
+========================================
+LR(0) Canonical Collection + Closure
+========================================
+State 0:
+  E' -> . E
+  E -> . E + T
+  E -> . T
+  T -> . T * F
+  T -> . F
+  F -> . ( E )
+  F -> . id
+  S -> . id = E
+  E -> . E + T
+  E -> . T
+Kernel: E' -> . E
+
+State 1:
+  E' -> E .
+  E -> E . + T
+  E -> E . + T
+Kernel: E' -> E ., E -> E . + T, E -> E . + T
+
+State 2:
+  E -> T .
+  T -> T . * F
+  E -> T .
+Kernel: E -> T ., T -> T . * F, E -> T .
+
+State 3:
+  T -> F .
+Kernel: T -> F .
+
+State 4:
+  E -> . E + T
+  E -> . T
+  T -> . T * F
+  T -> . F
+  F -> . ( E )
+  F -> ( . E )
+  F -> . id
+  S -> . id = E
+  E -> . E + T
+  E -> . T
+Kernel: F -> ( . E )
+
+State 5:
+  F -> id .
+  S -> id . = E
+Kernel: F -> id ., S -> id . = E
+
+State 6:
+  E -> . E + T
+  E -> E + . T
+  E -> . T
+  T -> . T * F
+  T -> . F
+  F -> . ( E )
+  F -> . id
+  S -> . id = E
+  E -> . E + T
+  E -> E + . T
+  E -> . T
+Kernel: E -> E + . T, E -> E + . T
+
+State 7:
+  E -> . E + T
+  E -> . T
+  T -> . T * F
+  T -> T * . F
+  T -> . F
+  F -> . ( E )
+  F -> . id
+  S -> . id = E
+  E -> . E + T
+  E -> . T
+Kernel: T -> T * . F
+
+State 8:
+  E -> E . + T
+  F -> ( E . )
+  E -> E . + T
+Kernel: E -> E . + T, F -> ( E . ), E -> E . + T
+
+State 9:
+  E -> . E + T
+  E -> . T
+  T -> . T * F
+  T -> . F
+  F -> . ( E )
+  F -> . id
+  S -> . id = E
+  S -> id = . E
+  E -> . E + T
+  E -> . T
+Kernel: S -> id = . E
+
+State 10:
+  E -> E . + T
+  E -> E . + T
+Kernel: E -> E . + T, E -> E . + T
+
+State 11:
+  E -> E + T .
+  E -> T .
+  T -> T . * F
+  E -> E + T .
+  E -> T .
+Kernel: E -> E + T ., E -> T ., T -> T . * F, E -> E + T ., E -> T .
+
+State 12:
+  T -> T * F .
+  T -> F .
+Kernel: T -> T * F ., T -> F .
+
+State 13:
+  F -> ( E ) .
+Kernel: F -> ( E ) .
+
+State 14:
+  E -> E . + T
+  S -> id = E .
+  E -> E . + T
+Kernel: E -> E . + T, S -> id = E ., E -> E . + T
+
+========================================
+State Transition Graph
+========================================
+0 --E--> 1
+0 --T--> 2
+0 --F--> 3
+0 --(--> 4
+0 --id--> 5
+1 --+--> 6
+2 --*--> 7
+4 --E--> 8
+4 --T--> 2
+4 --F--> 3
+4 --(--> 4
+4 --id--> 5
+5 --=--> 9
+6 --E--> 10
+6 --T--> 11
+6 --F--> 3
+6 --(--> 4
+6 --id--> 5
+7 --E--> 10
+7 --T--> 2
+7 --F--> 12
+7 --(--> 4
+7 --id--> 5
+8 --+--> 6
+8 --)--> 13
+9 --E--> 14
+9 --T--> 2
+9 --F--> 3
+9 --(--> 4
+9 --id--> 5
+10 --+--> 6
+11 --*--> 7
+14 --+--> 6
+========================================
+LR(0) Conflict Check
+========================================
+State 2: reduce-reduce conflict
+State 2: shift-reduce conflict
+State 5: shift-reduce conflict
+State 11: reduce-reduce conflict
+State 11: shift-reduce conflict
+State 12: reduce-reduce conflict
+State 14: shift-reduce conflict
+Grammar has conflicts, not LR(0).
+
