@@ -1,0 +1,17 @@
+The path of the current lab is 
+
+Read the lab report template in the `lab_report_template.tex` under the root folder of this repository, and follow the template to write the report for the current lab in an empty file created for you in `<current_lab_path>/lab-report/report.tex`.
+
+Read the lab instructions and codes carefully so you fully understand the tasks, the implementation, and the result of this lab.
+
+(Optional) The output of the code is stored in the `output.txt` file under the folder of the current lab. Embed it in the lab report where appropriate.
+
+(Optional) The relevant screenshots and images are stored in `<current_lab_path>/lab-report/images`. Read them carefully and make sure you fully understand them. Embed them in the lab report where appropriate.
+
+Use code snippets for clearer explanations when appropriate.
+
+(Important) Make sure you explain all the embeddings clearly and in details after you embed them in the lab report.
+
+The overall language style should be clear and simple, BUT this doesn't mean the lab report should be short. Make the length appropriate.
+
+Write in Chinese.
