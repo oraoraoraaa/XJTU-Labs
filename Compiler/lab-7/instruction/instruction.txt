@@ -11,3 +11,5 @@
 - 生成的输出文件和命名规范： `output_file_summary.png`
 
 Before you write the code for the lab 7, scan through the instructions and the codes of previous lab. There might be something can be used directly.
+
+Important: for the Intermediate Code Generation, the generator in the lab six should be used and referenced as the highest priority. You can also check the C code in the lab six folder for any grammar rules.
