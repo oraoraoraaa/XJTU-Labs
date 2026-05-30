@@ -17,3 +17,6 @@ cifar-10-python.tar.gz
 # Machine Learning Lab Transformer
 Machine-Learning/lab-3-transformer/model
 Machine-Learning/lab-3-transformer/transformer_seq2seq.pt
+
+# Compiler lab
+Compiler/compiler_lab_prompt.txt
