@@ -1,0 +1,4 @@
+# Example 1: expression grammar (single grammar for SLR table)
+E -> E + T | T
+T -> T * F | F
+F -> ( E ) | id
