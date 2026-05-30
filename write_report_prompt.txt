@@ -10,6 +10,8 @@ Read the lab instructions and codes carefully so you fully understand the tasks,
 
 Use code snippets for clearer explanations when appropriate.
 
+(Note) When you embed the text form embeddings (text output, codes, etc.), DO NOT reference it as a file, directly copy the text and embed into the lab report.
+
 (Important) Make sure you explain all the embeddings clearly and in details after you embed them in the lab report.
 
 The overall language style should be clear and simple, BUT this doesn't mean the lab report should be short. Make the length appropriate.
