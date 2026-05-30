@@ -1,0 +1,9 @@
+实验六：中间代码生成
+
+输入是一段符合文法的代码。
+`example_input.png`
+
+输出是中间代码四元式：
+`example_output.png`
+
+利用测试代码 Compiler/test-set 对本次实验的中间代码生成器进行测试，确保测试都通过。

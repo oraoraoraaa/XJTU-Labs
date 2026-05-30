@@ -1,0 +1,17 @@
+ID = L([a-z][a-z0-9]*)\KEY
+KEY = {int, float, void, if, else, while, return, input, print}
+INT = {int}; FLOAT = {float}; VOID = {void}; IF = {if}; ELSE = {else}
+WHILE = {while}; RETURN = {return}; INPUT = {input}; PRINT = {print}
+NUM = L([+-]?[0-9]*)
+FLO = L([+-]?[0-9]*.[0-9]+|[+-]?[0-9]+.[0-9]*)
+OP = AOP ∪ ROP ∪ BOP ∪ {=, +=, ++}
+AOP = {+, -, *, /}
+ADD = {+}; SUB = {-}; MUL = {*}; DIV = {/}
+ROP = {<, <=, ==, >, >=, !=}
+BOP = {^, v, |} 或 BOP = {&&, ||, !}
+ASG = {=}; AAS = {+=}; AAA = {++}
+DLI = {(, [, \{, \}, \, \_}
+LPA = {(}; RPA = {)}; LBK = {[}; RBK = {]}; LBR = {\{}; RBR = {\}}; CMA = {\ ,},SCO = {;}
+
+d:ID; int:KEY; int:INT; i:NUM; f:FLO; o:AOP; +:ADD; r:ROP; <:L(<);
+    ^:BOP;     ^:L(^);    &&:BOP;  (:DLL;   ):LPA;
