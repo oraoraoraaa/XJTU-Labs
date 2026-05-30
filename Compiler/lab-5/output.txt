@@ -1,0 +1,56 @@
+AST:
+program
+  func(qsort)
+    params
+      param(int)
+        id(low)
+      param(int)
+        id(high)
+    block
+      stmt_list
+        decl(int)
+          decl_list
+            id(i)
+            id(j)
+        decl(float)
+          decl_list
+            id(x)
+        assign
+          id(i)
+          input
+        if
+          relop(<=)
+            id(i)
+            id(high)
+          block
+            stmt_list
+              assign
+                id(x)
+                num(-3.14)
+              print
+                id(i)
+          block
+            stmt_list
+              while
+                relop(<)
+                  id(j)
+                  num(10)
+                block
+                  stmt_list
+                    assign
+                      id(j)
+                      add
+                        id(j)
+                        num(1)
+        return
+
+Symbol Table:
+Name             Type     Scope   
+low              int      0       
+high             int      0       
+i                int      1       
+j                int      1       
+x                float    1       
+
+Semantic Errors:
+None
