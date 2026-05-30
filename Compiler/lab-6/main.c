@@ -7,6 +7,8 @@
 #define MAX_NAME 64
 #define MAX_QUADS 4096
 #define MAX_SYMBOLS 512
+#define MAX_FUNCS 128
+#define MAX_CALLS 512
 #define MAX_ERRORS 256
 
 typedef enum
@@ -79,6 +81,12 @@ typedef struct
 
 typedef struct
 {
+  char name[MAX_NAME];
+  ValueType ret_type;
+} Function;
+
+typedef struct
+{
   char op[16];
   char arg1[MAX_NAME];
   char arg2[MAX_NAME];
@@ -99,6 +107,10 @@ static int g_quad_count = 0;
 static int g_temp_count = 0;
 static Symbol g_symbols[MAX_SYMBOLS];
 static int g_symbol_count = 0;
+static Function g_funcs[MAX_FUNCS];
+static int g_func_count = 0;
+static char g_calls[MAX_CALLS][MAX_NAME];
+static int g_call_count = 0;
 static int g_scope_level = 0;
 static ValueType g_func_ret = TYPE_VOID;
 static char g_errors[MAX_ERRORS][MAX_NAME * 2];
@@ -285,6 +297,34 @@ next_token (void)
           return make_token (TOK_INPUT, buf, line, col);
         }
       return make_token (TOK_ID, buf, line, col);
+    }
+
+  if (c == '.' && isdigit ((unsigned char)g_lex.src[g_lex.pos + 1]))
+    {
+      char buf[MAX_NAME];
+      int n = 0;
+      int has_dot = 0;
+      while (isdigit ((unsigned char)lexer_peek ()) || lexer_peek () == '.')
+        {
+          if (lexer_peek () == '.')
+            {
+              if (has_dot)
+                {
+                  break;
+                }
+              has_dot = 1;
+            }
+          if (n < MAX_NAME - 1)
+            {
+              buf[n++] = lexer_next ();
+            }
+          else
+            {
+              lexer_next ();
+            }
+        }
+      buf[n] = '\0';
+      return make_token (TOK_NUM, buf, line, col);
     }
 
   if (isdigit ((unsigned char)c))
@@ -516,6 +556,77 @@ declare_symbol (const char *name, ValueType type, int is_array, int array_size)
   return 1;
 }
 
+static int
+find_function (const char *name, ValueType *ret_type)
+{
+  for (int i = 0; i < g_func_count; ++i)
+    {
+      if (strcmp (g_funcs[i].name, name) == 0)
+        {
+          if (ret_type)
+            {
+              *ret_type = g_funcs[i].ret_type;
+            }
+          return 1;
+        }
+    }
+  return 0;
+}
+
+static int
+declare_function (const char *name, ValueType ret_type)
+{
+  for (int i = 0; i < g_func_count; ++i)
+    {
+      if (strcmp (g_funcs[i].name, name) == 0)
+        {
+          return 0;
+        }
+    }
+  if (g_func_count >= MAX_FUNCS)
+    {
+      return 0;
+    }
+  Function *fn = &g_funcs[g_func_count++];
+  strncpy (fn->name, name, MAX_NAME - 1);
+  fn->name[MAX_NAME - 1] = '\0';
+  fn->ret_type = ret_type;
+  return 1;
+}
+
+static void
+record_call (const char *name)
+{
+  for (int i = 0; i < g_call_count; ++i)
+    {
+      if (strcmp (g_calls[i], name) == 0)
+        {
+          return;
+        }
+    }
+  if (g_call_count >= MAX_CALLS)
+    {
+      return;
+    }
+  strncpy (g_calls[g_call_count], name, MAX_NAME - 1);
+  g_calls[g_call_count][MAX_NAME - 1] = '\0';
+  g_call_count++;
+}
+
+static void
+check_undefined_calls (void)
+{
+  for (int i = 0; i < g_call_count; ++i)
+    {
+      if (!find_function (g_calls[i], NULL))
+        {
+          char msg[MAX_NAME * 2];
+          snprintf (msg, sizeof (msg), "Undeclared function '%s'", g_calls[i]);
+          record_error (msg);
+        }
+    }
+}
+
 static ValueType
 type_merge (ValueType a, ValueType b)
 {
@@ -594,7 +705,12 @@ parse_primary (void)
           char argc_buf[MAX_NAME];
           snprintf (argc_buf, sizeof (argc_buf), "%d", arg_count);
           emit_quad ("call", name, argc_buf, tmp);
-          return make_expr (tmp, TYPE_UNKNOWN, 0);
+          ValueType ret_type = TYPE_UNKNOWN;
+          if (!find_function (name, &ret_type))
+            {
+              record_call (name);
+            }
+          return make_expr (tmp, ret_type, 0);
         }
 
       char full[MAX_NAME];
@@ -638,6 +754,12 @@ parse_primary (void)
       return e;
     }
 
+  if (match (TOK_ADD))
+    {
+      Expr e = parse_primary ();
+      return make_expr (e.name, e.type, 0);
+    }
+
   if (match (TOK_SUB))
     {
       Expr e = parse_primary ();
@@ -648,6 +770,10 @@ parse_primary (void)
     }
 
   record_error ("Invalid expression");
+  if (g_cur.type != TOK_EOF)
+    {
+      advance_token ();
+    }
   return make_expr ("", TYPE_UNKNOWN, 0);
 }
 
@@ -796,8 +922,8 @@ parse_decl (ValueType type)
 
       if (match (TOK_ASSIGN))
         {
-          Expr rhs = parse_expression ();
-          emit_quad ("=", rhs.name, "", name);
+          record_error ("Initialization in declaration is not allowed");
+          (void)parse_expression ();
         }
 
       if (match (TOK_COMMA))
@@ -806,43 +932,6 @@ parse_decl (ValueType type)
         }
       break;
     }
-}
-
-static Expr
-parse_lvalue (void)
-{
-  if (g_cur.type != TOK_ID)
-    {
-      record_error ("Expected identifier");
-      return make_expr ("", TYPE_UNKNOWN, 0);
-    }
-  char name[MAX_NAME];
-  strncpy (name, g_cur.lexeme, MAX_NAME - 1);
-  name[MAX_NAME - 1] = '\0';
-  advance_token ();
-
-  ValueType t = TYPE_UNKNOWN;
-  if (!find_symbol (name, &t))
-    {
-      char msg[MAX_NAME * 2];
-      snprintf (msg, sizeof (msg), "Undeclared identifier '%s'", name);
-      record_error (msg);
-    }
-
-  char full[MAX_NAME];
-  strncpy (full, name, MAX_NAME - 1);
-  full[MAX_NAME - 1] = '\0';
-  while (match (TOK_LBK))
-    {
-      Expr idx = parse_expression ();
-      expect (TOK_RBK, "Missing ] in index");
-      char buf[MAX_NAME];
-      snprintf (buf, sizeof (buf), "%s[%s]", full, idx.name);
-      strncpy (full, buf, MAX_NAME - 1);
-      full[MAX_NAME - 1] = '\0';
-    }
-
-  return make_expr (full, t, 1);
 }
 
 static void
@@ -983,31 +1072,6 @@ parse_statement (void)
       match (TOK_SEMI);
       return;
     }
-  if (g_cur.type == TOK_ID)
-    {
-      Token lookahead = g_cur;
-      advance_token ();
-      if (g_cur.type == TOK_LPA)
-        {
-          g_cur = lookahead;
-          Expr call = parse_expression ();
-          (void)call;
-          match (TOK_SEMI);
-          return;
-        }
-      if (g_cur.type == TOK_ASSIGN || g_cur.type == TOK_LBK)
-        {
-          g_cur = lookahead;
-          Expr lhs = parse_lvalue ();
-          expect (TOK_ASSIGN, "Missing = in assignment");
-          Expr rhs = parse_expression ();
-          emit_quad ("=", rhs.name, "", lhs.name);
-          match (TOK_SEMI);
-          return;
-        }
-      g_cur = lookahead;
-    }
-
   Expr e = parse_expression ();
   (void)e;
   match (TOK_SEMI);
@@ -1101,6 +1165,13 @@ parse_function (void)
   name[MAX_NAME - 1] = '\0';
   advance_token ();
 
+  if (!declare_function (name, ret_type))
+    {
+      char msg[MAX_NAME * 2];
+      snprintf (msg, sizeof (msg), "Duplicate function '%s'", name);
+      record_error (msg);
+    }
+
   expect (TOK_LPA, "Missing ( in function");
   enter_scope ();
   g_func_ret = ret_type;
@@ -1180,6 +1251,7 @@ main (int argc, char **argv)
   lexer_init (src);
   advance_token ();
   parse_toplevel ();
+  check_undefined_calls ();
 
   if (g_error_count > 0)
     {

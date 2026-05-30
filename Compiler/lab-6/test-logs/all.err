@@ -1,0 +1,226 @@
+
+== ../test-set/11.src ==
+----------------------------------------
+Error: Missing ) in function at 1:14
+Error: Missing { at 1:14
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Trailing comma in call
+Error: Missing } at 11:1
+Error: Undeclared function 'acc'
+STATUS: FAIL (exit 1)
+
+== ../test-set/17.src ==
+----------------------------------------
+Error: Undeclared identifier 'c'
+Error: Undeclared identifier 'c'
+STATUS: FAIL (exit 1)
+
+== ../test-set/2.src ==
+----------------------------------------
+Error: Initialization in declaration is not allowed
+Error: Unexpected character '&' at 3:11
+Error: Missing ) after if condition at 3:11
+Error: Invalid expression
+Error: Missing } at 3:11
+STATUS: FAIL (exit 1)
+
+== ../test-set/21.src ==
+----------------------------------------
+Error: Missing ) in function at 1:18
+Error: Missing { at 1:18
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Undeclared identifier 'i'
+Error: Undeclared identifier 'j'
+Error: Undeclared identifier 'j'
+Error: Undeclared identifier 'j'
+Error: Initialization in declaration is not allowed
+Error: Undeclared identifier 'j'
+Error: Undeclared identifier 'j'
+Error: Undeclared identifier 'j'
+Error: Undeclared identifier 'j'
+Error: Invalid expression
+Error: Missing ) at 13:12
+Error: Initialization in declaration is not allowed
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Trailing comma in call
+Error: Void function should not return a value
+Error: Undeclared function 'test'
+STATUS: FAIL (exit 1)
+
+== ../test-set/22.src ==
+----------------------------------------
+Error: Missing ) in function at 1:16
+Error: Missing { at 1:16
+Error: Invalid expression
+Error: Invalid expression
+Error: Undeclared identifier 'tmep'
+Error: Unexpected character 'ï' at 6:2
+Error: Missing } at 6:2
+STATUS: FAIL (exit 1)
+
+== ../test-set/23.src ==
+----------------------------------------
+Error: Missing ) in function at 1:14
+Error: Missing { at 1:14
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Missing ) at 9:12
+Error: Trailing comma in call
+Error: Missing } at 14:7
+Error: Undeclared function 'main'
+STATUS: FAIL (exit 1)
+
+== ../test-set/24.src ==
+----------------------------------------
+Error: Initialization in declaration is not allowed
+STATUS: FAIL (exit 1)
+
+== ../test-set/25.src ==
+----------------------------------------
+Error: Initialization in declaration is not allowed
+Error: Void function should not return a value
+STATUS: FAIL (exit 1)
+
+== ../test-set/26.src ==
+----------------------------------------
+Error: Missing ) in function at 1:14
+Error: Missing { at 1:14
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Missing ) at 5:13
+Error: Trailing comma in call
+Error: Missing } at 10:7
+Error: Undeclared function 'calc'
+STATUS: FAIL (exit 1)
+
+== ../test-set/28.src ==
+----------------------------------------
+Error: Missing ) in function at 1:20
+Error: Missing { at 1:20
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Missing ) at 13:12
+Error: Invalid expression
+Error: Missing ] at 17:21
+Error: Trailing comma in call
+Error: Missing } at 19:7
+Error: Undeclared function 'main'
+STATUS: FAIL (exit 1)
+
+== ../test-set/29.src ==
+----------------------------------------
+Error: Missing ) in function at 1:16
+Error: Missing { at 1:16
+Error: Invalid expression
+Error: Invalid expression
+Error: Initialization in declaration is not allowed
+Error: Invalid expression
+Error: Missing ) at 9:12
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Undeclared identifier 'arr'
+Error: Undeclared identifier 'arr4'
+Error: Missing ) in call at 12:21
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Undeclared identifier 'arr'
+Error: Void function should not return a value
+Error: Undeclared function 'main'
+STATUS: FAIL (exit 1)
+
+== ../test-set/30.src ==
+----------------------------------------
+Error: Missing ) in function at 1:20
+Error: Missing { at 1:20
+Error: Invalid expression
+Error: Invalid expression
+Error: Unexpected character 'ï' at 2:15
+Error: Missing } at 2:15
+Error: Missing } at 2:15
+STATUS: FAIL (exit 1)
+
+== ../test-set/31.src ==
+----------------------------------------
+Error: Missing ) in function at 1:20
+Error: Missing { at 1:20
+Error: Invalid expression
+Error: Invalid expression
+Error: Unexpected character 'ï' at 4:6
+Error: Missing } at 4:6
+Error: Missing } at 4:6
+STATUS: FAIL (exit 1)
+
+== ../test-set/32.src ==
+----------------------------------------
+Error: Missing ) in function at 1:22
+Error: Missing { at 1:22
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Missing ) at 5:12
+Error: Trailing comma in call
+Error: Missing } at 14:7
+Error: Undeclared function 'main'
+STATUS: FAIL (exit 1)
+
+== ../test-set/33.src ==
+----------------------------------------
+Error: Invalid expression
+Error: Invalid expression
+Error: Invalid expression
+Error: Missing ) in call at 3:14
+Error: Undeclared identifier 'i'
+Error: Undeclared identifier 'i'
+Error: Invalid expression
+Error: Undeclared identifier 'i'
+Error: Undeclared identifier 'i'
+Error: Invalid expression
+Error: Invalid expression
+Error: Missing ) in call at 4:18
+Error: Undeclared identifier 'j'
+Error: Undeclared identifier 'j'
+Error: Invalid expression
+Error: Undeclared identifier 'j'
+Error: Undeclared identifier 'j'
+Error: Invalid expression
+Error: Undeclared identifier 'i'
+Error: Undeclared identifier 'j'
+Error: Undeclared identifier 'i'
+Error: Undeclared identifier 'j'
+Error: Undeclared function 'for'
+STATUS: FAIL (exit 1)
+
+== ../test-set/5.src ==
+----------------------------------------
+Error: Undeclared identifier 'a'
+STATUS: FAIL (exit 1)
+
+== ../test-set/6.src ==
+----------------------------------------
+Error: Undeclared function 'foo'
+STATUS: FAIL (exit 1)
+
+== ../test-set/8.src ==
+----------------------------------------
+Error: Unexpected character '"' at 3:15
+Error: Invalid expression
+Error: Missing ) after print at 3:15
+Error: Missing } at 3:15
+Error: Missing } at 3:15
+STATUS: FAIL (exit 1)
