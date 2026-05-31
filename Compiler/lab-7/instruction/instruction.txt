@@ -12,4 +12,4 @@
 
 Before you write the code for the lab 7, scan through the instructions and the codes of previous lab. There might be something can be used directly.
 
-Important: for the Intermediate Code Generation, the generator in the lab six should be used and referenced as the highest priority. You can also check the C code in the lab six folder for any grammar rules.
+Important: for the Intermediate Code Generation, the generator in the lab six should be used and referenced as the highest priority. Therefore, you should read the lab report of lab 6 carefully `Compiler/lab-6/lab-report/report.tex` .
