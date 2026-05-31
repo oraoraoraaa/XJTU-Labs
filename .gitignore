@@ -20,3 +20,6 @@ Machine-Learning/lab-3-transformer/transformer_seq2seq.pt
 
 # Compiler lab
 Compiler/compiler_lab_prompt.txt
+Compiler/lab-7/webui/out.quads
+Compiler/lab-7/webui/out.s
+Compiler/lab-7/webui/bin/icg
