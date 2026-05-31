@@ -28,6 +28,10 @@ openGauss installation:
 sudo yum install opengauss -y
 ```
 
+Switch to the default database user:
+
+*(You would need to change the password of the user and add it to the sudoers before the following steps.)*
+
 Start the database server:
 
 ```bash
