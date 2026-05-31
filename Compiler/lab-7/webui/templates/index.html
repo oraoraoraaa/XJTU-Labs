@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Lab 7 WebUI</title>
+    <style>
+      body { font-family: sans-serif; margin: 16px; }
+      textarea { width: 100%; height: 240px; }
+      .col { display:flex; gap:16px; }
+      .panel { flex:1; }
+    </style>
+  </head>
+  <body>
+    <h1>Lab 7 — Compiler Pipeline WebUI</h1>
+    <p>
+      <button id="build">Build icg (Lab6)</button>
+      <select id="tests"></select>
+      <button id="run">Run icg</button>
+      <button id="translate">Translate → ARM64</button>
+    </p>
+    <p id="status" style="color:green"></p>
+
+    <div class="col">
+      <div class="panel">
+        <h3>Source</h3>
+        <textarea id="source" readonly></textarea>
+      </div>
+      <div class="panel">
+        <h3>Quadruples</h3>
+        <textarea id="quads" readonly></textarea>
+      </div>
+      <div class="panel">
+        <h3>ARM64 Assembly</h3>
+        <textarea id="asm" readonly></textarea>
+      </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
