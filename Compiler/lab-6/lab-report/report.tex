@@ -78,7 +78,7 @@
 四元组格式为 `(op, arg1, arg2, res)`，主要 op 示例：`=`、`+`、`-`、`*`、`/`、`neg`、`param`、`call`、`ret`、`print`、条件跳转 `j<`/`j<=` 等。
 
 \section{实现细节与关键代码片段}
-下面给出程序中几个关键函数的精简代码片段（为了阅读方便做了适度缩减，但保留核心逻辑）。
+下面给出程序中几个关键函数的精简代码片段。
 
 \subsection{词法与数值处理（核心）}
 \begin{lstlisting}
@@ -119,7 +119,6 @@ if (match(TOK_ASSIGN)) {
 
 \subsection{四元组输出}
 \begin{verbatim}
-% BEGIN of all.out
 
 
 == ../test-set/1.src ==
@@ -296,17 +295,12 @@ STATUS: OK
 3. (ret, x,  ,  )
 4. (call, main, 0, T2)
 STATUS: OK
-
-% END of all.out
 \end{verbatim}
 
 说明：以上输出为解析成功并打印四元组的样例（`STATUS: OK` 表示解析器在该输入上没有记录错误且成功输出四元组）。
 
-\subsection{错误日志（摘自运行结果，直接粘贴）}
+\subsection{错误日志}
 \begin{verbatim}
-% BEGIN of all.err
-
-
 == ../test-set/11.src ==
 ----------------------------------------
 Error: Missing ) in function at 1:14
@@ -532,7 +526,6 @@ Error: Missing ) after print at 3:15
 Error: Missing } at 3:15
 Error: Missing } at 3:15
 STATUS: FAIL (exit 1)
-
 \end{verbatim}
 
 \subsection{测试结果分析}
