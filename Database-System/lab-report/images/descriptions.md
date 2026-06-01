@@ -15,3 +15,10 @@
 - `12_3_1(6).png`: Screenshot to answer the question 三 - 1.(6).
 - `13_3_1(7).png`: Screenshot to answer the question 三 - 1.(7).
 - `14_3_1(8).png`: Screenshot to answer the question 三 - 1.(8).
+- `15_3_2_1.png`: Screenshot to answer the question 三 - 2, showing the conflict error.
+- `16_3_2_2.png`: Screenshot to answer the question 三 - 2, success insertion.
+- `17_3_3.png`: Screenshot to answer the question 三 - 3.
+- `18_3_4.png`: Screenshot to answer the question 三 - 4.
+- `19_3_5(1).png`: Screenshot to answer the question 三 - 5.(1).
+- `20_3_5(2).png`: Screenshot to answer the question 三 - 5.(2).
+- `21_3_5(3).png`: Screenshot to answer the question 三 - 5.(3).

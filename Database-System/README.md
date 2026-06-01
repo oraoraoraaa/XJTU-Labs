@@ -142,7 +142,7 @@ netstat -lnpt | grep gauss
 - `gs_ctl start -D $PGDATA`: Start the database server.
 - `gs_ctl restart -D $PGDATA`: Restart the database server.
 - `gsql -d postgres -p 7654 -r`: Connect to the database.
-
+- `gs_dump [OPTION]... [DBNAME]`: Dump the database [DBNAME]. (Create a backup)
 
 > The following commands needs to be run after entering the database.
 

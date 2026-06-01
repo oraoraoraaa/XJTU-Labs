@@ -233,3 +233,100 @@ HAVING COUNT(sc."C_num") >= 3
 ORDER BY AVG(sc."GRADE") DESC
 LIMIT 1;
 ```
+
+## 三 - 2
+
+在 S799 和 C799 表中插入学生记录：
+
+```sql
+INSERT INTO "public"."S799" ("S_num", "SNAME", "SEX", "BDATE", "HEIGHT", "DORM") 
+VALUES ('01032005', '刘竟', '男', '2003-12-10', 1.75, '东14舍312');
+
+INSERT INTO "public"."C799" ("C_num", "CNAME", "PERIOD", "CREDIT", "TEACHER") 
+VALUES ('CS-03', '离散数学', 64, 4, '陈建明');
+```
+
+## 三 - 3
+
+思路：利用子查询，先在选课表 SC799 和课程表 C799 中通过 GROUP BY 计算每位学生的总学分，筛选出大于 20 的学号，再由 DELETE 语句进行删除。由于设置了外键级联关系，如果直接删除学生，可能需要确保没有外键约束报错（或者确保外键是 ON DELETE CASCADE，否则需要先删 SC799 里的对应选课记录）。
+
+```sql
+DELETE FROM "public"."S799"
+WHERE "S_num" IN (
+    SELECT sc."S_num"
+    FROM "public"."SC799" sc
+    JOIN "public"."C799" c ON sc."C_num" = c."C_num"
+    GROUP BY sc."S_num"
+    HAVING SUM(c."CREDIT") > 20
+);
+```
+
+## 三 - 4
+
+```sql
+UPDATE "public"."C799"
+SET "PERIOD" = 36, "CREDIT" = "CREDIT" + 1
+WHERE "TEACHER" = '张明' AND "CNAME" = '数字电子技术';
+```
+
+## 三 - 5
+
+### (1) 居住在“东18舍”的男生视图
+
+```sql
+CREATE VIEW "view_male_dorm18" AS
+SELECT "S_num", "SNAME", "BDATE", "HEIGHT", "SEX", "DORM"
+FROM "public"."S799"
+WHERE "SEX" = '男' AND "DORM" LIKE '东18舍%';
+```
+
+### (2) “张明”老师所开设课程情况的视图（含平均成绩）
+
+```sql
+CREATE VIEW "view_teacher_zhang_courses" AS
+SELECT c."C_num", c."CNAME", AVG(sc."GRADE") AS "AVG_GRADE"
+FROM "public"."C799" c
+LEFT JOIN "public"."SC799" sc ON c."C_num" = sc."C_num"
+WHERE c."TEACHER" = '张明'
+GROUP BY c."C_num", c."CNAME";
+```
+
+### (3) 所有选修了“人工智能”课程的学生视图
+
+```sql
+CREATE VIEW "view_ai_students" AS
+SELECT s."S_num", s."SNAME", sc."GRADE"
+FROM "public"."S799" s
+JOIN "public"."SC799" sc ON s."S_num" = sc."S_num"
+JOIN "public"."C799" c ON sc."C_num" = c."C_num"
+WHERE c."CNAME" = '人工智能';
+```
+
+## 四 - 1
+
+### (1) 使用 JDBC 测试数据库连接
+
+思路：使用 openGauss JDBC 驱动包 `opengauss-jdbc-6.0.0.jar`，加载 `org.opengauss.Driver`，连接到 `mydb` 数据库后执行一条简单的查询语句，用来验证连接是否成功。
+
+程序中使用的连接信息如下：
+
+- 地址：`192.168.39.160`
+- 端口：`7654`
+- 数据库名：`mydb`
+- 用户名：`dbremote`
+
+Java 代码：[`Database-System/data-generator/DataGenerator.java`](./data-generator/DataGenerator.java)
+
+运行步骤：
+
+```bash
+cd Database-System/openGauss-JDBC-6.0.0
+javac -cp "opengauss-jdbc-6.0.0.jar" ConnectionTest.java
+java -cp ".:opengauss-jdbc-6.0.0.jar" ConnectionTest
+```
+
+手动指定连接参数：
+
+```bash
+java -cp ".:opengauss-jdbc-6.0.0.jar" ConnectionTest jdbc:opengauss://192.168.39.160:7654/mydb dbremote dbremote:399
+```

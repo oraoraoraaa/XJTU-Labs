@@ -23,3 +23,6 @@ Compiler/compiler_lab_prompt.txt
 Compiler/lab-7/webui/out.quads
 Compiler/lab-7/webui/out.s
 Compiler/lab-7/webui/bin/icg
+
+# Database System Lab Java Class
+Database-System/openGauss-JDBC-6.0.0/*.class
