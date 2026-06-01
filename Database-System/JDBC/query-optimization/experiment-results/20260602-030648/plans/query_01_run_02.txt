@@ -1,0 +1,22 @@
+HashAggregate  (cost=11126.60..11176.71 rows=5011 width=69) (actual time=148.175..148.728 rows=5011 loops=1)
+  Group By Key: s."S_num", s."SNAME"
+  (Buffers: shared hit=2008)
+  ->  Hash Left Join  (cost=267.43..9629.40 rows=199626 width=37) (actual time=1.237..87.881 rows=199627 loops=1)
+        Hash Cond: ((sc."C_num")::text = (c."C_num")::text)
+        (Buffers: shared hit=2008)
+        ->  Hash Right Join  (cost=219.75..6836.87 rows=199626 width=52) (actual time=1.029..52.235 rows=199627 loops=1)
+              Hash Cond: ((sc."S_num")::text = (s."S_num")::text)
+              (Buffers: shared hit=1983)
+              ->  Seq Scan on "SC799" sc  (cost=0.00..3872.26 rows=199626 width=37) (actual time=0.002..11.260 rows=199626 loops=1)
+                    (Buffers: shared hit=1876)
+              ->  Hash  (cost=157.11..157.11 rows=5011 width=32) (actual time=1.018..1.018 rows=5011 loops=1)
+                     Buckets: 32768  Batches: 1  Memory Usage: 575kB
+                    (Buffers: shared hit=107)
+                    ->  Seq Scan on "S799" s  (cost=0.00..157.11 rows=5011 width=32) (actual time=0.005..0.422 rows=5011 loops=1)
+                          (Buffers: shared hit=107)
+        ->  Hash  (cost=35.08..35.08 rows=1008 width=25) (actual time=0.200..0.200 rows=1008 loops=1)
+               Buckets: 32768  Batches: 1  Memory Usage: 313kB
+              (Buffers: shared hit=25)
+              ->  Seq Scan on "C799" c  (cost=0.00..35.08 rows=1008 width=25) (actual time=0.002..0.091 rows=1008 loops=1)
+                    (Buffers: shared hit=25)
+Total runtime: 148.976 ms

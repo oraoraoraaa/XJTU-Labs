@@ -1,0 +1,151 @@
+[
+  {
+    "type": "ddl",
+    "label": "indexes",
+    "statement_index": 1,
+    "elapsed_ms": 14.228
+  },
+  {
+    "type": "ddl",
+    "label": "indexes",
+    "statement_index": 2,
+    "elapsed_ms": 24.69
+  },
+  {
+    "type": "ddl",
+    "label": "indexes",
+    "statement_index": 3,
+    "elapsed_ms": 12.488
+  },
+  {
+    "type": "ddl",
+    "label": "indexes",
+    "statement_index": 4,
+    "elapsed_ms": 13.511
+  },
+  {
+    "type": "maintenance",
+    "label": "analyze",
+    "elapsed_ms": 885.665
+  },
+  {
+    "type": "query",
+    "query_index": 1,
+    "run": 1,
+    "elapsed_ms": 158.717,
+    "plan_execution_ms": 150.099,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_01_run_01.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 1,
+    "run": 2,
+    "elapsed_ms": 153.182,
+    "plan_execution_ms": 148.976,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_01_run_02.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 1,
+    "run": 3,
+    "elapsed_ms": 205.158,
+    "plan_execution_ms": 150.208,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_01_run_03.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 2,
+    "run": 1,
+    "elapsed_ms": 144.827,
+    "plan_execution_ms": 140.482,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_02_run_01.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 2,
+    "run": 2,
+    "elapsed_ms": 145.128,
+    "plan_execution_ms": 140.569,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_02_run_02.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 2,
+    "run": 3,
+    "elapsed_ms": 232.025,
+    "plan_execution_ms": 140.617,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_02_run_03.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 3,
+    "run": 1,
+    "elapsed_ms": 160.753,
+    "plan_execution_ms": 155.301,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_03_run_01.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 3,
+    "run": 2,
+    "elapsed_ms": 160.012,
+    "plan_execution_ms": 155.345,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_03_run_02.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 3,
+    "run": 3,
+    "elapsed_ms": 201.088,
+    "plan_execution_ms": 155.958,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_03_run_03.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 4,
+    "run": 1,
+    "elapsed_ms": 147.396,
+    "plan_execution_ms": 142.939,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_04_run_01.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 4,
+    "run": 2,
+    "elapsed_ms": 145.796,
+    "plan_execution_ms": 141.779,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_04_run_02.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 4,
+    "run": 3,
+    "elapsed_ms": 228.124,
+    "plan_execution_ms": 142.21,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_04_run_03.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 5,
+    "run": 1,
+    "elapsed_ms": 145.551,
+    "plan_execution_ms": 140.745,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_05_run_01.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 5,
+    "run": 2,
+    "elapsed_ms": 145.707,
+    "plan_execution_ms": 141.153,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_05_run_02.txt"
+  },
+  {
+    "type": "query",
+    "query_index": 5,
+    "run": 3,
+    "elapsed_ms": 231.63,
+    "plan_execution_ms": 156.478,
+    "plan_file": "/Users/rinalic/Local/Github/XJTU-Labs/Database-System/JDBC/query-optimization/experiment-results/20260602-030648/plans/query_05_run_03.txt"
+  }
+]

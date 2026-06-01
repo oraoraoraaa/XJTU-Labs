@@ -4,18 +4,17 @@ generate_names.py
 
 Fetches realistic person names from RandomUser API and emits SQL insert
 statements for S799 (students) and C799 (courses) along with optional
-SC799 enrollments. This is a lightweight alternative to the Java
-generator and can produce richer `SNAME` and `TEACHER` values.
+SC799 enrollments. It also writes reusable plain-text name lists so the
+Java generator can consume the names directly.
 
 Usage:
-  pip install requests
-  python3 generate_names.py --students 1000 --courses 100 --enrollments 20000 --outdir ./sql_out
+    pip install requests
+    python3 generate_names.py --students 1000 --courses 100 --enrollments 20000 --outdir ./sql_out
 
-The script will write files: students.sql, courses.sql, enrollments.sql
-which can be loaded via psql or executed through JDBC.
+Output files:
+    students.sql, courses.sql, enrollments.sql, student_names.txt, teacher_names.txt
 """
 import argparse
-import json
 import os
 import random
 import sys
@@ -47,6 +46,24 @@ def fetch_names(count):
     return names
 
 
+def unique_values(values):
+    seen = set()
+    out = []
+    for value in values:
+        if value and value not in seen:
+            seen.add(value)
+            out.append(value)
+    return out
+
+
+def write_name_list(names, outpath, filename):
+    path = os.path.join(outpath, filename)
+    with open(path, "w", encoding="utf-8") as f:
+        for name in names:
+            f.write(name + "\n")
+    return path
+
+
 def write_students(names, outpath, start_id=1):
     path = os.path.join(outpath, "students.sql")
     with open(path, "w", encoding="utf-8") as f:
@@ -60,8 +77,11 @@ def write_students(names, outpath, start_id=1):
             bdate = f"{year:04d}-{month:02d}-{day:02d}"
             height = round(1.50 + random.random() * 0.50, 2)
             dorm = f"Dorm{random.randint(1,200)}"
-            sql = ("INSERT INTO \"public\".\"S799\" (\"S_num\",\"SNAME\",\"SEX\",\"BDATE\",\"HEIGHT\",\"DORM\") "
-                   f"VALUES ('{sid}','{n.replace("'","''")}', '{sex}', '{bdate}', {height}, '{dorm}');\n")
+            safe_name = n.replace("'", "''")
+            sql = (
+                "INSERT INTO \"public\".\"S799\" (\"S_num\",\"SNAME\",\"SEX\",\"BDATE\",\"HEIGHT\",\"DORM\") "
+                f"VALUES ('{sid}','{safe_name}', '{sex}', '{bdate}', {height}, '{dorm}');\n"
+            )
             f.write(sql)
     return path
 
@@ -110,13 +130,21 @@ def main():
 
     os.makedirs(args.outdir, exist_ok=True)
     print(f"Fetching {args.students} student names...")
-    student_names = fetch_names(args.students)
+    raw_student_names = fetch_names(args.students * 2)
+    student_names = unique_values(raw_student_names)[:args.students]
     sfile = write_students(student_names, args.outdir)
     print(f"Wrote students SQL to {sfile}")
+
+    student_names_file = write_name_list(student_names, args.outdir, "student_names.txt")
+    print(f"Wrote student name list to {student_names_file}")
 
     print(f"Generating {args.courses} courses...")
     cfile = write_courses(args.courses, args.outdir)
     print(f"Wrote courses SQL to {cfile}")
+
+    teacher_pool = unique_values(fetch_names(max(args.courses * 2, 50)))
+    teacher_names_file = write_name_list(teacher_pool, args.outdir, "teacher_names.txt")
+    print(f"Wrote teacher name list to {teacher_names_file}")
 
     print(f"Generating {args.enrollments} enrollments...")
     efile = write_enrollments(args.students, args.courses, args.enrollments, args.outdir)

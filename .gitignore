@@ -24,5 +24,8 @@ Compiler/lab-7/webui/out.quads
 Compiler/lab-7/webui/out.s
 Compiler/lab-7/webui/bin/icg
 
-# Database System Lab Java Class
+# Database System
+# Java class
 Database-System/JDBC/**/*.class
+# Generated names
+Database-System/JDBC/generate-data/sql_out

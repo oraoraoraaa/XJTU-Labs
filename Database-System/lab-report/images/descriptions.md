@@ -22,3 +22,8 @@
 - `19_3_5(1).png`: Screenshot to answer the question 三 - 5.(1).
 - `20_3_5(2).png`: Screenshot to answer the question 三 - 5.(2).
 - `21_3_5(3).png`: Screenshot to answer the question 三 - 5.(3).
+- `22_4_0.png`: Successful test connection to the database using JDBC.
+- `23_4_1_1.png`: Student data examples that python script generated.
+- `24_4_1_2.png`: Terminal output of data generation and insertion.
+- `25_4_1_3.png`: Three tables viewed from navicat after data generation and insertion.
+- `26_4_2_1.png`: Terminal output of data expansion again.

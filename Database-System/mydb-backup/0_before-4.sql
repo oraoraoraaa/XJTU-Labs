@@ -11,6 +11,19 @@ SET session_replication_role = replica;
 SET client_min_messages = warning;
 SET enable_dump_trigger_definer = on;
 
+SET search_path = public;
+
+ALTER TABLE IF EXISTS public."SC799" DROP CONSTRAINT IF EXISTS "SC799_S_num_fkey";
+ALTER TABLE IF EXISTS public."SC799" DROP CONSTRAINT IF EXISTS "SC799_C_num_fkey";
+ALTER TABLE IF EXISTS public."SC799" DROP CONSTRAINT IF EXISTS "SC799_pkey";
+ALTER TABLE IF EXISTS public."S799" DROP CONSTRAINT IF EXISTS "S799_pkey";
+ALTER TABLE IF EXISTS public."C799" DROP CONSTRAINT IF EXISTS "C799_pkey";
+DROP VIEW IF EXISTS public.view_teacher_zhang_courses;
+DROP VIEW IF EXISTS public.view_male_dorm18;
+DROP VIEW IF EXISTS public.view_ai_students;
+DROP TABLE IF EXISTS public."SC799";
+DROP TABLE IF EXISTS public."S799";
+DROP TABLE IF EXISTS public."C799";
 --
 -- Name: BEHAVIORCOMPAT; Type: BEHAVIORCOMPAT; Schema: -; Owner: 
 --

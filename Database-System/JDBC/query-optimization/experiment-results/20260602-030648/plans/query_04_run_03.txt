@@ -1,0 +1,21 @@
+Limit  (cost=8933.35..8933.35 rows=1 width=98) (actual time=142.166..142.167 rows=1 loops=1)
+  ->  Sort  (cost=8933.35..8945.87 rows=5011 width=98) (actual time=142.166..142.166 rows=1 loops=1)
+        Sort Key: (avg(sc."GRADE")) DESC
+        Sort Method: top-N heapsort  Memory: 25kB
+        (Buffers: shared hit=1983)
+        ->  HashAggregate  (cost=8833.12..8908.29 rows=5011 width=98) (actual time=140.135..141.345 rows=5004 loops=1)
+              Group By Key: s."S_num", s."SNAME"
+              Filter: (count(sc."C_num") >= 3)
+              Rows Removed by Filter: 6
+              (Buffers: shared hit=1983)
+              ->  Hash Join  (cost=219.75..6836.87 rows=199626 width=58) (actual time=1.014..52.729 rows=199626 loops=1)
+                    Hash Cond: ((sc."S_num")::text = (s."S_num")::text)
+                    (Buffers: shared hit=1983)
+                    ->  Seq Scan on "SC799" sc  (cost=0.00..3872.26 rows=199626 width=43) (actual time=0.003..10.811 rows=199626 loops=1)
+                          (Buffers: shared hit=1876)
+                    ->  Hash  (cost=157.11..157.11 rows=5011 width=32) (actual time=1.000..1.000 rows=5011 loops=1)
+                           Buckets: 32768  Batches: 1  Memory Usage: 575kB
+                          (Buffers: shared hit=107)
+                          ->  Seq Scan on "S799" s  (cost=0.00..157.11 rows=5011 width=32) (actual time=0.002..0.412 rows=5011 loops=1)
+                                (Buffers: shared hit=107)
+Total runtime: 142.210 ms

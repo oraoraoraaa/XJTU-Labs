@@ -1,0 +1,35 @@
+Sort  (cost=9546.45..9558.98 rows=5011 width=102) (actual time=154.937..155.071 rows=5007 loops=1)
+  Sort Key: s."S_num" DESC
+  Sort Method: quicksort  Memory: 709kB
+  (Buffers: shared hit=2094)
+  InitPlan 1 (returns $1)
+    ->  Aggregate  (cost=317.68..317.69 rows=1 width=38) (actual time=0.452..0.452 rows=1 loops=1)
+          (Buffers: shared hit=111)
+          ->  Nested Loop  (cost=4.56..317.58 rows=40 width=6) (actual time=0.018..0.447 rows=3 loops=1)
+                ->  Seq Scan on "S799" s2  (cost=0.00..169.64 rows=1 width=17) (actual time=0.003..0.430 rows=1 loops=1)
+                      Filter: (("SNAME")::text = '许澍'::text)
+                      Rows Removed by Filter: 5010
+                      (Buffers: shared hit=107)
+                ->  Bitmap Heap Scan on "SC799" sc2  (cost=4.56..147.54 rows=40 width=23) (actual time=0.012..0.013 rows=3 loops=1)
+                      Recheck Cond: (("S_num")::text = (s2."S_num")::text)
+                      Heap Blocks: exact=1
+                      (Buffers: shared hit=4)
+                      ->  Bitmap Index Scan on idx_sc799_snum  (cost=0.00..4.55 rows=40 width=0) (actual time=0.011..0.011 rows=3 loops=1)
+                            Index Cond: (("S_num")::text = (s2."S_num")::text)
+                            (Buffers: shared hit=3)
+  ->  HashAggregate  (cost=8833.12..8920.82 rows=5011 width=102) (actual time=137.215..138.529 rows=5007 loops=1)
+        Group By Key: s."S_num", s."SNAME"
+        Filter: (avg(sc."GRADE") < $1)
+        Rows Removed by Filter: 3
+        (Buffers: shared hit=2094)
+        ->  Hash Join  (cost=219.75..6836.87 rows=199626 width=38) (actual time=0.975..52.273 rows=199626 loops=1)
+              Hash Cond: ((sc."S_num")::text = (s."S_num")::text)
+              (Buffers: shared hit=1983)
+              ->  Seq Scan on "SC799" sc  (cost=0.00..3872.26 rows=199626 width=23) (actual time=0.003..10.797 rows=199626 loops=1)
+                    (Buffers: shared hit=1876)
+              ->  Hash  (cost=157.11..157.11 rows=5011 width=32) (actual time=0.962..0.962 rows=5011 loops=1)
+                     Buckets: 32768  Batches: 1  Memory Usage: 575kB
+                    (Buffers: shared hit=107)
+                    ->  Seq Scan on "S799" s  (cost=0.00..157.11 rows=5011 width=32) (actual time=0.001..0.382 rows=5011 loops=1)
+                          (Buffers: shared hit=107)
+Total runtime: 155.345 ms

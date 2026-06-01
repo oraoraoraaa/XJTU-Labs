@@ -320,7 +320,6 @@ Java 代码：[`Database-System/JDBC/generate-data/DataGenerator.java`](./JDBC/g
 运行步骤：
 
 ```bash
-cd Database-System/openGauss-JDBC-6.0.0
 javac -cp "opengauss-jdbc-6.0.0.jar" ConnectionTest.java
 java -cp ".:opengauss-jdbc-6.0.0.jar" ConnectionTest
 ```
@@ -341,18 +340,6 @@ java -cp ".:opengauss-jdbc-6.0.0.jar" ConnectionTest jdbc:opengauss://192.168.39
 - 对可能造成主键冲突的插入，使用 `ON CONFLICT ... DO NOTHING` 做幂等写入，方便重复执行测试。
 - 删除步骤使用基于 `ctid` 的子查询方式删除满足条件（成绩 < 60 或 NULL）的固定数量记录，避免大事务回滚风险。
 
-运行命令：
-
-```bash
-cd Database-System/JDBC/generate-data
-javac -cp "../opengauss-jdbc-6.0.0.jar" DataGenerator.java
-# 任务1（默认）：S≈1000, C≈100, SC≈20000
-java -cp ".:../opengauss-jdbc-6.0.0.jar" DataGenerator --students 1000 --courses 100 --enrollments 20000 --threads 8
-
-# 或使用内置快捷参数
-java -cp ".:../opengauss-jdbc-6.0.0.jar" DataGenerator --task2 --threads 16
-```
-
 #### 数据生成、数据存取
 
 数据生成
@@ -362,17 +349,20 @@ java -cp ".:../opengauss-jdbc-6.0.0.jar" DataGenerator --task2 --threads 16
 - 功能：调用 RandomUser API 获取真实感的姓名，生成 `students.sql`、`courses.sql`、`enrollments.sql`。
 - 输出：位于 `JDBC/generate-data/sql_out/`（可通过 `--outdir` 指定），文件为纯 SQL，可用 `psql` 或 JDBC 逐条执行或批量执行导入。
 
-运行命令：
+The Python helper can generate reusable name lists that the Java generator consumes.
 
 ```bash
-cd Database-System/JDBC/generate-data
-pip3 install -r requirements.txt
-python3 generate_names.py --students 1000 --courses 100 --enrollments 20000 --outdir ./sql_out
-# 导入示例（使用 psql）：
-# psql "host=192.168.39.160 port=7654 dbname=mydb user=dbremote" -f sql_out/students.sql
-# psql "..." -f sql_out/courses.sql
-# psql "..." -f sql_out/enrollments.sql
+python generate_names.py --students 1000 --courses 100 --enrollments 20000 --outdir ./sql_out
+
+# Then pass the generated text files into the Java generator.
+javac -cp "../opengauss-jdbc-6.0.0.jar" DataGenerator.java
+java -cp ".:../opengauss-jdbc-6.0.0.jar" DataGenerator \
+  --students 1000 --courses 100 --enrollments 20000 --threads 8 \
+  --student-names ./sql_out/student_names.txt \
+  --teacher-names ./sql_out/teacher_names.txt
 ```
+
+If the name files are not provided, the Java generator falls back to synthetic names.
 
 数据存取（写入）
 
@@ -385,48 +375,29 @@ python3 generate_names.py --students 1000 --courses 100 --enrollments 20000 --ou
 
 自动化实验驱动器
 
-将“索引/分区 + 查询性能评估”流程标准化，实现 Python 自动化实验驱动器：`JDBC/query-optimization/optimization_driver.py`。
+将“索引/分区 + 查询性能评估”流程标准化，实现 Python 自动化实验驱动器：`JDBC/query-optimization/optimization_driver.py`。当前驱动器覆盖了 3 个来自“三、1”的查询：第 (4) 题、第 (6) 题和第 (8) 题，并为其中部分查询提供了不同写法的对比版本。
 
 实验步骤：
 
-1. 先用 `DataGenerator.java` 或 `generate_names.py` 生成并写入更大规模的的数据。
+1. 先用 `DataGenerator.java` 或 `generate_names.py` 生成并写入更大规模的数据。
 2. 运行自动化驱动器做“基线测试”（仅 `--run-queries`）。
 3. 运行自动化驱动器做“索引优化测试”（`--apply-indexes --run-queries`）。
-4. （可选）运行“分区优化测试”（`--apply-partition --run-queries`，建议在隔离环境）。
-5. 对比 `summary.csv` 与 `plans/*.txt`，分析 `elapsed_ms` 与 `Execution Time` 变化趋势，形成结论。
+4. 对比 `summary.csv` 与 `plans/*.txt`，分析 `elapsed_ms` 与 `Execution Time` 变化趋势，形成结论。
 
 驱动器能力：
 
 - 自动执行 `sql/indexes.sql`（索引实验）。
-- 可选执行 `sql/partitioning.sql`（分区实验模板）。
 - 自动执行 `sql/query_variants.sql` 中的 `EXPLAIN (ANALYZE, BUFFERS)` 语句。
 - 按重复次数（`--repeats`）执行并收集指标，输出 JSON/CSV/Markdown 汇总与执行计划文本。
-
-依赖安装：
-
-```bash
-cd Database-System/JDBC/query-optimization
-pip3 install -r requirements.txt
-```
+- 在执行 `ANALYZE` 时，脚本会临时切换到 autocommit 模式，避免 openGauss 报出 “ANALYZE cannot run inside a transaction block”。
 
 运行示例（索引 + 查询对比）：
 
 ```bash
-cd Database-System/JDBC/query-optimization
-python3 optimization_driver.py \
+python optimization_driver.py \
     --host 192.168.39.160 --port 7654 --dbname mydb \
     --user dbremote --password 'dbremote:399' \
     --apply-indexes --run-queries --repeats 3 --analyze-after-ddl
-```
-
-运行示例（分区 + 查询对比，谨慎）：
-
-```bash
-cd Database-System/JDBC/query-optimization
-python3 optimization_driver.py \
-    --host 192.168.39.160 --port 7654 --dbname mydb \
-    --user dbremote --password 'dbremote:399' \
-    --apply-partition --run-queries --repeats 3 --analyze-after-ddl
 ```
 
 结果输出目录（自动按时间戳创建）：

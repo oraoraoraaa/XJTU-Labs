@@ -142,7 +142,10 @@ netstat -lnpt | grep gauss
 - `gs_ctl start -D $PGDATA`: Start the database server.
 - `gs_ctl restart -D $PGDATA`: Restart the database server.
 - `gsql -d postgres -p 7654 -r`: Connect to the database.
-- `gs_dump [OPTION]... [DBNAME]`: Dump the database [DBNAME]. (Create a backup)
+- `gsql -d postgres -p 7654 -U dbremote -W "***" -c "DROP DATABASE IF EXISTS mydb;"`: Delete (Drop) a database if exists.
+- `gsql -d postgres -p 7654 -U dbremote -W "***" -c "CREATE DATABASE mydb OWNER dbremote;"`: Create a new database and set the owner.
+- `gs_dump -p 7654 -U dbremote --clean -f ~/mydb.backup.sql mydb`: Dump the database [DBNAME]. (Create a backup)
+- `gsql -d <target_database> -p <port> -U <user> -W <password> -f /path/to/backup.sql`: Restore a backup.
 
 > The following commands needs to be run after entering the database.
 

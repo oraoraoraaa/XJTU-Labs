@@ -1,0 +1,22 @@
+Limit  (cost=9482.52..9482.52 rows=1 width=64) (actual time=141.094..141.094 rows=1 loops=1)
+  ->  Sort  (cost=9482.52..9495.05 rows=5011 width=64) (actual time=141.093..141.093 rows=1 loops=1)
+        Sort Key: student_avg.avg_grade DESC
+        Sort Method: top-N heapsort  Memory: 25kB
+        (Buffers: shared hit=1983)
+        ->  Subquery Scan on student_avg  (cost=9332.19..9457.47 rows=5011 width=64) (actual time=138.666..140.314 rows=5004 loops=1)
+              ->  HashAggregate  (cost=9332.19..9407.36 rows=5011 width=106) (actual time=138.666..139.954 rows=5004 loops=1)
+                    Group By Key: s."S_num", s."SNAME"
+                    Filter: (count(sc."C_num") >= 3)
+                    Rows Removed by Filter: 6
+                    (Buffers: shared hit=1983)
+                    ->  Hash Join  (cost=219.75..6836.87 rows=199626 width=58) (actual time=1.021..52.561 rows=199626 loops=1)
+                          Hash Cond: ((sc."S_num")::text = (s."S_num")::text)
+                          (Buffers: shared hit=1983)
+                          ->  Seq Scan on "SC799" sc  (cost=0.00..3872.26 rows=199626 width=43) (actual time=0.004..10.921 rows=199626 loops=1)
+                                (Buffers: shared hit=1876)
+                          ->  Hash  (cost=157.11..157.11 rows=5011 width=32) (actual time=1.005..1.005 rows=5011 loops=1)
+                                 Buckets: 32768  Batches: 1  Memory Usage: 575kB
+                                (Buffers: shared hit=107)
+                                ->  Seq Scan on "S799" s  (cost=0.00..157.11 rows=5011 width=32) (actual time=0.003..0.447 rows=5011 loops=1)
+                                      (Buffers: shared hit=107)
+Total runtime: 141.153 ms

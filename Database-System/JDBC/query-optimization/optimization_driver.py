@@ -2,7 +2,7 @@
 """Automated optimization experiment driver for openGauss.
 
 Features:
-1) Apply SQL scripts for indexes and optional partitioning.
+1) Apply SQL scripts for indexes.
 2) Run EXPLAIN (ANALYZE, BUFFERS) query variants.
 3) Collect structured results (JSON/CSV) and plan text files.
 
@@ -32,7 +32,6 @@ import sqlparse
 ROOT = Path(__file__).resolve().parent
 SQL_DIR = ROOT / "sql"
 DEFAULT_INDEXES = SQL_DIR / "indexes.sql"
-DEFAULT_PARTITION = SQL_DIR / "partitioning.sql"
 DEFAULT_QUERIES = SQL_DIR / "query_variants.sql"
 
 
@@ -46,11 +45,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--password", default=os.getenv("OG_PASS", "dbremote:399"))
 
     parser.add_argument("--indexes-sql", type=Path, default=DEFAULT_INDEXES)
-    parser.add_argument("--partition-sql", type=Path, default=DEFAULT_PARTITION)
     parser.add_argument("--queries-sql", type=Path, default=DEFAULT_QUERIES)
 
     parser.add_argument("--apply-indexes", action="store_true", help="Apply indexes SQL script")
-    parser.add_argument("--apply-partition", action="store_true", help="Apply partition SQL script")
     parser.add_argument("--run-queries", action="store_true", help="Run EXPLAIN ANALYZE queries")
     parser.add_argument("--repeats", type=int, default=1, help="Repeat each query N times")
 
@@ -79,14 +76,24 @@ def sql_statements(path: Path) -> List[str]:
     return statements
 
 
+def strip_leading_sql_comments(stmt: str) -> str:
+    lines = []
+    for line in stmt.splitlines():
+        stripped = line.lstrip()
+        if not lines and (not stripped or stripped.startswith("--")):
+            continue
+        lines.append(line)
+    return "\n".join(lines).strip()
+
+
 def is_explain_statement(stmt: str) -> bool:
-    compact = stmt.lstrip().upper()
+    compact = strip_leading_sql_comments(stmt).lstrip().upper()
     return compact.startswith("EXPLAIN")
 
 
 def extract_execution_time_ms(plan_lines: List[str]) -> float:
     for line in plan_lines:
-        m = re.search(r"Execution Time:\\s*([0-9.]+)\\s*ms", line)
+        m = re.search(r"(?:Execution Time|Total runtime):\s*([0-9.]+)\s*ms", line, re.IGNORECASE)
         if m:
             return float(m.group(1))
     return -1.0
@@ -124,17 +131,25 @@ def run_ddl_script(conn, script_path: Path, label: str) -> List[Dict[str, object
 
 def run_analyze(conn) -> Dict[str, object]:
     t0 = time.perf_counter()
-    with conn.cursor() as cur:
-        cur.execute('ANALYZE "public"."S799";')
-        cur.execute('ANALYZE "public"."C799";')
-        cur.execute('ANALYZE "public"."SC799";')
-    conn.commit()
+    previous_autocommit = conn.autocommit
+    conn.autocommit = True
+    try:
+        with conn.cursor() as cur:
+            cur.execute('ANALYZE "public"."S799";')
+            cur.execute('ANALYZE "public"."C799";')
+            cur.execute('ANALYZE "public"."SC799";')
+    finally:
+        conn.autocommit = previous_autocommit
     elapsed_ms = (time.perf_counter() - t0) * 1000.0
     return {"type": "maintenance", "label": "analyze", "elapsed_ms": round(elapsed_ms, 3)}
 
 
 def run_query_variants(conn, queries_sql: Path, repeats: int, out_dir: Path) -> List[Dict[str, object]]:
     statements = [s for s in sql_statements(queries_sql) if is_explain_statement(s)]
+    if len(statements) < 3:
+        raise SystemExit(
+            f"Expected at least 3 EXPLAIN queries in {queries_sql}, found {len(statements)}"
+        )
     query_dir = out_dir / "plans"
     query_dir.mkdir(parents=True, exist_ok=True)
 
@@ -212,8 +227,8 @@ def write_reports(events: List[Dict[str, object]], out_dir: Path) -> None:
 def main() -> None:
     args = parse_args()
 
-    if not (args.apply_indexes or args.apply_partition or args.run_queries):
-        raise SystemExit("No action selected. Use --apply-indexes and/or --apply-partition and/or --run-queries")
+    if not (args.apply_indexes or args.run_queries):
+        raise SystemExit("No action selected. Use --apply-indexes and/or --run-queries")
 
     timestamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     out_dir = args.output_dir / timestamp
@@ -225,10 +240,7 @@ def main() -> None:
         if args.apply_indexes:
             events.extend(run_ddl_script(conn, args.indexes_sql, "indexes"))
 
-        if args.apply_partition:
-            events.extend(run_ddl_script(conn, args.partition_sql, "partitioning"))
-
-        if args.analyze_after_ddl and (args.apply_indexes or args.apply_partition):
+        if args.analyze_after_ddl and args.apply_indexes:
             events.append(run_analyze(conn))
 
         if args.run_queries:
