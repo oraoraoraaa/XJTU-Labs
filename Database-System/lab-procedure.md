@@ -406,3 +406,63 @@ python optimization_driver.py \
 - `Database-System/JDBC/query-optimization/experiment-results/<timestamp>/summary.csv`
 - `Database-System/JDBC/query-optimization/experiment-results/<timestamp>/summary.md`
 - `Database-System/JDBC/query-optimization/experiment-results/<timestamp>/plans/query_XX_run_YY.txt`
+
+## 六
+
+### Verification
+
+Run the following commands before AND after compiling and running the Java program, verify that both the deletion and backup worked by running these queries in your SQL console:
+
+```sql
+-- This should return 0 rows if all targeted records were removed
+SELECT COUNT(*) FROM "public"."SC799" WHERE "GRADE" IS NULL;
+
+-- This should return the exact count of records your Java app deleted (e.g., 100)
+SELECT * FROM "public"."BK799";
+```
+
+### Create the Backup Table (BK799)
+
+```sql
+CREATE TABLE "public"."BK799" (
+    "S_num" VARCHAR(20),
+    "C_num" VARCHAR(20),
+    "GRADE" NUMERIC(4,1),
+    "DDATE" TIMESTAMP
+);
+```
+
+### Create the Trigger Function & Trigger
+
+In openGauss, a trigger requires a PL/pgSQL function that defines what happens during the event, followed by the trigger declaration itself.
+
+Run these two blocks in the database:
+
+```sql
+-- 1. Create the trigger function
+CREATE OR REPLACE FUNCTION log_deleted_sc_record()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO "public"."BK799" ("S_num", "C_num", "GRADE", "DDATE")
+    VALUES (OLD."S_num", OLD."C_num", OLD."GRADE", NOW());
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 2. Bind the trigger to the SC799 table
+CREATE TRIGGER trg_sc_delete_backup
+AFTER DELETE ON "public"."SC799"
+FOR EACH ROW
+EXECUTE PROCEDURE log_deleted_sc_record();
+```
+
+### The Java Implementation
+
+The Java class [`Database-System/JDBC/delete-null/DeleteNullGrade.java`](./JDBC/delete-null/DeleteNullGrade.java) connects to your database, randomly selects up to 100 rows where GRADE is NULL using `ORDER BY random()`, and deletes them one by one via a loop to ensure the row-level trigger fires for every single deletion.
+
+Run the script:
+
+```bash
+javac -cp "../opengauss-jdbc-6.0.0.jar" TriggerDeletionTask.java
+java -cp ".:../opengauss-jdbc-6.0.0.jar" TriggerDeletionTask
+```
