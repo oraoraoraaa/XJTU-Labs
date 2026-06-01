@@ -1,0 +1,17 @@
+# Images Descriptions
+
+- `0_ssh_opengauss.png`: ssh into the openEuler operating system, opengauss user, running on a virtual machine using Mac in the same local network.
+- `1_navicat_remote_connect.png`: Successful remote connection to the running database.
+- `2_create_tables.png`: Use navicat query to create tables S799, C799 and SC799 in `mydb` database.
+- `3_insert_s799.png`: Insert values into table S799.
+- `4_insert_c799.png`: Insert values into table C799.
+- `5_insert_sc799.png`: Insert values into table SC799.
+- `6_query_tables_and_attributes.png`: Use SQL to query tables and their attributes information.
+- `7_3_1(1).png`: Screenshot to answer the question 三 - 1.(1).
+- `8_3_1(2).png`: Screenshot to answer the question 三 - 1.(2).
+- `9_3_1(3).png`: Screenshot to answer the question 三 - 1.(3).
+- `10_3_1(4).png`: Screenshot to answer the question 三 - 1.(4).
+- `11_3_1(5).png`: Screenshot to answer the question 三 - 1.(5).
+- `12_3_1(6).png`: Screenshot to answer the question 三 - 1.(6).
+- `13_3_1(7).png`: Screenshot to answer the question 三 - 1.(7).
+- `14_3_1(8).png`: Screenshot to answer the question 三 - 1.(8).
