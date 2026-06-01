@@ -315,7 +315,7 @@ WHERE c."CNAME" = '人工智能';
 - 数据库名：`mydb`
 - 用户名：`dbremote`
 
-Java 代码：[`Database-System/data-generator/DataGenerator.java`](./data-generator/DataGenerator.java)
+Java 代码：[`Database-System/JDBC/generate-data/DataGenerator.java`](./JDBC/generate-data/DataGenerator.java)
 
 运行步骤：
 
@@ -330,3 +330,108 @@ java -cp ".:opengauss-jdbc-6.0.0.jar" ConnectionTest
 ```bash
 java -cp ".:opengauss-jdbc-6.0.0.jar" ConnectionTest jdbc:opengauss://192.168.39.160:7654/mydb dbremote dbremote:399
 ```
+
+### (2) 大规模数据生成与多线程写入
+
+思路：为完成实验附件中提出的数据规模任务，采用一个多线程的 Java 程序负责生成并写入数据。程序位于 `Database-System/JDBC/generate-data/DataGenerator.java`。实现要点：
+
+- 使用随机生成的学号、课程编号和成绩分布，保证数据格式与表定义一致。
+- 对 S799、C799、SC799 三个表分别采用分批（batch）提交，避免单条插入造成的过多网络往返。
+- 每个批次由独立线程执行，各线程使用各自的 JDBC 连接以减小同步开销。
+- 对可能造成主键冲突的插入，使用 `ON CONFLICT ... DO NOTHING` 做幂等写入，方便重复执行测试。
+- 删除步骤使用基于 `ctid` 的子查询方式删除满足条件（成绩 < 60 或 NULL）的固定数量记录，避免大事务回滚风险。
+
+运行命令：
+
+```bash
+cd Database-System/JDBC/generate-data
+javac -cp "../opengauss-jdbc-6.0.0.jar" DataGenerator.java
+# 任务1（默认）：S≈1000, C≈100, SC≈20000
+java -cp ".:../opengauss-jdbc-6.0.0.jar" DataGenerator --students 1000 --courses 100 --enrollments 20000 --threads 8
+
+# 或使用内置快捷参数
+java -cp ".:../opengauss-jdbc-6.0.0.jar" DataGenerator --task2 --threads 16
+```
+
+#### 数据生成、数据存取
+
+数据生成
+
+为便于生成更真实的姓名与教师信息，使用一个 Python 脚本 [`JDBC/generate-data/generate_names.py`](./JDBC/generate-data/generate_names.py)：
+
+- 功能：调用 RandomUser API 获取真实感的姓名，生成 `students.sql`、`courses.sql`、`enrollments.sql`。
+- 输出：位于 `JDBC/generate-data/sql_out/`（可通过 `--outdir` 指定），文件为纯 SQL，可用 `psql` 或 JDBC 逐条执行或批量执行导入。
+
+运行命令：
+
+```bash
+cd Database-System/JDBC/generate-data
+pip3 install -r requirements.txt
+python3 generate_names.py --students 1000 --courses 100 --enrollments 20000 --outdir ./sql_out
+# 导入示例（使用 psql）：
+# psql "host=192.168.39.160 port=7654 dbname=mydb user=dbremote" -f sql_out/students.sql
+# psql "..." -f sql_out/courses.sql
+# psql "..." -f sql_out/enrollments.sql
+```
+
+数据存取（写入）
+
+- 使用批量提交（PreparedStatement.addBatch + executeBatch）显著降低网络往返与事务开销。
+- 通过并发线程分区写入（每线程独立 Connection）提高并发写入吞吐，但要避免过多并发导致数据库连接耗尽或锁竞争。
+- 将插入分解为适中大小的事务（例如每 200-1000 条提交一次），在出现错误时易于回滚和重试。
+- 在写入前后使用 `ANALYZE`（或 `VACUUM ANALYZE`）更新统计信息，帮助优化器选择合理的执行计划。
+
+## 四 - 2
+
+自动化实验驱动器
+
+将“索引/分区 + 查询性能评估”流程标准化，实现 Python 自动化实验驱动器：`JDBC/query-optimization/optimization_driver.py`。
+
+实验步骤：
+
+1. 先用 `DataGenerator.java` 或 `generate_names.py` 生成并写入更大规模的的数据。
+2. 运行自动化驱动器做“基线测试”（仅 `--run-queries`）。
+3. 运行自动化驱动器做“索引优化测试”（`--apply-indexes --run-queries`）。
+4. （可选）运行“分区优化测试”（`--apply-partition --run-queries`，建议在隔离环境）。
+5. 对比 `summary.csv` 与 `plans/*.txt`，分析 `elapsed_ms` 与 `Execution Time` 变化趋势，形成结论。
+
+驱动器能力：
+
+- 自动执行 `sql/indexes.sql`（索引实验）。
+- 可选执行 `sql/partitioning.sql`（分区实验模板）。
+- 自动执行 `sql/query_variants.sql` 中的 `EXPLAIN (ANALYZE, BUFFERS)` 语句。
+- 按重复次数（`--repeats`）执行并收集指标，输出 JSON/CSV/Markdown 汇总与执行计划文本。
+
+依赖安装：
+
+```bash
+cd Database-System/JDBC/query-optimization
+pip3 install -r requirements.txt
+```
+
+运行示例（索引 + 查询对比）：
+
+```bash
+cd Database-System/JDBC/query-optimization
+python3 optimization_driver.py \
+    --host 192.168.39.160 --port 7654 --dbname mydb \
+    --user dbremote --password 'dbremote:399' \
+    --apply-indexes --run-queries --repeats 3 --analyze-after-ddl
+```
+
+运行示例（分区 + 查询对比，谨慎）：
+
+```bash
+cd Database-System/JDBC/query-optimization
+python3 optimization_driver.py \
+    --host 192.168.39.160 --port 7654 --dbname mydb \
+    --user dbremote --password 'dbremote:399' \
+    --apply-partition --run-queries --repeats 3 --analyze-after-ddl
+```
+
+结果输出目录（自动按时间戳创建）：
+
+- `Database-System/JDBC/query-optimization/experiment-results/<timestamp>/summary.json`
+- `Database-System/JDBC/query-optimization/experiment-results/<timestamp>/summary.csv`
+- `Database-System/JDBC/query-optimization/experiment-results/<timestamp>/summary.md`
+- `Database-System/JDBC/query-optimization/experiment-results/<timestamp>/plans/query_XX_run_YY.txt`
