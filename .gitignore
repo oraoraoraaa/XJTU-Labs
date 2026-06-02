@@ -29,3 +29,7 @@ Compiler/lab-7/webui/bin/icg
 Database-System/JDBC/**/*.class
 # Generated names
 Database-System/JDBC/generate-data/sql_out
+
+# Computer Vision
+# DATASET
+Computer-Vision/z-final-project/network-publish/DATASET
