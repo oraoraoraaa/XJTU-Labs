@@ -4,10 +4,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ConnectionTest {
-    private static final String DEFAULT_URL = "jdbc:opengauss://192.168.39.160:7654/mydb";
-    private static final String DEFAULT_USER = "dbremote";
-    private static final String DEFAULT_PASSWORD = "dbremote:399";
+public class ConnectionTestHuawei {
+    private static final String DEFAULT_URL = "jdbc:opengauss://120.46.95.199:26000/mydb";
+    private static final String DEFAULT_USER = "yuxiao";
+    private static final String DEFAULT_PASSWORD = "Bigdata@223501";
 
     public static void main(String[] args) {
         String url = args.length > 0 ? args[0] : DEFAULT_URL;

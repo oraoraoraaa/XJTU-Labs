@@ -1,0 +1,19 @@
+用latex回答图片中的这些问题，用latex代码框输出。
+语言风格是简洁的，文字仅作必要的叙述即可。
+不要使用过多分点，如 \begin{itemize} 或 \begin{enumerate} 等。
+如需要画图，用文字形式用代码框嵌入到latex文档中。
+如需要嵌入代码，则按照相应的格式用代码框形式嵌入到latex文档中。
+
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+
+\usepackage[UTF-8]{ctex}
+
+\newcommand{\authname}{姓名}
+\newcommand{\authid}{学号}
+\newcommand{\authclass}{班级}
+
+\author{\authname：\underline{李祥熙} \quad \authid：\underline{2234412799} \quad \authclass: \underline{计算机2301}}
+
+\date{}

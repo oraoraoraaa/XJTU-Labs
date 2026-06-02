@@ -320,8 +320,8 @@ Java 代码：[`Database-System/JDBC/generate-data/DataGenerator.java`](./JDBC/g
 运行步骤：
 
 ```bash
-javac -cp "opengauss-jdbc-6.0.0.jar" ConnectionTest.java
-java -cp ".:opengauss-jdbc-6.0.0.jar" ConnectionTest
+javac -cp "opengauss-jdbc-6.0.0.jar" ConnectionTestLocal.java
+java -cp ".:opengauss-jdbc-6.0.0.jar" ConnectionTestLocal
 ```
 
 手动指定连接参数：
