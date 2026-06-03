@@ -15,7 +15,7 @@
 3. Run training (GPU recommended — helper functions call .cuda() in several places):
 
 ```python
-python network-publish/train_ageNet.py
+python train_ageNet.py
 ```
 
 Output: `network-publish/best_age_net.pth` and `network-publish/custom.txt` (test predictions).
