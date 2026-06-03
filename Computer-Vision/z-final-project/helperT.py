@@ -13,6 +13,9 @@ import cv2
 import pandas as pd
 import torchvision.transforms as T
 
+if "bool" not in np.__dict__:
+    np.bool = bool
+
 from imgaug import augmenters as iaa
 
 EPOCH = 100  # Training epoches
@@ -32,6 +35,10 @@ GAMMA = 0.2  # Learning rate scheduler gamma
 AGE_STDDEV = 1.0
 # DELETE ABOVE WHEN PUBLISHED
 #############################################################
+
+
+def identity_transform(img):
+    return img
 
 
 def get_dataloaders(base_dir):
@@ -177,8 +184,9 @@ def show_results(preds, gt):
 def test(model, loader, filename):
     model.eval()
     preds = []
+    device = next(model.parameters()).device
     for i, (y, x) in enumerate(loader):
-        x, y = x.cuda().float(), y.cuda().float().reshape(-1, 1)
+        x, y = x.to(device).float(), y.to(device).float().reshape(-1, 1)
         outputs = model(x)
 
         preds.append(outputs.cpu().detach().numpy())
@@ -191,8 +199,9 @@ def test(model, loader, filename):
 def test_cel(model, loader, filename):
     model.eval()
     preds = []
+    device = next(model.parameters()).device
     for i, (y, x) in enumerate(loader):
-        x = x.cuda().float()
+        x = x.to(device).float()
         outputs = model(x)
         preds.append(F.softmax(outputs, dim=-1).cpu().detach().numpy())
 
@@ -219,7 +228,6 @@ class ImgAugTransform:
                     scale={"x": (0.95, 1.05), "y": (0.95, 1.05)},
                     translate_percent={"x": (-0.05, 0.05), "y": (-0.05, 0.05)},
                 ),
-                iaa.AddToHueAndSaturation(value=(-10, 10), per_channel=True),
                 iaa.GammaContrast((0.3, 2)),
                 iaa.Fliplr(0.5),
             ]
@@ -246,7 +254,7 @@ class FaceDataset(Dataset):
         if augment:
             self.transform = ImgAugTransform()
         else:
-            self.transform = lambda i: i
+            self.transform = identity_transform
 
         self.x = []
         self.y = []

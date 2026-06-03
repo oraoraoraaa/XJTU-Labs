@@ -1,0 +1,138 @@
+Using device: cuda
+Epoch 1/100  loss=1667.0581  val_mae=19.0350
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 2/100  loss=1417.9337  val_mae=12.1587
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 3/100  loss=1372.3589  val_mae=11.9465
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 4/100  loss=1364.4399  val_mae=11.6530
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 5/100  loss=1365.5798  val_mae=11.7766
+Epoch 6/100  loss=1363.5469  val_mae=11.3688
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 7/100  loss=1359.4486  val_mae=11.2926
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 8/100  loss=1356.8829  val_mae=11.6734
+Epoch 9/100  loss=1357.2716  val_mae=11.5073
+Epoch 10/100  loss=1352.9768  val_mae=11.4142
+Epoch 11/100  loss=1352.6638  val_mae=11.4736
+Epoch 12/100  loss=1352.7586  val_mae=11.2399
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 13/100  loss=1352.4093  val_mae=11.5712
+Epoch 14/100  loss=1349.5878  val_mae=11.6319
+Epoch 15/100  loss=1348.2007  val_mae=11.3575
+Epoch 16/100  loss=1343.7834  val_mae=11.3186
+Epoch 17/100  loss=1343.3989  val_mae=11.8498
+Epoch 18/100  loss=1342.3488  val_mae=11.2713
+Epoch 19/100  loss=1342.0723  val_mae=11.2046
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 20/100  loss=1339.3070  val_mae=11.2702
+Epoch 21/100  loss=1340.3937  val_mae=11.2637
+Epoch 22/100  loss=1334.6849  val_mae=11.3125
+Epoch 23/100  loss=1337.2613  val_mae=11.2773
+Epoch 24/100  loss=1335.3738  val_mae=11.3282
+Epoch 25/100  loss=1334.3300  val_mae=11.1985
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 26/100  loss=1334.1340  val_mae=11.1436
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 27/100  loss=1328.0623  val_mae=11.1073
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 28/100  loss=1328.4021  val_mae=11.1337
+Epoch 29/100  loss=1326.8527  val_mae=11.2799
+Epoch 30/100  loss=1323.9825  val_mae=11.1191
+Epoch 31/100  loss=1326.0633  val_mae=11.1090
+Epoch 32/100  loss=1323.3895  val_mae=11.3825
+Epoch 33/100  loss=1318.6192  val_mae=11.1109
+Epoch 34/100  loss=1315.3461  val_mae=11.2900
+Epoch 35/100  loss=1311.6431  val_mae=11.0239
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 36/100  loss=1310.2559  val_mae=10.9858
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 37/100  loss=1305.8632  val_mae=11.0901
+Epoch 38/100  loss=1304.6559  val_mae=11.2138
+Epoch 39/100  loss=1305.3475  val_mae=10.9724
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 40/100  loss=1303.5088  val_mae=11.0382
+Epoch 41/100  loss=1301.3956  val_mae=10.7700
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 42/100  loss=1294.2319  val_mae=11.5071
+Epoch 43/100  loss=1288.1633  val_mae=10.5998
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 44/100  loss=1299.8861  val_mae=10.5072
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 45/100  loss=1293.6135  val_mae=10.5989
+Epoch 46/100  loss=1285.5250  val_mae=10.3239
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 47/100  loss=1281.0335  val_mae=10.5749
+Epoch 48/100  loss=1284.3258  val_mae=10.3784
+Epoch 49/100  loss=1287.7091  val_mae=10.3984
+Epoch 50/100  loss=1282.6712  val_mae=10.3173
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 51/100  loss=1270.1084  val_mae=9.9518
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 52/100  loss=1271.9585  val_mae=10.1869
+Epoch 53/100  loss=1267.6172  val_mae=10.2300
+Epoch 54/100  loss=1270.3376  val_mae=9.6641
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 55/100  loss=1261.3474  val_mae=10.2460
+Epoch 56/100  loss=1260.7688  val_mae=9.3775
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 57/100  loss=1262.4208  val_mae=9.2065
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 58/100  loss=1257.2732  val_mae=9.2320
+Epoch 59/100  loss=1253.2442  val_mae=9.8910
+Epoch 60/100  loss=1253.4067  val_mae=9.2774
+Epoch 61/100  loss=1246.5818  val_mae=8.9843
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 62/100  loss=1247.1413  val_mae=9.3357
+Epoch 63/100  loss=1244.8286  val_mae=8.9201
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 64/100  loss=1239.5881  val_mae=8.9211
+Epoch 65/100  loss=1235.0063  val_mae=9.0950
+Epoch 66/100  loss=1237.4284  val_mae=9.1450
+Epoch 67/100  loss=1236.1399  val_mae=8.8376
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 68/100  loss=1222.7316  val_mae=8.4923
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 69/100  loss=1224.0540  val_mae=8.4806
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 70/100  loss=1224.5871  val_mae=9.4031
+Epoch 71/100  loss=1227.2239  val_mae=8.8189
+Epoch 72/100  loss=1218.0306  val_mae=8.0971
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 73/100  loss=1218.5717  val_mae=8.4332
+Epoch 74/100  loss=1214.7470  val_mae=7.9926
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 75/100  loss=1215.5472  val_mae=8.1873
+Epoch 76/100  loss=1212.8201  val_mae=7.8169
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 77/100  loss=1210.9225  val_mae=8.0948
+Epoch 78/100  loss=1213.1178  val_mae=8.0697
+Epoch 79/100  loss=1213.2227  val_mae=8.0526
+Epoch 80/100  loss=1209.1719  val_mae=7.7896
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 81/100  loss=1207.3384  val_mae=7.9173
+Epoch 82/100  loss=1201.0961  val_mae=7.9762
+Epoch 83/100  loss=1202.6442  val_mae=7.7267
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 84/100  loss=1197.7562  val_mae=7.8219
+Epoch 85/100  loss=1192.1676  val_mae=7.8674
+Epoch 86/100  loss=1210.7811  val_mae=10.0344
+Epoch 87/100  loss=1211.6096  val_mae=8.1846
+Epoch 88/100  loss=1186.9460  val_mae=7.7204
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 89/100  loss=1194.1046  val_mae=7.3164
+Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
+Epoch 90/100  loss=1189.7146  val_mae=7.3512
+Epoch 91/100  loss=1191.5197  val_mae=7.8359
+Epoch 92/100  loss=1187.9061  val_mae=7.5507
+Epoch 93/100  loss=1180.8360  val_mae=7.5387
+Epoch 94/100  loss=1181.8223  val_mae=7.4821
+Epoch 95/100  loss=1183.3720  val_mae=7.5734
+Epoch 96/100  loss=1180.4340  val_mae=7.3367
+Epoch 97/100  loss=1185.6194  val_mae=7.4583
+Epoch 98/100  loss=1179.6876  val_mae=8.1135
+Epoch 99/100  loss=1181.8023  val_mae=7.7127
+Epoch 100/100  loss=1172.5933  val_mae=7.4276
+=> training finished
+Test results saved to custom.txt
