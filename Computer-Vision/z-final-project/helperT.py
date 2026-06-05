@@ -43,7 +43,7 @@ def identity_transform(img):
 
 def get_dataloaders(base_dir):
     global img_d
-    img_d = base_dir + "appa-real-release/"
+    img_d = os.path.join(base_dir, "appa-real-release")
 
     # Dataset
     class FaceNPDataset(Dataset):
@@ -53,11 +53,13 @@ def get_dataloaders(base_dir):
 
             # Loading and sorting labels
             if sub != "test":
-                self.age = np.loadtxt(base_dir + sub + ".txt", delimiter=",")
+                self.age = np.loadtxt(
+                    os.path.join(base_dir, f"{sub}.txt"), delimiter=","
+                )
             else:
                 self.age = np.random.rand(500) * 100
 
-            self.features = np.load(base_dir + "feature_" + sub + ".npy")
+            self.features = np.load(os.path.join(base_dir, f"feature_{sub}.npy"))
             assert len(self.age) == len(self.features)
 
         def __len__(self):
@@ -98,7 +100,7 @@ def get_dataloaders(base_dir):
 
 def get_img_dataloaders(base_dir):
     global img_d
-    img_d = base_dir + "appa-real-release/"
+    img_d = os.path.join(base_dir, "appa-real-release")
     data_dir = img_d
     img_size = 128
     train_dataset = FaceDataset(
@@ -260,7 +262,7 @@ class FaceDataset(Dataset):
         self.y = []
         self.std = []
         df = pd.read_csv(str(csv_path))
-        ignore_path = "ignore_list.csv"
+        ignore_path = os.path.join(os.path.dirname(__file__), "ignore_list.csv")
         ignore_img_names = list(pd.read_csv(str(ignore_path))["img_name"].values)
 
         for _, row in df.iterrows():
