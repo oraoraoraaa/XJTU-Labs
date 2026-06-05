@@ -27,6 +27,8 @@
 - `24_4_1_2.png`: Terminal output of data generation and insertion.
 - `25_4_1_3.png`: Three tables viewed from navicat after data generation and insertion.
 - `26_4_2_1.png`: Terminal output of data expansion again.
-- `27_6_1.png`: Create backup table.
-- `28_6_2.png`: Create the triggering function.
-- `29_6_3.png`: NULL count and backup table before and after Java script runs.
+- `27_5_1.png`: Terminal output of restoring partner's backup.
+- `28_5_2.png`: Navicat view after restoring partner's backup.
+- `29_6_1.png`: Create backup table.
+- `30_6_2.png`: Create the triggering function.
+- `31_6_3.png`: NULL count and backup table before and after Java script runs.
