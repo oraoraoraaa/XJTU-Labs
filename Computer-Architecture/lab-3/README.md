@@ -48,3 +48,11 @@ ADD.D F8, F6, F2
 MUL.D F10, F8, F2
 S.D F10, 8(R1)
 ```
+
+## Sample programs
+
+Three ready-to-run examples are provided in `examples/`:
+
+- `no_hazard.asm`: independent instruction mix with no structural or data hazard pressure
+- `raw_hazard.asm`: contains at least one RAW dependence
+- `war_hazard.asm`: contains a classic WAR pattern for scheduling demonstration
