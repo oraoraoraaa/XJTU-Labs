@@ -7,8 +7,11 @@ from torch.utils.data import DataLoader
 from helperT import get_img_dataloaders, test_cel
 from age_net import AgeNet
 
+SCRIPT_DIR = os.path.dirname(__file__)
+DEFAULT_DATA_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "DATASET"))
 
-def train_ageNet(base_dir='DATASET/'):
+
+def train_ageNet(base_dir=DEFAULT_DATA_DIR):
     # hyper-parameters
     EPOCH = 100
     TRAIN_LR = 0.001
@@ -18,15 +21,17 @@ def train_ageNet(base_dir='DATASET/'):
     # data
     train_loader, val_loader, test_loader = get_img_dataloaders(base_dir)
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print('Using device:', device)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Using device:", device)
 
     model = AgeNet(num_classes=101).to(device)
-    optimizer = torch.optim.SGD(model.parameters(), lr=TRAIN_LR, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
+    optimizer = torch.optim.SGD(
+        model.parameters(), lr=TRAIN_LR, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY
+    )
     criterion = nn.CrossEntropyLoss()
 
     best_mae = 1e9
-    best_path = os.path.join(os.path.dirname(__file__), 'best_age_net.pth')
+    best_path = os.path.join(SCRIPT_DIR, "best_age_net.pth")
 
     ages = torch.arange(0, 101).float().to(device)
 
@@ -64,27 +69,27 @@ def train_ageNet(base_dir='DATASET/'):
         gtsVal = np.concatenate(gtsVal, axis=0)
         mae = np.mean(np.abs(predsVal - gtsVal))
 
-        print(f'Epoch {epoch+1}/{EPOCH}  loss={running_loss:.4f}  val_mae={mae:.4f}')
+        print(f"Epoch {epoch+1}/{EPOCH}  loss={running_loss:.4f}  val_mae={mae:.4f}")
 
         if mae < best_mae:
             best_mae = mae
             torch.save(model.state_dict(), best_path)
-            print('Saved best model to', best_path)
+            print("Saved best model to", best_path)
 
-    print('=> training finished')
+    print("=> training finished")
     return best_path, test_loader
 
 
-if __name__ == '__main__':
-    best_path, test_loader = train_ageNet('DATASET/')
+if __name__ == "__main__":
+    best_path, test_loader = train_ageNet()
 
     # Load best model and run test to produce predictions file
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = AgeNet(num_classes=101).to(device)
     model.load_state_dict(torch.load(best_path, map_location=device))
     model.to(device)
 
     # helperT.test_cel expects the model to be on cuda and will call .cuda() on inputs.
     # If running on CPU, test_cel will still produce outputs if model and inputs are on CPU.
-    prediction = test_cel(model, test_loader, os.path.join(os.path.dirname(__file__), 'custom.txt'))
-    print('Test results saved to custom.txt')
+    prediction = test_cel(model, test_loader, os.path.join(SCRIPT_DIR, "custom.txt"))
+    print("Test results saved to custom.txt")
