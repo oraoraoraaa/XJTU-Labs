@@ -6,6 +6,8 @@ Image-based pipeline for end-to-end CNN training. Prepare `gt_avg_train.csv`, `g
 
 ## How to Run
 
+### AgeNet
+
 1. Put the APPA-REAL dataset under `DATASET/` so that `appa-real-release/` and the CSV files required by the image pipeline are present. Download link: [appa-real-release](https://chalearnlap.cvc.uab.cat/dataset/26/description/).
 
 2. Create and activate a Python environment, then install dependencies. The project expects PyTorch, torchvision, pandas, Pillow, OpenCV, imgaug, and numpy.
@@ -18,8 +20,9 @@ python train_ageNet.py
 
 Outputs:
 
-- `best_age_net.pth`: best checkpoint saved by validation MAE.
-- `custom.txt`: test predictions written after training finishes.
+- Terminal output: [Computer-Vision/z-final-project/terminal_output.txt](agenet/terminal_output.txt)
+- Best checkpoint saved by validation MAE (Stored in google drive because of its large size): [Computer-Vision/z-final-project/best_age_net.pth](https://drive.google.com/file/d/1Z8bHwR7482lGMzuX4g3M57c-ZIEwyWpI/view?usp=sharing)
+- Test predictions written after training finishes: [Computer-Vision/z-final-project/custom.txt](agenet/custom.txt)
 
 ## Project Layout
 
@@ -28,11 +31,18 @@ Outputs:
 - `train_ageNet.py`: training entry point.
 - `README.md`: run instructions.
 
-## Result
+### DenseNet and VIT
 
-- Terminal output: [Computer-Vision/z-final-project/terminal_output.txt](./terminal_output.txt)
-- Best checkpoint saved by validation MAE (Stored in google drive because of its large size): [Computer-Vision/z-final-project/best_age_net.pth](https://drive.google.com/file/d/1Z8bHwR7482lGMzuX4g3M57c-ZIEwyWpI/view?usp=sharing)
-- Test predictions written after training finishes: [Computer-Vision/z-final-project/custom.txt](./custom.txt)
+Navigate to `Computer-Vision/z-final-project/dense-vit`, and run:
+
+```bash
+python trainn_dense_vit.py --backbone both
+```
+
+Best checkpoint:
+
+- [DenseNet](https://drive.google.com/file/d/1NBemYm7YQObmzZg1SeEZ6n6IfDw9mDs0/view?usp=sharing)
+- [VIT](https://drive.google.com/file/d/1vLN7IxB_pKKsog9XzYVsj0cu_r9dUqfD/view?usp=sharing)
 
 ## Notes
 
