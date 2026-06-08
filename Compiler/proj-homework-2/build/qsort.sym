@@ -1,0 +1,11 @@
+; QTAC symbol table
+[GLOBAL] a : int[10]  size=80
+[FUNCTION] swap(arr:int[], i:int, j:int) -> void
+    local temp : int
+[FUNCTION] partition(arr:int[], low:int, high:int) -> int
+    local pivot : int
+    local i : int
+    local j : int
+[FUNCTION] qsort(arr:int[], low:int, high:int) -> void
+    local p : int
+[FUNCTION] entry() -> int  (program entry)

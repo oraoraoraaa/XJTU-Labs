@@ -1,0 +1,90 @@
+i80 a;
+
+define swap(arr, i, j){
+LABEL swap;
+t0 = i * 8;
+t1 = arr + t0;
+t2 = M[t1];
+temp = t2;
+t3 = i * 8;
+t4 = arr + t3;
+t5 = j * 8;
+t6 = arr + t5;
+t7 = M[t6];
+M[t4] = t7;
+t8 = j * 8;
+t9 = arr + t8;
+M[t9] = temp;
+RETURN 0;
+}
+
+define partition(arr, low, high){
+LABEL partition;
+t10 = high * 8;
+t11 = arr + t10;
+t12 = M[t11];
+pivot = t12;
+t13 = low - 1;
+i = t13;
+t14 = low - 1;
+j = t14;
+LABEL l0;
+t15 = j + 1;
+j = t15;
+IF j < high THEN l1 ELSE l2;
+LABEL l1;
+t16 = j * 8;
+t17 = arr + t16;
+t18 = M[t17];
+IF t18 < pivot THEN l3 ELSE l4;
+LABEL l3;
+t19 = i + 1;
+i = t19;
+PAR arr;
+PAR i;
+PAR j;
+t20 = CALL swap, 3;
+LABEL l4;
+GOTO l0;
+LABEL l2;
+t21 = i + 1;
+PAR arr;
+PAR t21;
+PAR high;
+t22 = CALL swap, 3;
+t23 = i + 1;
+RETURN t23;
+RETURN 0;
+}
+
+define qsort(arr, low, high){
+LABEL qsort;
+IF low < high THEN l5 ELSE l6;
+LABEL l5;
+PAR arr;
+PAR low;
+PAR high;
+t24 = CALL partition, 3;
+p = t24;
+t25 = p - 1;
+PAR arr;
+PAR low;
+PAR t25;
+t26 = CALL qsort, 3;
+t27 = p + 1;
+PAR arr;
+PAR t27;
+PAR high;
+t28 = CALL qsort, 3;
+LABEL l6;
+RETURN 0;
+}
+
+define entry(){
+LABEL entry;
+PAR a;
+PAR 0;
+PAR 9;
+t29 = CALL qsort, 3;
+RETURN 0;
+}

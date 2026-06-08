@@ -1,0 +1,140 @@
+Program
+  decls:
+    VarDecl a: int[10]
+    FuncDecl void swap(arr[], i, j)
+      Block
+        VarDecl temp: int
+        ExprStmt
+          Binary =
+            Id temp
+            Index
+              base:
+                Id arr
+              index:
+                Id i
+        ExprStmt
+          Binary =
+            Index
+              base:
+                Id arr
+              index:
+                Id i
+            Index
+              base:
+                Id arr
+              index:
+                Id j
+        ExprStmt
+          Binary =
+            Index
+              base:
+                Id arr
+              index:
+                Id j
+            Id temp
+    FuncDecl int partition(arr[], low, high)
+      Block
+        VarDecl pivot: int
+        VarDecl i: int
+        VarDecl j: int
+        ExprStmt
+          Binary =
+            Id pivot
+            Index
+              base:
+                Id arr
+              index:
+                Id high
+        ExprStmt
+          Binary =
+            Id i
+            Binary -
+              Id low
+              Num 1
+        ExprStmt
+          Binary =
+            Id j
+            Binary -
+              Id low
+              Num 1
+        While
+          cond:
+            Binary <
+              Binary =
+                Id j
+                Binary +
+                  Id j
+                  Num 1
+              Id high
+          body:
+            Block
+              If
+                cond:
+                  Binary <
+                    Index
+                      base:
+                        Id arr
+                      index:
+                        Id j
+                    Id pivot
+                then:
+                  Block
+                    ExprStmt
+                      Binary =
+                        Id i
+                        Binary +
+                          Id i
+                          Num 1
+                    ExprStmt
+                      Call swap
+                        Id arr
+                        Id i
+                        Id j
+        ExprStmt
+          Call swap
+            Id arr
+            Binary +
+              Id i
+              Num 1
+            Id high
+        Return
+          Binary +
+            Id i
+            Num 1
+    FuncDecl void qsort(arr[], low, high)
+      Block
+        VarDecl p: int
+        If
+          cond:
+            Binary <
+              Id low
+              Id high
+          then:
+            Block
+              ExprStmt
+                Binary =
+                  Id p
+                  Call partition
+                    Id arr
+                    Id low
+                    Id high
+              ExprStmt
+                Call qsort
+                  Id arr
+                  Id low
+                  Binary -
+                    Id p
+                    Num 1
+              ExprStmt
+                Call qsort
+                  Id arr
+                  Binary +
+                    Id p
+                    Num 1
+                  Id high
+  stmts:
+    ExprStmt
+      Call qsort
+        Id a
+        Num 0
+        Num 9

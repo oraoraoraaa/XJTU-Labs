@@ -1,0 +1,5 @@
+# build binaries produced by run.sh (the .s/.qtac/... artefacts are kept)
+build/*.o
+build/qsort_run
+build/qsort_opt_run
+**/__pycache__/
