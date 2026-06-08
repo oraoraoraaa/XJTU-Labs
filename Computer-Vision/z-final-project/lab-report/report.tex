@@ -1,375 +1,371 @@
-\documentclass[12pt,a4paper]{ctexart}
-\usepackage[margin=2.2cm]{geometry}
+\documentclass[12pt,a4paper,fontset=fandol]{ctexart}
+
+\usepackage[margin=2.15cm,headheight=15pt]{geometry}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{amsmath}
 \usepackage{float}
-\usepackage{hyperref}
-\usepackage{xcolor}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage[table,dvipsnames]{xcolor}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tikz}
+\usepackage{pgfplots}
 \usepackage{listings}
+\usepackage{hyperref}
 
-\lstset{
+\pgfplotsset{compat=1.18}
+
+\definecolor{Ink}{HTML}{222831}
+\definecolor{Muted}{HTML}{58616D}
+\definecolor{AccentBlue}{HTML}{2F5D8C}
+\definecolor{AccentTeal}{HTML}{1A8C87}
+\definecolor{AccentGold}{HTML}{C58A1B}
+\definecolor{SoftBlue}{HTML}{EEF5FA}
+\definecolor{SoftTeal}{HTML}{EAF7F4}
+\definecolor{SoftGold}{HTML}{FFF5DE}
+\definecolor{RuleGray}{HTML}{D8DEE6}
+\definecolor{CodeBg}{HTML}{F7F9FB}
+
+\urlstyle{same}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=AccentBlue,
+  urlcolor=AccentTeal,
+  citecolor=AccentGold,
+  pdfauthor={李祥熙, 储正非, 袁宇霄},
+  pdftitle={APPA-REAL 表观年龄预测实验报告}
+}
+
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.35em}
+\setlist[itemize]{leftmargin=2em,itemsep=0.25em,topsep=0.3em}
+\setlist[enumerate]{leftmargin=2em,itemsep=0.25em,topsep=0.3em}
+\renewcommand{\arraystretch}{1.18}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textcolor{Muted}{计算机视觉大实验}}
+\fancyhead[R]{\textcolor{Muted}{APPA-REAL 年龄预测}}
+\fancyfoot[C]{\textcolor{Muted}{\thepage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{RuleGray}\leaders\hrule height \headrulewidth\hfill}}
+
+\titleformat{\section}
+  {\Large\bfseries\color{AccentBlue}}
+  {\thesection}{0.8em}{}
+  [\vspace{-0.4em}\textcolor{RuleGray}{\titlerule}]
+\titleformat{\subsection}
+  {\large\bfseries\color{Ink}}
+  {\thesubsection}{0.7em}{}
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{AccentTeal}}
+  {\thesubsubsection}{0.6em}{}
+
+\captionsetup{
+  font=small,
+  labelfont={bf,color=AccentBlue},
+  labelsep=quad
+}
+
+\lstdefinestyle{reportpython}{
   language=Python,
   basicstyle=\ttfamily\small,
-  keywordstyle=\color{blue!70!black},
-  commentstyle=\color{green!40!black},
-  stringstyle=\color{orange!60!black},
+  keywordstyle=\color{AccentBlue}\bfseries,
+  commentstyle=\color{AccentTeal!80!black},
+  stringstyle=\color{AccentGold!85!black},
   showstringspaces=false,
   breaklines=true,
   frame=single,
-  tabsize=4
+  rulecolor=\color{RuleGray},
+  backgroundcolor=\color{CodeBg},
+  tabsize=4,
+  numbers=left,
+  numberstyle=\scriptsize\color{Muted},
+  xleftmargin=1.8em,
+  framexleftmargin=1.4em
+}
+\lstset{style=reportpython}
+
+\newcommand{\projecttitle}{基于 APPA-REAL 的\\表观年龄预测}
+\newcommand{\coursename}{计算机视觉与模式识别大实验}
+\newcommand{\metricbox}[3]{%
+  \begin{minipage}[t]{0.31\textwidth}
+    \colorbox{#1}{%
+      \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
+        \vspace{0.45em}
+        {\small\color{Muted}#2}\\[-0.1em]
+        {\Large\bfseries\color{Ink}#3}
+        \vspace{0.45em}
+      }%
+    }
+  \end{minipage}
 }
 
-\newcommand{\reporttitle}{大实验报告 —— AgeNet (APPA-REAL) 年龄预测}
-\newcommand{\subtask}{终端训练与评估}
-\newcommand{\authname}{姓名}
-\newcommand{\authid}{学号}
-
-\title{\reporttitle}
-\author{\authname：\underline{李祥熙} \quad \authid：\underline{2234412799}\\
-        \authname：\underline{储正非} \quad \authid：\underline{2233412534}\\
-        \authname：\underline{袁宇霄} \quad \authid：\underline{2235015935}\\
-        }
-\date{\today}
-
 \begin{document}
-\maketitle
+
+\begin{titlepage}
+  \thispagestyle{empty}
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[SoftBlue] (current page.north west) rectangle ([yshift=-4.75cm]current page.north east);
+    \fill[AccentBlue] ([yshift=-4.75cm]current page.north west) rectangle ([xshift=0.32cm]current page.south west);
+    \fill[AccentTeal] ([xshift=0.32cm,yshift=-4.75cm]current page.north west) rectangle ([xshift=0.42cm]current page.south west);
+
+    \node[
+      anchor=north,
+      align=center,
+      text=AccentBlue,
+      font=\Large\bfseries
+    ] at ([yshift=-2.95cm]current page.north) {\coursename};
+    \draw[AccentGold,line width=1.2pt]
+      ([xshift=2.35cm,yshift=-4.10cm]current page.north west) --
+      ([xshift=-2.35cm,yshift=-4.10cm]current page.north east);
+
+    \node[
+      anchor=north,
+      align=center,
+      text=Ink,
+      text width=15.2cm,
+      font=\fontsize{27pt}{35pt}\selectfont\bfseries
+    ] at ([yshift=-5.85cm]current page.north) {\projecttitle};
+
+    \node[
+      anchor=north,
+      align=center,
+      text=Muted,
+      text width=15.8cm,
+      font=\Large
+    ] at ([yshift=-8.85cm]current page.north) {AgeNet 主模型实现、训练评估与 DenseNet/ViT 拓展对比};
+
+    \node[
+      fill=SoftTeal,
+      inner xsep=0.26cm,
+      inner ysep=0.18cm,
+      minimum width=4.95cm,
+      minimum height=1.36cm,
+      text width=4.45cm,
+      align=left,
+      anchor=north west
+    ] at ([xshift=-7.72cm,yshift=-10.45cm]current page.north)
+      {{\small\color{Muted}最佳 AgeNet 验证 MAE}\\[-0.05cm]{\Large\bfseries\color{Ink}7.3164 岁}};
+
+    \node[
+      fill=SoftGold,
+      inner xsep=0.26cm,
+      inner ysep=0.18cm,
+      minimum width=4.95cm,
+      minimum height=1.36cm,
+      text width=4.45cm,
+      align=left,
+      anchor=north west
+    ] at ([xshift=-2.48cm,yshift=-10.45cm]current page.north)
+      {{\small\color{Muted}训练上限}\\[-0.05cm]{\Large\bfseries\color{Ink}100 epochs}};
+
+    \node[
+      fill=SoftBlue,
+      inner xsep=0.26cm,
+      inner ysep=0.18cm,
+      minimum width=4.95cm,
+      minimum height=1.36cm,
+      text width=4.45cm,
+      align=left,
+      anchor=north west
+    ] at ([xshift=2.75cm,yshift=-10.45cm]current page.north)
+      {{\small\color{Muted}预测形式}\\[-0.05cm]{\fontsize{17pt}{19pt}\selectfont\bfseries\color{Ink}101 类概率期望}};
+
+    \node[anchor=north,align=center] at ([yshift=-17.45cm]current page.north) {
+      \begin{tabular}{@{}ll@{}}
+        \toprule
+        成员 & 学号 \\
+        \midrule
+        李祥熙 & 2234412799 \\
+        储正非 & 2233412534 \\
+        袁宇霄 & 2235015935 \\
+        \bottomrule
+      \end{tabular}
+    };
+
+    \node[anchor=north,text=Muted] at ([yshift=-24.95cm]current page.north)
+      {报告日期：\today};
+  \end{tikzpicture}
+  \vphantom{.}
+\end{titlepage}
+
+\pagenumbering{Roman}
 \tableofcontents
 \newpage
+\pagenumbering{arabic}
 
-\section{实验目的}
+\section{实验概述}
 
-本实验完成一个基于 APPA-REAL 人脸数据集的端到端年龄预测系统。核心任务是在 PyTorch 中实现指定的 \texttt{AgeNet(nn.Module)}，输入 \texttt{128$\times$128} RGB 人脸图像，输出 0 到 100 岁共 101 个年龄类别。
+本实验围绕 APPA-REAL 人脸数据集完成端到端表观年龄预测。课程要求的核心任务是实现 \texttt{AgeNet(nn.Module)}：模型输入一张 $128\times128$ RGB 人脸图像，输出 0 到 100 岁共 101 个类别的 logits，并在验证集上用平均绝对误差（MAE）选择最优模型。项目同时补充实现了 DenseNet-121 与 ViT-B/16 两个从零训练的拓展模型，用于观察卷积式结构与 Transformer 式结构在本数据规模下的表现差异。
 
-本次实验的主要目标如下：
+\begin{table}[H]
+  \centering
+  \caption{项目实现范围}
+  \begin{tabularx}{\textwidth}{>{\bfseries}p{3.1cm}X}
+    \toprule
+    模块 & 说明 \\
+    \midrule
+    主模型 & 在 \texttt{agenet/age\_net.py} 中实现 5 个卷积块与 3 个全连接层的 AgeNet。 \\
+    数据管线 & 在 \texttt{helperT.py} 中读取 APPA-REAL CSV 与 \texttt{\_face.jpg} 人脸裁剪图，完成缩放、增强、归一化与异常样本过滤。 \\
+    训练评估 & 使用交叉熵训练 101 类年龄分类器，验证阶段将 softmax 概率分布转化为年龄期望并计算 MAE。 \\
+    拓展对比 & 在 \texttt{dense-vit/train\_dense\_vit.py} 中实现 DenseNet-121 与 ViT-B/16 两个对比模型。 \\
+    输出文件 & AgeNet、DenseNet、ViT 分别生成 \texttt{custom.txt}、\texttt{custom\_densenet.txt}、\texttt{custom\_vit.txt}。 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{实验目标}
+
+本次实验的目标可以概括为以下六点：
 \begin{enumerate}
-    \item 理解年龄估计任务中分类建模与回归评价相结合的思想；
-    \item 使用 PyTorch 实现课程要求的 AgeNet 卷积神经网络；
-    \item 完成 APPA-REAL 图像数据读取、预处理、数据增强、训练、验证和测试预测；
-    \item 使用平均绝对误差 MAE 评价年龄估计结果；
-    \item 保存验证集 MAE 最优的模型权重，并输出测试集预测年龄文件；
-    \item 根据训练日志分析模型收敛过程和实验结果。
+  \item 理解年龄估计中“分类训练 + 回归评价”的建模方式；
+  \item 使用 PyTorch 按课程给定结构实现 \texttt{AgeNet}；
+  \item 完成 APPA-REAL 图像数据读取、预处理、训练集增强与测试集预测；
+  \item 以验证集 MAE 作为主要指标，保存验证性能最优的模型权重；
+  \item 对训练日志中的收敛趋势、模型选择与误差来源进行分析；
+  \item 在同一评价方式下比较 AgeNet、DenseNet-121 与 ViT-B/16 的实验现象。
 \end{enumerate}
 
-\section{实验过程}
+\section{实验环境与数据处理}
+
 \subsection{实验环境}
-\begin{itemize}
-  \item 操作系统：Linux
-  \item 编程语言：Python 3
-  \item 深度学习框架：PyTorch
-  \item 关键依赖：torchvision, pandas, Pillow, OpenCV, imgaug, numpy
-  \item 计算资源：优先使用 GPU（训练日志显示使用了 CUDA）
-\end{itemize}
 
+训练日志显示本实验在 CUDA 环境下完成。项目的主要依赖和运行条件如下：
 
-\subsection{年龄估计建模方法}
+\begin{table}[H]
+  \centering
+  \caption{实验环境与关键依赖}
+  \begin{tabular}{ll}
+    \toprule
+    项目 & 配置 \\
+    \midrule
+    编程语言 & Python 3 \\
+    深度学习框架 & PyTorch, torchvision \\
+    数据处理 & numpy, pandas, OpenCV, Pillow \\
+    数据增强 & imgaug \\
+    训练设备 & CUDA GPU（日志输出 \texttt{Using device: cuda}） \\
+    批量大小 & 12 \\
+    训练轮数 & 100 epochs \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-年龄估计既可以直接建模为回归问题，也可以转化为分类问题。本实验采用分类训练、期望回归的方式：模型输出 101 维 logits，每一维对应一个年龄类别。训练阶段将年龄四舍五入并裁剪到 0--100 范围，使用交叉熵损失进行监督；预测阶段对 logits 做 softmax 得到年龄概率分布，再计算概率分布的期望作为最终预测年龄。
+\subsection{数据集组织}
 
-设网络输出为 $f(x)$，年龄类别为 $a \in \{0,1,\ldots,100\}$，则预测过程为：
+APPA-REAL 数据集需要放置在 \texttt{DATASET/appa-real-release/} 下，并包含训练、验证、测试三个图像目录以及对应的平均年龄标注 CSV。项目实际读取的是人脸裁剪后的 \texttt{\_face.jpg} 图像，目录结构如下：
+
+\begin{lstlisting}[caption={APPA-REAL 数据目录结构}]
+DATASET/
+  appa-real-release/
+    gt_avg_train.csv
+    gt_avg_valid.csv
+    gt_avg_test.csv
+    train/
+    valid/
+    test/
+\end{lstlisting}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.155\textwidth]{../DATASET/valid/005607.jpg_face.jpg}
+  \includegraphics[width=0.155\textwidth]{../DATASET/valid/005608.jpg_face.jpg}
+  \includegraphics[width=0.155\textwidth]{../DATASET/valid/005609.jpg_face.jpg}
+  \includegraphics[width=0.155\textwidth]{../DATASET/valid/005610.jpg_face.jpg}
+  \includegraphics[width=0.155\textwidth]{../DATASET/valid/005611.jpg_face.jpg}
+  \includegraphics[width=0.155\textwidth]{../DATASET/valid/005612.jpg_face.jpg}
+  \caption{项目中保留的 APPA-REAL 验证集人脸样例。图像统一作为模型输入前的视觉证据，用于说明数据形态与裁剪方式。}
+  \label{fig:samples}
+\end{figure}
+
+\subsection{预处理与增强}
+
+数据管线在 \texttt{helperT.py} 的 \texttt{FaceDataset} 中实现。输入图像先由 OpenCV 读取，统一缩放到 $128\times128$，再由 BGR 转为 RGB，并经过 \texttt{ToTensor} 与均值、标准差均为 0.5 的归一化，最终输入范围大致落在 $[-1,1]$。
+
+训练集还加入了多种增强策略：加性高斯噪声、高斯模糊、$-20^\circ$ 到 $20^\circ$ 的随机旋转、小幅缩放和平移、Gamma 对比度变化以及随机水平翻转。对于训练标签，程序会根据年龄标注标准差加入高斯扰动，再四舍五入并裁剪到 0 到 100 岁。这一处理利用了 APPA-REAL 标注标准差中蕴含的不确定性，可降低模型对单一整数标签的过拟合。
+
+\section{方法设计}
+
+\subsection{分类训练与期望回归}
+
+年龄估计可以直接看作回归问题，也可以转化为分类问题。本实验采用后者：网络输出 101 维 logits，每一维对应一个年龄类别。训练阶段使用交叉熵损失；评价与预测阶段先用 softmax 得到年龄概率分布，再计算概率期望作为连续年龄估计。
+
 \[
-P(a|x)=\mathrm{softmax}(f(x)),
+P(a|x)=\mathrm{softmax}(f(x))_a,
 \qquad
-\hat{y}=\sum_{a=0}^{100} a \cdot P(a|x).
+\hat{y}=\sum_{a=0}^{100}a\cdot P(a|x).
 \]
 
-这种方法避免了只取最大概率类别时的离散跳变，也比直接回归单个年龄值更容易利用分类损失稳定训练。由于 APPA-REAL 的年龄标签来自多名标注者的表观年龄估计，标签本身具有一定主观性，使用概率分布表达预测结果更符合任务特点。
+这种方式的优点是训练信号来自稳定的分类损失，而最终输出仍能表达连续年龄。与直接取最大概率类别相比，期望回归可以利用整个概率分布，减少整数类别之间的跳变。
 
 \subsection{评价指标}
 
-实验主要使用平均绝对误差 MAE 评价模型：
+实验使用平均绝对误差（MAE）评价预测年龄与真实年龄的偏差：
+
 \[
 \mathrm{MAE}=\frac{1}{N}\sum_{i=1}^{N}|\hat{y}_i-y_i|.
 \]
 
-MAE 的单位是岁，含义是模型平均预测偏差，因此比分类准确率更适合年龄估计任务。训练过程中每轮在验证集上计算 MAE，并以验证集 MAE 最小时的参数作为最终模型。
+MAE 的单位是“岁”，数值越小表示模型平均预测偏差越低。由于测试集没有公开真实年龄标签，项目只能对测试集生成预测文件；可量化比较主要基于验证集 MAE。
 
-\subsection{数据集与预处理}
-\subsubsection{数据集}
-本实验使用 APPA-REAL 数据集（人脸裁剪后的 `\_face.jpg` 图像与相应 CSV 标注）。关键点：
+\subsection{AgeNet 网络结构}
+
+AgeNet 是一个 VGG 风格的卷积网络。输入为 $3\times128\times128$，每经过一次 $2\times2$ 最大池化，空间尺寸减半，最终得到 $512\times4\times4$ 的特征图。展平后的 8192 维特征经过两个 4096 维全连接层，最后输出 101 个年龄类别。
+
+\begin{table}[H]
+  \centering
+  \caption{AgeNet 网络结构}
+  \label{tab:agenet}
+  \begin{tabularx}{\textwidth}{p{2.1cm}X p{3.2cm}}
+    \toprule
+    模块 & 层结构 & 输出尺度 \\
+    \midrule
+    Block 1 & \texttt{Conv 7x7, 3->64} + ReLU + MaxPool & $128^2 \to 64^2$ \\
+    Block 2 & \texttt{Conv 5x5, 64->128} + ReLU + \texttt{Conv 5x5, 128->128} + ReLU + MaxPool & $64^2 \to 32^2$ \\
+    Block 3 & 3 个 \texttt{3x3} 卷积，通道 \texttt{128->256->256->256} + MaxPool & $32^2 \to 16^2$ \\
+    Block 4 & 3 个 \texttt{3x3} 卷积，通道 \texttt{256->512->512->512} + MaxPool & $16^2 \to 8^2$ \\
+    Block 5 & 3 个 \texttt{3x3} 卷积，通道 \texttt{512->512->512->512} + MaxPool & $8^2 \to 4^2$ \\
+    Classifier & Flatten + \texttt{8192->4096->4096->101} & 101 类 logits \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{拓展模型}
+
+为了观察不同结构在同一数据管线下的表现，项目额外训练了两个对比模型：
 \begin{itemize}
-  \item 输入尺寸：128 $\times$ 128 RGB；在数据加载器中通过 \texttt{cv2.resize(..., (128,128))} 强制为 128 分辨率；
-  \item 标签：每张图像的"apparent age"（取整并裁剪到 0--100）；训练时通过对真实标签加上带标准差的噪声进行数据增强（仅训练集启用）；
-  \item 归一化：在 \texttt{FaceDataset} 中使用 transforms.Normalize(mean=[0.5,0.5,0.5], std=[0.5,0.5,0.5])；
-  \item 批量大小与并行：默认 \texttt{BATCH\_SIZE=12}, \texttt{NUM\_WORKER=8}。
+  \item \textbf{DenseNet-121}：使用 \texttt{torchvision.models.densenet121(weights=None)}，将最后分类层替换为 101 类输出。由于训练从随机初始化开始，DenseNet 的密集连接有助于梯度传播，但没有 ImageNet 预训练的先验优势。
+  \item \textbf{ViT-B/16}：使用 \texttt{torchvision.models.vit\_b\_16(weights=None)}，输入在模型内插值到 $224\times224$。Transformer 对数据规模与训练策略更敏感，从零训练时更容易出现收敛不足。
 \end{itemize}
 
-项目要求将数据集整理为如下目录结构：
+\section{关键实现}
 
-\begin{lstlisting}[caption={APPA-REAL 数据目录结构}]
-DATASET/
-|-- appa-real-release/
-|   |-- gt_avg_train.csv
-|   |-- gt_avg_valid.csv
-|   |-- gt_avg_test.csv
-|   |-- train/
-|   |-- valid/
-|   |-- test/
-\end{lstlisting}
+\subsection{AgeNet 模型定义}
 
-其中训练集和验证集 CSV 文件提供可用于监督学习的年龄标签；测试集没有公开真实年龄标签，因此训练结束后只能生成测试集预测文件，不能直接计算测试 MAE。
+以下片段概括了主模型的实现方式。完整代码位于 \texttt{agenet/age\_net.py}。
 
-项目中的 \texttt{helperT.py} 负责读取数据。程序从训练、验证和测试三个 CSV 文件中读取图片文件名，再到对应的 \texttt{train}、\texttt{valid} 和 \texttt{test} 目录中查找 \texttt{\_face.jpg} 人脸裁剪图。
-
-项目还使用 \texttt{ignore\_list.csv} 跳过部分异常样本，避免缺失图片或异常标注影响训练流程。
-
-\subsubsection{基础预处理}
-
-输入图片统一缩放为 \texttt{128$\times$128}，并完成如下处理：
-\begin{enumerate}
-    \item 使用 OpenCV 读取人脸图片；
-    \item 将图片 resize 到 \texttt{128$\times$128}；
-    \item 将 BGR 格式转换为 RGB 格式；
-    \item 使用 \texttt{ToTensor} 转换为 PyTorch 张量；
-    \item 使用均值 \texttt{[0.5, 0.5, 0.5]} 和标准差 \texttt{[0.5, 0.5, 0.5]} 归一化，使输入大致落在 \texttt{[-1, 1]}。
-\end{enumerate}
-
-\subsubsection{训练集增强}
-
-为了提高模型对光照、姿态和成像质量变化的鲁棒性，训练集使用了多种数据增强：
-\begin{enumerate}
-    \item 加性高斯噪声；
-    \item 高斯模糊；
-    \item 随机旋转，范围约为 $-20^\circ$ 到 $20^\circ$；
-    \item 小幅缩放和平移；
-    \item Gamma 对比度变化；
-    \item 随机水平翻转。
-\end{enumerate}
-
-训练时还会根据 \texttt{apparent\_age\_std} 对年龄标签加入随机扰动，然后四舍五入并裁剪到 0--100 范围。这一处理利用了 APPA-REAL 标注标准差所反映的不确定性，有助于降低模型对单一整数标签的过拟合。
-
-\subsection{实现步骤}
-
-\subsubsection{实现 AgeNet}
-
-AgeNet 是一个 VGG 风格的卷积神经网络，包含 5 个卷积特征提取阶段和 3 个全连接层。网络输入为 $3 \times 128 \times 128$，每经过一次 $2\times2$ 最大池化，空间尺寸减半，最终得到 $512 \times 4 \times 4$ 的特征图。
-
-\begin{center}
-\texttt{128 -> 64 -> 32 -> 16 -> 8 -> 4}
-\end{center}
-
-展平后的 8192 维特征依次经过两个 4096 维全连接层和一个 101 维输出层，输出 0 到 100 岁的类别 logits。
-
-\begin{table}[!htbp]
-    \centering
-    \caption{AgeNet 网络结构}
-    \begin{tabular}{p{2.2cm}p{7.0cm}p{3.8cm}}
-        \toprule
-        模块 & 层结构 & 输出尺寸变化 \\
-        \midrule
-        Block 1 & \texttt{Conv 7x7, 3->64} + ReLU + MaxPool & $128\times128 \to 64\times64$ \\
-        Block 2 & \texttt{Conv 5x5, 64->128} + ReLU + \texttt{Conv 5x5, 128->128} + ReLU + MaxPool & $64\times64 \to 32\times32$ \\
-        Block 3 & 3 个 \texttt{3x3} 卷积，通道 \texttt{128->256->256->256} + MaxPool & $32\times32 \to 16\times16$ \\
-        Block 4 & 3 个 \texttt{3x3} 卷积，通道 \texttt{256->512->512->512} + MaxPool & $16\times16 \to 8\times8$ \\
-        Block 5 & 3 个 \texttt{3x3} 卷积，通道 \texttt{512->512->512->512} + MaxPool & $8\times8 \to 4\times4$ \\
-        分类器 & Flatten + \texttt{8192->4096->4096->101} & 输出 101 类 \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\subsubsection{数据集加载、训练和验证}
-
-\begin{enumerate}
-  \item 编写数据加载器 \texttt{FaceDataset} 与增强管线（使用 \texttt{imgaug}）；
-  \item 在 \texttt{train\_ageNet.py} 中构建训练循环（100 epochs）、使用 SGD 优化器、交叉熵损失，并在每个 epoch 后计算验证 MAE（以概率分布的期望作为年龄预测）；训练参数如表 \ref{parameter}.
-
-    \begin{table}[h!]
-    \centering
-    \label{parameter}
-    \caption{训练参数设置}
-    \begin{tabular}{ll}
-        \toprule
-        参数 & 设置 \\
-        \midrule
-        训练轮数 & 100 epochs \\
-        Batch size & 12 \\
-        优化器 & SGD \\
-        学习率 & 0.001 \\
-        Momentum & 0.9 \\
-        Weight decay & 0.0 \\
-        损失函数 & CrossEntropyLoss \\
-        输入尺寸 & $128 \times 128$ \\
-        输出类别 & 101 类，对应 0 到 100 岁 \\
-        最优模型选择 & 验证集 MAE 最小时保存 \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-    
-  \item 在验证 MAE 下降时保存最佳模型权重到 \texttt{best\_age\_net.pth}；训练完成后使用最佳模型生成测试集预测写入 \texttt{custom.txt}。
-\end{enumerate}
-
-\section{实验内容}
-本实验的主要任务为：基于给定网络结构与数据预处理，训练 AgeNet 实现年龄回归（通过 101 类分类后取期望作为连续年龄估计）。
-
-\subsection{模型结构与关键实现}
-关键模型定义摘自 \texttt{age\_net.py}：
-\begin{lstlisting}
+\begin{lstlisting}[caption={AgeNet 核心结构节选}]
 class AgeNet(nn.Module):
     def __init__(self, num_classes=101):
         super(AgeNet, self).__init__()
         self.features = nn.Sequential(
-            nn.Conv2d(3,64,kernel_size=7,padding=3), nn.ReLU(), nn.MaxPool2d(2),
-            nn.Conv2d(64,128,kernel_size=5,padding=2), nn.ReLU(),
-            nn.Conv2d(128,128,kernel_size=5,padding=2), nn.ReLU(), nn.MaxPool2d(2),
-            # 后续为多层 3x3 卷积与池化，最终通道 512
-        )
-        self.avgpool = nn.AdaptiveAvgPool2d((4,4))
-        self.classifier = nn.Sequential(
-            nn.Flatten(), nn.Linear(512*4*4,4096), nn.ReLU(), nn.Dropout(0.5),
-            nn.Linear(4096,4096), nn.ReLU(), nn.Dropout(0.5),
-            nn.Linear(4096,num_classes)
-        )
-
-    def forward(self,x):
-        x = self.features(x)
-        x = self.avgpool(x)
-        x = self.classifier(x)
-        return x
-\end{lstlisting}
-
-实现要点说明：
-\begin{itemize}
-  \item 使用 5 个卷积块逐步提取特征，保证训练时通道数与空间尺度与指导文档一致；
-  \item 通过自适应池化确保进入全连接层前空间维为 $4\times4$，从而使线性层维度固定；
-  \item 输出为 101 维 logits，训练时使用 \texttt{CrossEntropyLoss}，评价时通过 softmax 得到概率分布，再计算期望作为年龄预测：$\hat{age}=\sum_{i=0}^{100} p_i \cdot i$。
-\end{itemize}
-
-\subsection{训练流程（关键片段）}
-训练脚本中的核心循环（节选自 \texttt{train\_ageNet.py}）：
-\begin{lstlisting}
-for epoch in range(EPOCH):
-    model.train()
-    running_loss = 0.0
-    for i, (y,x) in enumerate(train_loader):
-        x = x.to(device).float(); y = y.to(device).long()
-        outputs = model(x)
-        loss = criterion(outputs, y)
-        optimizer.zero_grad(); loss.backward(); optimizer.step()
-        running_loss += loss.item()
-
-    # validation: 用概率分布求期望并计算 MAE
-    with torch.no_grad():
-        for i, (y,x) in enumerate(val_loader):
-            outputs = model(x.to(device).float())
-            probs = torch.softmax(outputs, dim=1)
-            pred_age = (probs * ages).sum(dim=1)
-            predsVal.append(pred_age.cpu().numpy())
-            gtsVal.append(y.cpu().numpy())
-    mae = np.mean(np.abs(predsVal - gtsVal))
-    print(f'Epoch {epoch+1}/{EPOCH}  loss={running_loss:.4f}  val_mae={mae:.4f}')
-    if mae < best_mae:
-        best_mae = mae
-        torch.save(model.state_dict(), best_path)
-\end{lstlisting}
-
-关键超参数：\texttt{EPOCH=100}, \texttt{TRAIN\_LR=0.001}, 优化器为 SGD（动量 0.9），无权重衰减。
-
-\section{实验结果}
-\subsection{训练日志摘录}
-以下为训练过程中的关键输出片段（逐步记录验证 MAE 的变化与保存最佳模型信息）：
-\begin{lstlisting}
-Using device: cuda
-Epoch 1/100  loss=1667.0581  val_mae=19.0350
-Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
-...
-Epoch 51/100  loss=1270.1084  val_mae=9.9518
-Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
-...
-Epoch 74/100  loss=1214.7470  val_mae=7.9926
-Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
-...
-Epoch 89/100  loss=1194.1046  val_mae=7.3164
-Saved best model to /home/rin/Local/Github/XJTU-Labs/Computer-Vision/z-final-project/best_age_net.pth
-...
-Epoch 100/100  loss=1172.5933  val_mae=7.4276
-=> training finished
-Test results saved to custom.txt
-\end{lstlisting}
-
-说明：
-\begin{itemize}
-  \item "Using device: cuda" 表明训练时使用了 GPU，能显著加速卷积网络的训练；
-  \item 训练早期（例如第 1 \textasciitilde{} 10 个 epoch）验证 MAE 快速从约 19 降到 11 \textasciitilde{} 12，表明网络从随机初始化开始快速学习到一定的年龄判别能力；
-  \item 随后 MAE 持续缓慢下降，中后期（epoch 50 \textasciitilde{} 90）出现多个保存最佳模型的时刻，说明模型在验证集上不断找到更优的权重；
-  \item 最佳记录出现在 epoch 89（val\_mae = 7.3164），训练结束时最终验证 MAE 为 7.4276，整体表现稳定在约 7.3 \textasciitilde{} 7.9 范围；
-  \item 每次出现 "Saved best model to ..." 对应验证 MAE 刷新，这里保存路径为项目根下的 \texttt{best\_age\_net.pth}。
-\end{itemize}
-
-\subsection{结果分析}
-\begin{itemize}
-  \item 从数值上看，最终验证 MAE 约为 7.3 \textasciitilde{} 7.4，这是从零初始化、基于 VGG 风格小型网络在 APPA-REAL 上能取得的合理基线精度；
-  \item 模型以分类 + 期望回归的方式输出连续年龄估计：相比直接回归，分类后期望的做法可以通过 softmax 建模不确定性并稳定训练；
-  \item 训练日志中 loss 为每个 epoch 的累加和（注意不是平均损失），因此与常见的每 batch 平均 loss 值在数量级上不同；
-  \item 可进一步改进点：使用更强的数据增强、学习率调度（如 StepLR 或 CosineAnnealing）、预训练骨干（如 ImageNet 预训练的 VGG/ResNet）以及更大的批量或长时间训练。 
-\end{itemize}
-
-\section{总结}
-本实验按照指导实现并训练了 \texttt{AgeNet} 模型，验证集上最终 MAE 约为 7.3，训练过程中多次记录并保存了验证集上的最优权重，测试预测结果写入 \texttt{custom.txt}。实现遵循了实验要求：固定输入尺寸、5 个卷积块、3 个全连接层、SGD 优化及 100 个 epoch 上限。
-
-\section{附录：主要源码与运行命令}
-
-\subsection{运行命令}
-\begin{verbatim}
-# 在准备好 DATASET/ 后运行：
-python train_ageNet.py
-\end{verbatim}
-
-\subsection{主要源码}
-
-\subsubsection{\texttt{age\_net.py}}
-
-\begin{lstlisting}
-import torch
-import torch.nn as nn
-
-
-class AgeNet(nn.Module):
-    """AgeNet classification model producing 101-way logits (ages 0..100).
-
-    Designed for 128x128 RGB input following the provided architecture.
-    """
-    def __init__(self, num_classes=101):
-        super(AgeNet, self).__init__()
-
-        self.features = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=7, stride=1, padding=3),
+            nn.Conv2d(3, 64, kernel_size=7, padding=3),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
-
             nn.Conv2d(64, 128, kernel_size=5, padding=2),
             nn.ReLU(inplace=True),
             nn.Conv2d(128, 128, kernel_size=5, padding=2),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
-
-            nn.Conv2d(128, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(256, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(256, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-
-            nn.Conv2d(256, 512, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
+            # three 3x3-conv stages follow, ending with 512 channels
         )
-
-        # ensure spatial size is 4x4 before the first FC
         self.avgpool = nn.AdaptiveAvgPool2d((4, 4))
-
         self.classifier = nn.Sequential(
             nn.Flatten(),
             nn.Linear(512 * 4 * 4, 4096),
@@ -380,123 +376,173 @@ class AgeNet(nn.Module):
             nn.Dropout(0.5),
             nn.Linear(4096, num_classes),
         )
-
-        self._initialize_weights()
-
-    def forward(self, x):
-        x = self.features(x)
-        x = self.avgpool(x)
-        x = self.classifier(x)
-        return x
-
-    def _initialize_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, 0, 0.01)
-                nn.init.constant_(m.bias, 0)
 \end{lstlisting}
 
-\subsubsection{\texttt{train\_ageNet.py}}
+\subsection{训练与验证流程}
 
-\begin{lstlisting}
-import os
-import numpy as np
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader
+训练脚本位于 \texttt{agenet/train\_ageNet.py}。模型使用 SGD 优化器，学习率为 0.001，动量为 0.9，无权重衰减。每个 epoch 结束后在验证集计算 MAE；当 MAE 刷新时保存 \texttt{best\_age\_net.pth}。
 
-from helperT import get_img_dataloaders, test_cel
-from age_net import AgeNet
+\begin{lstlisting}[caption={验证阶段的概率期望与 MAE 计算}]
+ages = torch.arange(0, 101).float().to(device)
+with torch.no_grad():
+    for _, (y, x) in enumerate(val_loader):
+        outputs = model(x.to(device).float())
+        probs = torch.softmax(outputs, dim=1)
+        pred_age = (probs * ages).sum(dim=1)
+        predsVal.append(pred_age.cpu().numpy())
+        gtsVal.append(y.cpu().numpy())
 
-
-def train_ageNet(base_dir='DATASET/'):
-    # hyper-parameters
-    EPOCH = 100
-    TRAIN_LR = 0.001
-    MOMENTUM = 0.9
-    WEIGHT_DECAY = 0.0
-
-    # data
-    train_loader, val_loader, test_loader = get_img_dataloaders(base_dir)
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print('Using device:', device)
-
-    model = AgeNet(num_classes=101).to(device)
-    optimizer = torch.optim.SGD(model.parameters(), lr=TRAIN_LR, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
-    criterion = nn.CrossEntropyLoss()
-
-    best_mae = 1e9
-    best_path = os.path.join(os.path.dirname(__file__), 'best_age_net.pth')
-
-    ages = torch.arange(0, 101).float().to(device)
-
-    for epoch in range(EPOCH):
-        model.train()
-        running_loss = 0.0
-        for i, (y, x) in enumerate(train_loader):
-            x = x.to(device).float()
-            y = y.to(device).long()
-
-            outputs = model(x)
-            loss = criterion(outputs, y)
-
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            running_loss += loss.item()
-
-        # validation
-        model.eval()
-        predsVal = []
-        gtsVal = []
-        with torch.no_grad():
-            for i, (y, x) in enumerate(val_loader):
-                x = x.to(device).float()
-                y = y.to(device).long()
-                outputs = model(x)
-                probs = torch.softmax(outputs, dim=1)
-                pred_age = (probs * ages).sum(dim=1)
-                predsVal.append(pred_age.cpu().numpy())
-                gtsVal.append(y.cpu().numpy())
-
-        predsVal = np.concatenate(predsVal, axis=0)
-        gtsVal = np.concatenate(gtsVal, axis=0)
-        mae = np.mean(np.abs(predsVal - gtsVal))
-
-        print(f'Epoch {epoch+1}/{EPOCH}  loss={running_loss:.4f}  val_mae={mae:.4f}')
-
-        if mae < best_mae:
-            best_mae = mae
-            torch.save(model.state_dict(), best_path)
-            print('Saved best model to', best_path)
-
-    print('=> training finished')
-    return best_path, test_loader
-
-
-if __name__ == '__main__':
-    best_path, test_loader = train_ageNet('DATASET/')
-
-    # Load best model and run test to produce predictions file
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = AgeNet(num_classes=101).to(device)
-    model.load_state_dict(torch.load(best_path, map_location=device))
-    model.to(device)
-
-    # helperT.test_cel expects the model to be on cuda and will call .cuda() on inputs.
-    # If running on CPU, test_cel will still produce outputs if model and inputs are on CPU.
-    prediction = test_cel(model, test_loader, os.path.join(os.path.dirname(__file__), 'custom.txt'))
-    print('Test results saved to custom.txt')
-
+mae = np.mean(np.abs(predsVal - gtsVal))
 \end{lstlisting}
+
+\section{实验结果}
+
+\subsection{训练日志与最优模型}
+
+三个模型均训练 100 个 epoch，并使用验证集 MAE 选择最优权重。表 \ref{tab:result} 汇总了日志中的关键结果。
+
+\begin{table}[H]
+  \centering
+  \caption{验证集结果对比}
+  \label{tab:result}
+  \begin{tabular}{lrrrr}
+    \toprule
+    模型 & 第 1 轮 MAE & 最优 epoch & 最优 MAE & 第 100 轮 MAE \\
+    \midrule
+    AgeNet & 19.0350 & 89 & \textbf{7.3164} & 7.4276 \\
+    DenseNet-121 & 11.7877 & 96 & 7.6932 & 7.9647 \\
+    ViT-B/16 & 11.3913 & 92 & 11.0396 & 11.0592 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=0.96\textwidth,
+      height=7.3cm,
+      xlabel={Epoch},
+      ylabel={Validation MAE / years},
+      xmin=1,xmax=100,
+      ymin=6.8,ymax=19.8,
+      xtick={1,20,40,60,80,100},
+      ytick={7,9,11,13,15,17,19},
+      grid=major,
+      grid style={draw=RuleGray!65,line width=0.3pt},
+      axis line style={draw=Muted!70},
+      tick label style={font=\small,color=Muted},
+      label style={font=\small,color=Ink},
+      legend style={at={(0.5,-0.19)},anchor=north,legend columns=3,draw=none,font=\small},
+      mark options={solid}
+    ]
+      \addplot+[color=AccentBlue,very thick,mark=*,mark size=1.4pt] coordinates {
+        (1,19.04) (5,11.78) (10,11.41) (20,11.27) (30,11.12) (40,11.04)
+        (50,10.32) (60,9.28) (70,9.40) (80,7.79) (89,7.3164) (90,7.35) (100,7.43)
+      };
+      \addlegendentry{AgeNet}
+
+      \addplot+[color=AccentTeal,very thick,mark=square*,mark size=1.3pt] coordinates {
+        (1,11.79) (5,11.41) (10,11.15) (20,10.52) (30,10.11) (40,9.79)
+        (50,9.09) (60,8.68) (70,8.44) (80,8.23) (90,8.22) (96,7.6932) (100,7.96)
+      };
+      \addlegendentry{DenseNet-121}
+
+      \addplot+[color=AccentGold,very thick,mark=triangle*,mark size=1.5pt] coordinates {
+        (1,11.39) (5,11.41) (10,11.42) (20,11.48) (30,11.43) (40,11.58)
+        (50,11.15) (60,11.37) (70,11.45) (80,11.57) (90,11.06) (92,11.0396) (100,11.06)
+      };
+      \addlegendentry{ViT-B/16}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{验证集 MAE 变化趋势。为保持版面清晰，图中绘制了关键 epoch 与各模型最优点。}
+  \label{fig:mae}
+\end{figure}
+
+\subsection{结果分析}
+
+从结果看，AgeNet 在第 1 轮 MAE 较高，但随后快速下降，并在第 89 轮达到 7.3164 的最佳验证 MAE。说明该 VGG 风格结构虽然没有预训练权重，但与 $128\times128$ 人脸输入和 101 类年龄分类目标匹配度较高，训练后期仍能继续挖掘年龄相关的局部纹理与脸部形态特征。
+
+DenseNet-121 的收敛更平滑，最优 MAE 为 7.6932，略弱于 AgeNet。由于本实验中 DenseNet 也是从随机初始化训练，密集连接带来的特征复用优势未能完全抵消数据规模有限和缺少预训练先验的影响。
+
+ViT-B/16 的 MAE 长期停留在 11 左右，最终最优值为 11.0396。这与视觉 Transformer 的训练特性相符：当没有大规模预训练和充分数据时，ViT 很难像卷积网络那样利用局部归纳偏置快速学习稳定的人脸年龄特征。因此，在本实验设置下，ViT 更适合作为“从零训练不充分”的对照，而不是最终提交模型。
+
+\subsection{测试集预测输出}
+
+训练结束后，脚本加载验证集最优权重并对测试集生成预测文件。由于测试集没有公开真实年龄标签，测试阶段不计算 MAE。项目输出如下：
+
+\begin{table}[H]
+  \centering
+  \caption{测试集预测文件}
+  \begin{tabular}{ll}
+    \toprule
+    模型 & 输出文件 \\
+    \midrule
+    AgeNet & \texttt{agenet/custom.txt} \\
+    DenseNet-121 & \texttt{dense-vit/custom\_densenet.txt} \\
+    ViT-B/16 & \texttt{dense-vit/custom\_vit.txt} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{问题讨论与改进方向}
+
+\subsection{误差来源}
+
+表观年龄本身具有主观性，同一张人脸的感知年龄可能受表情、光照、姿态、妆容、分辨率和标注者偏好影响。APPA-REAL 提供的 \texttt{apparent\_age\_std} 正说明年龄标签并非严格的确定值。模型即使在验证集上达到较低 MAE，仍可能在儿童、老年人以及遮挡较强的人脸上出现更大偏差。
+
+此外，日志中的 loss 是每个 epoch 中 batch loss 的累加和，而不是平均 loss。因此 loss 的绝对数值不适合直接与常见的单 batch 平均损失比较，更适合用于观察同一训练过程内部的下降趋势。
+
+\subsection{可改进方案}
+
+后续可以从以下方向提升结果：
+\begin{itemize}
+  \item 引入学习率调度，例如 StepLR、CosineAnnealing 或 warmup 策略，使后期优化更稳定；
+  \item 使用 ImageNet 预训练的 ResNet、DenseNet 或 ConvNeXt，再微调 101 类年龄头；
+  \item 将交叉熵与标签分布学习结合，把年龄标准差显式转为软标签；
+  \item 对年龄段分布进行重采样或损失重加权，缓解常见年龄段和稀有年龄段的不均衡；
+  \item 增加验证集误差可视化，例如按年龄段统计 MAE，以定位模型在不同年龄区间的弱点。
+\end{itemize}
+
+\section{总结}
+
+本实验完成了 APPA-REAL 表观年龄预测的完整流程：数据读取与增强、AgeNet 网络实现、分类训练、验证集 MAE 选择最优模型，以及测试集年龄预测输出。主模型 AgeNet 在第 89 个 epoch 达到最佳验证 MAE 7.3164，说明课程要求的 VGG 风格卷积结构可以在从零训练的条件下形成较稳定的年龄估计能力。
+
+拓展实验表明，在相同数据管线和无预训练设置下，DenseNet-121 的最佳 MAE 为 7.6932，接近但略弱于 AgeNet；ViT-B/16 的最佳 MAE 为 11.0396，反映出 Transformer 结构在小规模数据和无预训练条件下不易充分收敛。综合准确性、实现稳定性与课程目标，AgeNet 是本项目中最合适的最终提交模型。
+
+\section{附录：运行命令与关键文件}
+
+\subsection{运行命令}
+
+\begin{lstlisting}[caption={AgeNet 训练与测试}]
+cd agenet
+python train_ageNet.py
+\end{lstlisting}
+
+\begin{lstlisting}[caption={DenseNet 与 ViT 拓展实验}]
+cd dense-vit
+python train_dense_vit.py --backbone densenet
+python train_dense_vit.py --backbone vit
+\end{lstlisting}
+
+\subsection{关键文件}
+
+\begin{table}[H]
+  \centering
+  \caption{项目关键文件索引}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{5.2cm}X}
+    \toprule
+    文件 & 作用 \\
+    \midrule
+    \path{helperT.py} & 数据集读取、图像增强、归一化、验证和测试预测辅助函数。 \\
+    \path{agenet/age_net.py} & 课程要求的 AgeNet 模型定义。 \\
+    \path{agenet/train_ageNet.py} & AgeNet 训练、验证、保存最优权重与测试输出脚本。 \\
+    \path{dense-vit/train_dense_vit.py} & DenseNet-121 与 ViT-B/16 拓展模型训练脚本。 \\
+    \path{agenet/terminal_output.txt} & AgeNet 100 个 epoch 的训练日志。 \\
+    \path{dense-vit/terminal_output_densenet.txt} & DenseNet-121 训练日志。 \\
+    \path{dense-vit/terminal_output_vit.txt} & ViT-B/16 训练日志。 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
 \end{document}
