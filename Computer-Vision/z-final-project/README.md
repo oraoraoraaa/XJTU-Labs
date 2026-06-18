@@ -6,13 +6,15 @@ Image-based pipeline for end-to-end CNN training. Prepare `gt_avg_train.csv`, `g
 
 ## How to Run
 
+### Prerequisite
+
+Put the APPA-REAL dataset under `DATASET/` so that `appa-real-release/` and the CSV files required by the image pipeline are present. Download link: [appa-real-release](https://chalearnlap.cvc.uab.cat/dataset/26/description/).
+
+Create and activate a Python environment, then install dependencies in `requirements.txt`. The project expects PyTorch, torchvision, pandas, Pillow, OpenCV, imgaug, and numpy.
+
 ### AgeNet
 
-1. Put the APPA-REAL dataset under `DATASET/` so that `appa-real-release/` and the CSV files required by the image pipeline are present. Download link: [appa-real-release](https://chalearnlap.cvc.uab.cat/dataset/26/description/).
-
-2. Create and activate a Python environment, then install dependencies. The project expects PyTorch, torchvision, pandas, Pillow, OpenCV, imgaug, and numpy.
-
-3. Run training. GPU is recommended, but the data helpers now work on CPU too.
+Navigate to `Computer-Vision/z-final-project/agenet`, and run:
 
 ```bash
 python train_ageNet.py
