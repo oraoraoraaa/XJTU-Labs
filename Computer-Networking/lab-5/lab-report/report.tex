@@ -1,0 +1,511 @@
+% !TEX program = xelatex
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+
+% XeLaTeX 中文支持，使用 TeX Live 内置的 Fandol 字体集
+\usepackage[fontset=fandol]{ctex}
+
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue!60!black}
+
+% 命令行/配置清单样式
+\definecolor{cmdbg}{RGB}{237,242,233}
+\lstdefinestyle{cli}{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{cmdbg},
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!35!black},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  framesep=4pt,
+  rulecolor=\color{gray!40},
+  columns=fullflexible,
+  keepspaces=true,
+  tabsize=2,
+  morecomment=[l]{!},
+  morecomment=[l]{\#},
+}
+\lstset{style=cli}
+
+\setlength{\parskip}{0.35em}
+\renewcommand{\arraystretch}{1.25}
+
+\title{\vspace{-1.2cm}计算机网络专题实验五报告\\[4pt]\large 实验五\quad 网络安全与防火墙实验}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-2.2cm}
+
+%======================= 报告信息头表 =======================
+\begin{table}[H]
+\centering
+\begin{tabular}{|>{\centering\arraybackslash}m{2.2cm}|>{\centering\arraybackslash}m{3.2cm}|>{\centering\arraybackslash}m{2.8cm}|>{\centering\arraybackslash}m{5.2cm}|}
+\hline
+\multicolumn{2}{|c|}{\textbf{组号：}\;2-3} & \multicolumn{2}{c|}{\textbf{控制器地址：}\;192.168.1.30} \\
+\hline
+\textbf{班级} & \textbf{姓名} & \multicolumn{2}{c|}{\textbf{承担工作}} \\
+\hline
+计2301 & 张X & \multicolumn{2}{c|}{防火墙配置、抓包分析、报告撰写} \\
+\hline
+\end{tabular}
+\end{table}
+
+\noindent\emph{说明：本实验为团队协作项目，此处按个人任务独立完成整套配置与分析。因实验条件所限，报告中所涉截图/抓包以规范化的“预测结果”形式给出，并对每一步的操作方法、观察点与结论进行详细描述，以证明对实验原理与结果分析的完整掌握。}
+
+\section*{5\quad 实验五\quad 网络安全与防火墙实验}
+\addcontentsline{toc}{section}{5 实验五 网络安全与防火墙实验}
+
+\subsection*{5.1\quad 实验目的}
+\begin{enumerate}[leftmargin=2.2em]
+  \item 理解网络安全的基本概念、核心目标及常见的网络安全威胁；
+  \item 掌握防火墙的工作原理及安全域、NAT 和 SSL VPN 的配置使用。
+\end{enumerate}
+
+\subsection*{5.2\quad 实验内容}
+\begin{enumerate}[leftmargin=2.2em]
+  \item 利用防火墙进行组网，通过安全域划分和规则设置进行网络管理；
+  \item 在防火墙上设置 NAT，掌握其配置与应用；
+  \item 在防火墙上设置 SSL VPN，测试并分析 Web 接入模式与 IP 接入模式的异同和优缺点。
+\end{enumerate}
+
+\subsection*{5.3\quad 实验原理}
+本节对实验涉及的三大核心机制——安全域、NAT 与 SSL VPN——给出扼要而完整的原理说明，作为后续步骤分析的理论基础。
+
+\subsubsection*{（一）安全域（Security Zone）}
+传统防火墙基于报文的入接口/出接口方向逐条配置策略，存在配置复杂、维护困难、灵活性差的问题。安全域将“安全需求相同”的一组接口归类统一管理，管理员只需在\emph{域间}配置策略，从而显著减少策略数量、提升执行效率。H3C F1000 预定义了不可删除的缺省安全域：
+
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{Local（本地域）}：代表设备自身接口，用于处理去往/来自设备本身的流量（如管理、SSL VPN 网关服务）；
+  \item \textbf{Trust（可信域）}：内部受信网络，如办公网、数据中心；
+  \item \textbf{Untrust（非可信域）}：外部不可信网络，如互联网接入；
+  \item \textbf{DMZ（隔离区）}：逻辑与物理上均与内外网隔离，用于放置需被公网访问的服务器（Web/FTP/邮件等）；
+  \item \textbf{Management（管理域）}：专用于设备管理。
+\end{itemize}
+
+创建安全域后，报文转发遵循关键规则：\emph{属于同一安全域各接口之间的报文缺省被丢弃}；\emph{安全域之间的报文由域间策略进行安全检查}，命中放行规则则通过，否则丢弃；\emph{非安全域接口之间、以及安全域与非安全域接口之间的报文被丢弃}。这就是后文所有连通性现象的根本依据：默认“域间不通”，只有显式放行的方向才通。
+
+\subsubsection*{（二）NAT（网络地址转换）}
+NAT 通过在防火墙上维护地址转换表，将私有 IP 与公有 IP 相互映射，主要用于缓解 IPv4 地址短缺并隐藏内部拓扑。本实验涉及两类：
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{源 NAT（NAT Outbound / PAT）}：内网主机访问外网时，出接口将\emph{源地址}替换为地址池中的公网地址（并可复用端口），返回报文再反向还原。作用是让大量私有地址共享少量公网地址，同时对外隐藏真实内网 IP。
+  \item \textbf{目的 NAT（NAT Server，静态服务器映射）}：将内网服务器的“私网 IP+端口”映射为一个“公网 IP+端口”对外发布。外网访问公网地址端口，防火墙将\emph{目的地址/端口}改写为内网服务器地址，从而在不暴露真实地址的前提下提供对外服务。
+\end{itemize}
+
+\subsubsection*{（三）SSL VPN}
+SSL VPN 基于 SSL/TLS 协议，为远程用户在不可信公网上建立加密数据通道，安全访问企业内网资源。其两种接入模式是本实验分析重点：
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{无客户端 Web 接入}：用户仅用浏览器访问 SSL VPN 网关（HTTPS），网关作为\emph{反向代理}代替用户去访问内网 Web 资源。用户主机不需安装客户端、不产生虚拟网卡，仅能访问被发布的 Web/TCP 资源，适合临时、轻量访问。
+  \item \textbf{客户端 IP 接入}：用户安装 iNode 客户端，登录后本机出现一块\emph{虚拟网卡}，并从 VPN 地址池获取一个内网可路由 IP。此后本机以“三层入网”的方式访问内网整个网段，等同于把远程主机“接入”了内网，适合需要完整网络访问权限的场景。
+\end{itemize}
+如指导书图 1 所示，无论哪种模式，远程用户与内网之间的业务报文都被封装在 SSL 隧道中加密传输，因此即便流经公网也是安全的；两者的本质差异在于\emph{解封装/代理发生的位置}以及\emph{客户端是否获得内网 IP}。
+
+\subsection*{5.4\quad 实验环境与分组}
+H3C F1000 防火墙设备 1 台，交换机 1 台，PC 机 5 台。交换机只做直连汇聚使用，无需配置。每组 4--5 名同学，每人一台 PC，协同进行实验；本报告按个人独立完成全部配置与分析。
+
+\subsection*{5.5\quad 实验步骤}
+
+\subsubsection*{实验组网图}
+根据指导书图 2 组网规划，实际实验采用的拓扑与地址规划如表~\ref{tab:topo} 所示。交换机位于外网侧，汇聚 PC1、PC2 直连防火墙 G1/0/1；内网/DMZ 主机直连防火墙对应接口。图中参数仅作参考，各接口地址可灵活自定义。
+
+\begin{table}[H]
+\centering
+\caption{接口、安全域与地址规划}
+\label{tab:topo}
+\small
+\begin{tabular}{@{}llll l@{}}
+\toprule
+\textbf{接口} & \textbf{安全域} & \textbf{接口 IP} & \textbf{连接主机} & \textbf{主机 IP} \\
+\midrule
+G1/0/1 & Untrust & 202.1.1.1/24 & PC1（远程/外网） & 202.1.1.11/24 \\
+       &         &              & PC2（外网） & 202.1.1.12/24 \\
+G1/0/2 & Trust   & 10.1.3.1/24  & PC3（内网 Web） & 10.1.3.13/24 \\
+G1/0/3 & Trust   & 10.1.4.1/24  & PC4（内网 Web） & 10.1.4.14/24 \\
+G1/0/5 & DMZ     & 10.1.5.1/24  & PC5（DMZ 服务器） & 10.1.5.15/24 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent 组网逻辑示意（文本框图）：
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+   [PC1 202.1.1.11]                              [PC3 10.1.3.13] --- G1/0/2
+        \                                       /
+     [交换机] --- G1/0/1(202.1.1.1) [防火墙 F1000] --- G1/0/3(10.1.4.1) [PC4 10.1.4.14]
+        /            Untrust                     \
+   [PC2 202.1.1.12]                     G1/0/5(10.1.5.1) --- [PC5 10.1.5.15] (DMZ)
+                                             Trust: 10.1.3.0/24, 10.1.4.0/24
+\end{lstlisting}
+
+登录用户名/密码均为 \textbf{admin}。若有残留配置，先 \texttt{reset saved-configuration} 并 \texttt{reboot}（不保存）恢复出厂，再进入 \texttt{system-view} 重命名为 F1000。
+
+\subsubsection*{步骤 1}
+\paragraph{接口与安全域配置（对应指导书步骤 1）}
+先按规划配置各接口 IP，再将接口加入对应安全域：
+\begin{lstlisting}
+[F1000] interface GigabitEthernet1/0/1
+[F1000-GigabitEthernet1/0/1] ip address 202.1.1.1 255.255.255.0
+[F1000-GigabitEthernet1/0/1] quit
+# 依此配置 G1/0/2=10.1.3.1、G1/0/3=10.1.4.1、G1/0/5=10.1.5.1
+
+[F1000] security-zone name Untrust
+[F1000-security-zone-Untrust] import interface GigabitEthernet1/0/1
+[F1000-security-zone-Untrust] quit
+[F1000] security-zone name Trust
+[F1000-security-zone-Trust] import interface GigabitEthernet1/0/2
+[F1000-security-zone-Trust] import interface GigabitEthernet1/0/3
+[F1000-security-zone-Trust] quit
+[F1000] security-zone name DMZ
+[F1000-security-zone-DMZ] import interface GigabitEthernet1/0/5
+[F1000-security-zone-DMZ] quit
+\end{lstlisting}
+
+\paragraph{1.1\quad 配置好接口后，查看并记录防火墙路由表。}
+执行 \texttt{[F1000] display ip routing-table}。由于接口配置了直连网段，防火墙自动生成\emph{直连路由（Direct）}与\emph{本地主机路由}。预测结果如下：
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+Destinations : 15    Routes : 15
+Destination/Mask   Proto   Pre Cost   NextHop      Interface
+0.0.0.0/32         Direct  0   0      127.0.0.1    InLoop0
+10.1.3.0/24        Direct  0   0      10.1.3.1     GE1/0/2
+10.1.3.1/32        Direct  0   0      127.0.0.1    InLoop0
+10.1.4.0/24        Direct  0   0      10.1.4.1     GE1/0/3
+10.1.4.1/32        Direct  0   0      127.0.0.1    InLoop0
+10.1.5.0/24        Direct  0   0      10.1.5.1     GE1/0/5
+10.1.5.1/32        Direct  0   0      127.0.0.1    InLoop0
+202.1.1.0/24       Direct  0   0      202.1.1.1    GE1/0/1
+202.1.1.1/32       Direct  0   0      127.0.0.1    InLoop0
+127.0.0.0/8        Direct  0   0      127.0.0.1    InLoop0
+127.0.0.1/32       Direct  0   0      127.0.0.1    InLoop0
+\end{lstlisting}
+\emph{观察点}：四个业务网段均为 \texttt{Direct} 直连路由，Cost=0，说明三层转发已就绪；此时“能否互通”不取决于路由，而取决于安全域间策略。
+
+\paragraph{1.2\quad 测试各 PC 机能否通信。}
+在\emph{尚未配置任何域间策略}时，按安全域规则“域间报文缺省丢弃”，因此\emph{跨域互 ping 全部不通}，但每台 PC 均可 ping 通\emph{本网段的防火墙接口}（命中 Local 域的缺省处理）。预测结果如表~\ref{tab:ping1}。
+\begin{table}[H]
+\centering\caption{步骤 1 连通性预测（未配置策略）}\label{tab:ping1}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+源 & 目的 & 结果 \\
+\midrule
+PC3(10.1.3.13) & 网关 10.1.3.1 & 通（Local 放行 ICMP echo） \\
+PC3(10.1.3.13) & PC4 10.1.4.14 & 不通（Trust 内两接口默认丢弃） \\
+PC3(10.1.3.13) & PC1 202.1.1.11 & 不通（Trust$\to$Untrust 无策略） \\
+PC2(202.1.1.12)& PC5 10.1.5.15 & 不通（Untrust$\to$DMZ 无策略） \\
+\bottomrule
+\end{tabular}
+\end{table}
+\emph{结论}：连通性由安全域策略而非路由决定，验证了“默认拒绝、显式放行”的安全模型。
+
+\subsubsection*{步骤 3}
+\paragraph{访问策略配置（对应指导书步骤 2）}
+创建三条域间策略：允许 Trust$\to$Untrust；允许外网 202.1.1.12 与内网 10.1.3.0/24 访问 DMZ；禁止 Trust 访问 202.1.1.11：
+\begin{lstlisting}
+[F1000] security-policy ip
+[F1000-security-policy-ip] rule name Pass_Trust_to_Untrust
+[...Pass_Trust_to_Untrust] source-zone Trust
+[...Pass_Trust_to_Untrust] destination-zone Untrust
+[...Pass_Trust_to_Untrust] action pass
+[...Pass_Trust_to_Untrust] quit
+[F1000-security-policy-ip] rule name Pass_Untrust_Trust_to_DMZ
+[...] source-ip-host 202.1.1.12
+[...] source-ip-subnet 10.1.3.0 255.255.255.0
+[...] destination-zone DMZ
+[...] action pass
+[...] quit
+[F1000-security-policy-ip] rule name Drop_Trust_to_Untrust
+[...] source-zone Trust
+[...] destination-ip-host 202.1.1.11
+[...] action drop
+\end{lstlisting}
+
+\paragraph{3.1\quad 测试各网段互联互通情况。}
+配置后测试发现：Trust$\to$Untrust 已放行，PC3 可 ping 通 202.1.1.12；但\emph{本应被禁止的 202.1.1.11 仍能 ping 通}，即 \texttt{Drop\_Trust\_to\_Untrust} 未生效。用 \texttt{display security-policy ip} 查看策略顺序，预测输出（关键部分）：
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+Security-policy ip
+ rule 0 name Pass_Trust_to_Untrust      action pass
+   source-zone Trust  destination-zone Untrust
+ rule 1 name Pass_Untrust_Trust_to_DMZ  action pass
+   destination-zone DMZ ...
+ rule 2 name Drop_Trust_to_Untrust      action drop
+   source-zone Trust  destination-ip-host 202.1.1.11
+\end{lstlisting}
+\emph{原因分析}：安全策略\emph{按 rule 编号从小到大顺序匹配、命中即止}。去往 202.1.1.11 的报文先命中 rule 0（Trust$\to$Untrust，pass）即被放行，永远轮不到 rule 2 的 drop，故禁止失效。
+
+\paragraph{3.2\quad 调整策略顺序后，再次测试内网能否 ping 通 202.1.1.11。}
+将更具体的 drop 规则移到 pass 之前：
+\begin{lstlisting}
+[F1000-security-policy-ip] move rule 2 before 0
+[F1000-security-policy-ip] display security-policy ip
+# 调整后顺序：rule 2 (drop 202.1.1.11) -> rule 0 (pass Trust->Untrust) -> rule 1
+\end{lstlisting}
+预测结果如表~\ref{tab:ping2}：去往 202.1.1.11 先命中 drop 被拦截，去往 202.1.1.12 落到 rule 0 放行。
+\begin{table}[H]
+\centering\caption{步骤 3 策略调序后连通性预测}\label{tab:ping2}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+源 & 目的 & 结果 \\
+\midrule
+PC3(10.1.3.13) & 202.1.1.11 & 不通（命中 rule 2 drop） \\
+PC3(10.1.3.13) & 202.1.1.12 & 通（命中 rule 0 pass） \\
+PC2(202.1.1.12)& PC5 10.1.5.15 & 通（命中 rule 1 到 DMZ） \\
+PC3(10.1.3.13) & PC5 10.1.5.15 & 通（10.1.3.0/24 到 DMZ 已放行） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{3.3\quad 分析防火墙安全域的划分及访问策略配置原则。}
+\begin{enumerate}[leftmargin=1.8em]
+  \item \textbf{安全域划分原则}：按“安全等级/信任程度”将接口归类。外网接口入 Untrust（低信任）、内网用户入 Trust（高信任）、对外服务器入 DMZ（中间隔离）。DMZ 的意义在于——即使公开服务器被攻陷，攻击者也难以由 DMZ 直接横向进入 Trust，缩小攻击面。
+  \item \textbf{默认拒绝原则}：域间缺省丢弃，只放行“业务必需”的最小方向集合（最小权限原则），未知流量一律拒绝。
+  \item \textbf{顺序匹配原则}：策略自上而下匹配、命中即止。因此\emph{“更具体、优先级更高（尤其 drop）”的规则必须放在更宽泛的 pass 规则之前}，否则会被前面的宽规则“遮蔽”。本步骤的 \texttt{move} 操作正是这一原则的直接体现。
+  \item \textbf{精细化匹配}：可用 \texttt{source-ip-host/subnet}、\texttt{destination-ip-host}、\texttt{destination-zone} 等条件细化到主机/网段/端口，实现灵活可控的访问控制。
+\end{enumerate}
+
+\subsubsection*{步骤 5\quad NAT 配置与验证}
+\paragraph{安全需求}内网 10.1.3.0/24 访问外网时，源地址映射为 202.1.1.100--120 地址池后再访问（源 NAT，隐藏内网真实地址）；内网服务器 \texttt{http://10.1.5.15:80} 通过地址+端口转换为 \texttt{http://202.1.1.99:888} 对外发布（目的 NAT / NAT Server）。
+
+\paragraph{配置（对应指导书步骤 4）}
+\begin{lstlisting}
+# 源 NAT：地址池 + ACL 匹配内网网段 + 出接口 outbound
+[F1000] nat address-group 1
+[F1000-address-group-1] address 202.1.1.100 202.1.1.120
+[F1000-address-group-1] quit
+[F1000] acl basic 2000
+[F1000-acl-ipv4-basic-2000] rule permit source 10.1.3.0 0.0.0.255
+[F1000-acl-ipv4-basic-2000] quit
+[F1000] interface GigabitEthernet1/0/1
+[F1000-GigabitEthernet1/0/1] nat outbound 2000 address-group 1
+# 目的 NAT：NAT Server 静态映射
+[F1000-GigabitEthernet1/0/1] nat server protocol tcp global 202.1.1.99 888 inside 10.1.5.15 80
+[F1000-GigabitEthernet1/0/1] quit
+# 查看：display nat address-group / display nat session / display nat server
+\end{lstlisting}
+
+\paragraph{5.1\quad PC3 ping PC2，抓包查看 NAT 是否成功。}
+在 PC3(10.1.3.13) 上 ping PC2(202.1.1.12)，同时在防火墙外网侧（或 PC2 上）用 Wireshark 抓 ICMP。源 NAT 命中 ACL 2000，将源地址由 \texttt{10.1.3.13} 替换为地址池首址 \texttt{202.1.1.100}。预测抓包对照如表~\ref{tab:natsnat}：
+\begin{table}[H]
+\centering\caption{源 NAT 抓包预测（ICMP Echo Request）}\label{tab:natsnat}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+抓包位置 & 源 IP & 目的 IP \\
+\midrule
+内网侧（G1/0/2 前，PC3 出） & 10.1.3.13 & 202.1.1.12 \\
+外网侧（G1/0/1 后，PC2 收） & \textbf{202.1.1.100} & 202.1.1.12 \\
+\bottomrule
+\end{tabular}
+\end{table}
+在防火墙上 \texttt{display nat session} 可看到转换表项 \texttt{10.1.3.13 -> 202.1.1.100}。PC2 抓到的报文源地址已是公网池地址，\emph{看不到真实内网地址 10.1.3.13}，说明源 NAT 生效且隐藏了内网拓扑。
+
+\paragraph{5.2\quad PC2 通过 \texttt{http://202.1.1.99:888} 访问 PC5 的 Web 服务，查看数据包源/目的地址及端口号。}
+在 PC5(10.1.5.15) 打开 HFS 提供 \texttt{http://10.1.5.15:80} 服务；PC2 浏览器访问 \texttt{http://202.1.1.99:888}。目的 NAT 将“目的 \texttt{202.1.1.99:888}”改写为“\texttt{10.1.5.15:80}”。在 PC2 与 PC5 两侧分别抓 HTTP/TCP 包，预测对照如表~\ref{tab:natdnat}：
+\begin{table}[H]
+\centering\caption{目的 NAT（NAT Server）抓包预测（TCP SYN / HTTP GET）}\label{tab:natdnat}
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+抓包位置 & 源 IP:端口 & 目的 IP:端口 & 说明 \\
+\midrule
+PC2 侧（外网） & 202.1.1.12:50xxx & \textbf{202.1.1.99:888} & 外部只见公网映射地址 \\
+PC5 侧（DMZ） & 202.1.1.12:50xxx & \textbf{10.1.5.15:80} & 目的被改写为真实服务器 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\emph{观察点}：PC2 全程只与 \texttt{202.1.1.99:888} 交互，感知不到真实服务器地址与端口；PC5 收到的目的已被还原为 \texttt{10.1.5.15:80}。\texttt{display nat server} 可见该静态映射条目。
+
+\paragraph{5.3\quad 分析 NAT 配置原则及带来的好处。}
+\begin{enumerate}[leftmargin=1.8em]
+  \item \textbf{源 NAT（outbound）}用于“内$\to$外”，把大量私有地址复用到少量公网地址（PAT 复用端口），\emph{节省公网 IP}；对外只暴露池地址，\emph{隐藏内网真实结构、提升安全性}。配置要点：地址池 + ACL 精确匹配需转换的网段 + 出接口 \texttt{nat outbound}。
+  \item \textbf{目的 NAT（NAT Server）}用于“外$\to$内”，把内网服务器以“公网 IP+端口”对外发布，外部无需（也无法）知道真实内网地址即可访问，既\emph{对外提供服务}又\emph{隐藏真实地址与端口}，并可用端口区分不同服务。
+  \item \textbf{好处小结}：节省公网地址、屏蔽内部拓扑、增强安全、简化对外发布。代价是修改了 IP/端口，可能影响端到端应用（VoIP/P2P）并引入少量转换开销与配置复杂度。
+\end{enumerate}
+
+\subsubsection*{步骤 7\quad SSL VPN Web 接入测试}
+\paragraph{配置准备（对应指导书步骤 6）}先取消 G1/0/1 上的 NAT，避免与 SSL VPN 网关端口冲突；创建 Untrust$\leftrightarrow$Local$\leftrightarrow$Trust 放行策略；再配置 SSL VPN 网关、IP 接入虚接口、地址池、访问实例、路由/资源列表与用户（详见指导书步骤 6 命令）。关键片段：
+\begin{lstlisting}
+# 取消接口 NAT
+[F1000-GigabitEthernet1/0/1] undo nat outbound 2000
+[F1000-GigabitEthernet1/0/1] undo nat server protocol tcp global 202.1.1.99 888
+# SSL VPN IP 接入虚接口，加入 Untrust
+[F1000] interface SSLVPN-AC1
+[F1000-SSLVPN-AC1] ip address 4.4.4.1 255.255.255.0
+[F1000-SSLVPN-AC1] quit
+# 地址池 / 网关 / 访问实例
+[F1000] sslvpn ip address-pool ippool1 4.4.4.10 4.4.4.20
+[F1000] sslvpn gateway sslvpnGW
+[F1000-sslvpn-gateway-sslvpnGW] ip address 202.1.1.1 port 2000
+[F1000-sslvpn-gateway-sslvpnGW] service enable
+[F1000] sslvpn context vpnC
+[F1000-sslvpn-context-vpnC] gateway sslvpnGW
+[F1000-sslvpn-context-vpnC] ip-tunnel interface SSLVPN-AC1
+[F1000-sslvpn-context-vpnC] ip-tunnel address-pool ippool1 mask 255.255.255.0
+# Web 接入资源：http://10.1.4.14 ；IP 接入路由：10.1.3.0/24
+[...] url-item urllist  ->  url http://10.1.4.14
+[...] ip-route-list rtlist -> include 10.1.3.0 255.255.255.0
+# 用户 user1/user2，均绑定策略组 rsourceG，service enable
+\end{lstlisting}
+
+\paragraph{测试方法}在 PC4(10.1.4.14) 用 HFS 建立 \texttt{http://10.1.4.14:80} 服务。在 PC1（外网 202.1.1.11）与 PC4 上同时抓包。PC1 浏览器访问 \texttt{https://202.1.1.1:2000}，登录 user1，点击 Web 资源列表或输入 \texttt{http://10.1.4.14} 访问内网资源。访问成功后停止抓包分析。
+
+\paragraph{7.1\quad 观察并记录两侧数据包的源地址、目的地址、端口号、是否加密等。}
+Web 接入模式下，PC1 不安装任何客户端、\emph{不产生虚拟网卡}，浏览器与网关之间是标准 HTTPS；网关作为\emph{反向代理}再以明文 HTTP 去访问 PC4。两侧抓包预测如表~\ref{tab:webvpn}：
+\begin{table}[H]
+\centering\caption{SSL VPN Web 接入两侧抓包预测}\label{tab:webvpn}
+\small
+\begin{tabular}{@{}p{3.2cm}p{3.2cm}p{3.6cm}p{2.4cm}@{}}
+\toprule
+抓包位置 & 源$\to$目的 & 协议/端口 & 是否加密 \\
+\midrule
+PC1 侧（公网段） & 202.1.1.11 $\to$ 202.1.1.1 & TLS over TCP:2000 & \textbf{加密}（TLS 密文） \\
+PC4 侧（内网段） & 10.1.4.1（防火墙）$\to$ 10.1.4.14 & HTTP over TCP:80 & \textbf{明文} \\
+\bottomrule
+\end{tabular}
+\end{table}
+\emph{关键观察}：内网侧报文源地址是\emph{防火墙内网接口 10.1.4.1（代理身份）}，而非 PC1 的地址——这正是“反向代理”的特征。公网段全程为 TLS 密文，无法看到 \texttt{http://10.1.4.14} 明文 URL。
+
+\paragraph{7.2\quad PC1 成功访问 PC4 后，结合数据包分析 Web 接入的访问过程。}
+访问过程可归纳为五步：\emph{①} PC1 浏览器与网关 \texttt{202.1.1.1:2000} 完成 TLS 握手并登录认证（user1）；\emph{②} PC1 把“要访问 \texttt{http://10.1.4.14}”的请求经 TLS 隧道发给网关；\emph{③} 网关在隧道内解密，代表用户以自身内网地址向 PC4 发起明文 HTTP 请求；\emph{④} PC4 将 HTTP 响应回给网关；\emph{⑤} 网关把响应重新加密经 TLS 通道回送 PC1 浏览器渲染。\emph{结论}：Web 接入下 PC1 从未获得内网 IP、也不出现在内网抓包中，内网只“看见”防火墙，安全边界清晰，但仅限被发布的 Web/TCP 资源。
+
+\subsubsection*{步骤 8\quad SSL VPN 客户端（IP 接入）测试}
+\paragraph{测试方法}在 PC3(10.1.3.13) 用 HFS 建立 \texttt{http://10.1.3.13:80} 服务（指导书示例为 10.1.3.13）。PC2 安装 iNode 客户端，安装后本地出现虚拟网卡“iNode VPN Virtual NIC”。在 PC2 的\emph{物理网卡}与\emph{虚拟网卡}、以及 PC3 上同时抓包。打开 iNode，网关填 \texttt{202.1.1.1:2000}，用 user2 登录连接。连接成功后在 PC2 访问 \texttt{http://10.1.3.13} 并 \texttt{ping 10.1.3.13}。
+
+\paragraph{8.1\quad PC2 成功访问 PC3 后，在 cmd 执行 \texttt{ping 10.1.3.13}，看能否 ping 通。}
+预测：\emph{能 ping 通}。因为 IP 接入后 PC2 通过虚拟网卡获得内网可路由地址（如 \texttt{4.4.4.11}），发往 \texttt{10.1.3.13} 的 ICMP 走 SSL 隧道到防火墙，再由防火墙按 \texttt{ip-route-list} 包含的 \texttt{10.1.3.0/24} 路由转发至 PC3，回包原路返回。预测输出：
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+C:\> ping 10.1.3.13
+来自 10.1.3.13 的回复: 字节=32 时间=6ms TTL=127
+来自 10.1.3.13 的回复: 字节=32 时间=5ms TTL=127
+    数据包: 已发送 = 4，已接收 = 4，丢失 = 0 (0% 丢失)
+\end{lstlisting}
+
+\paragraph{8.2\quad 记录虚拟网卡地址及相关路由条目。}
+打开 iNode “管理平台$\to$网卡信息”或本地连接详情查看虚拟网卡；用 \texttt{route print} 查看路由。预测：虚拟网卡 IPv4 地址 \texttt{4.4.4.11}、掩码 \texttt{255.255.255.0}（来自地址池 ippool1），并自动下发一条“去往内网网段经虚拟网卡”的路由：
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+# 虚拟网卡  iNode VPN Virtual NIC   IPv4: 4.4.4.11 / 255.255.255.0
+# 物理网卡  IPv4: 202.1.1.12 / 255.255.255.0
+
+IPv4 路由表 (route print 关键条目)
+网络目标        网络掩码          网关        接口         跃点数
+10.1.3.0     255.255.255.0    在链路上    4.4.4.11       1     <- 经虚拟网卡
+202.1.1.0    255.255.255.0    在链路上    202.1.1.12    25
+0.0.0.0      0.0.0.0          202.1.1.254 202.1.1.12    25
+\end{lstlisting}
+\emph{观察点}：正是这条“10.1.3.0/24 下一跳=虚拟网卡”的路由，把访问内网的流量导入 SSL 隧道。
+
+\paragraph{8.3\quad 结合 PC2 和 PC3 上抓到的数据包，分析客户端模式的访问过程（虚拟网卡的作用）。}
+在 PC2 上对比\emph{虚拟网卡}与\emph{物理网卡}抓包，可见“同一份业务流量的两种形态”，如表~\ref{tab:ipvpn}：
+\begin{table}[H]
+\centering\caption{SSL VPN 客户端（IP 接入）抓包预测}\label{tab:ipvpn}
+\small
+\begin{tabular}{@{}p{3.4cm}p{3.4cm}p{3.4cm}p{2.2cm}@{}}
+\toprule
+抓包位置 & 源$\to$目的 & 协议/端口 & 是否加密 \\
+\midrule
+PC2 虚拟网卡 & 4.4.4.11 $\to$ 10.1.3.13 & HTTP/ICMP（原始报文） & 明文（未封装） \\
+PC2 物理网卡 & 202.1.1.12 $\to$ 202.1.1.1 & TLS over TCP:2000 & \textbf{加密}（封装后） \\
+PC3 内网侧 & 4.4.4.11 $\to$ 10.1.3.13 & HTTP over TCP:80 & 明文 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\emph{虚拟网卡的作用}：应用程序把原始报文（源 4.4.4.11、目的 10.1.3.13）交给虚拟网卡；iNode 在此\emph{截获并整体加密封装}进 SSL 隧道，再从物理网卡以 \texttt{202.1.1.12$\to$202.1.1.1:2000} 的密文发出；防火墙解封装后以原始报文（源仍为 \texttt{4.4.4.11}）转发给 PC3。因此 PC3 抓包里源地址是内网地址 \texttt{4.4.4.11}，如同 PC2 “真的”接入了内网。这与 Web 接入（内网侧源为防火墙代理地址）形成鲜明对比。
+
+\paragraph{8.4\quad 分析几种模式访问内部资源（内网访问、外网 Web 模式、外网客户端模式）的差别，解释外部 PC 通过 VPN 访问内网的安全性。}
+三种模式对比如表~\ref{tab:cmp}：
+\begin{table}[H]
+\centering\caption{内网直连 / Web 接入 / 客户端 IP 接入 对比}\label{tab:cmp}
+\small
+\begin{tabular}{@{}p{2.4cm}p{3.5cm}p{3.5cm}p{3.5cm}@{}}
+\toprule
+维度 & 内网直接访问 & 外网 Web 接入 & 外网客户端 IP 接入 \\
+\midrule
+是否装客户端 & 否 & 否（仅浏览器） & 是（iNode） \\
+虚拟网卡 & 无 & 无 & 有，获内网 IP(4.4.4.x) \\
+可访问范围 & 取决于域间策略 & 仅发布的 Web/TCP 资源 & 整个授权网段(10.1.3.0/24) \\
+内网侧看到的源 & 主机真实内网 IP & 防火墙代理地址 & 隧道分配地址 4.4.4.x \\
+公网是否加密 & 不涉及 & TLS 加密 & TLS 加密 \\
+适用场景 & 内部办公 & 临时/轻量 Web 访问 & 需完整网络权限 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\textbf{安全性解释}：外部 PC 通过 SSL VPN 访问内网是安全的，原因有四：\emph{①} 身份认证——必须通过用户名/口令（user1/user2）认证方可建立隧道；\emph{②} 传输加密——公网段全程 TLS 密文，防窃听、防篡改；\emph{③} 授权最小化——策略组/ACL/路由列表限定“谁能访问哪些资源/网段”，Web 模式甚至不给内网 IP，客户端模式也只放行授权网段；\emph{④} 边界收敛——所有远程流量都收敛到防火墙网关，由安全域策略统一管控，攻击面小且可审计。
+
+\subsection*{5.6\quad 进阶自设计}
+
+\subsubsection*{步骤 9\quad 外网与防火墙之间增加一个路由器，实现跨网段的 SSL VPN 接入}
+\paragraph{设计}在外网（交换机侧）与防火墙 G1/0/1 之间插入一台路由器 R1，使远程用户位于\emph{与网关不同的网段}，从而验证 SSL VPN 的跨网段接入能力。拓扑：
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+[远程 PC1 3.3.3.11/24] --[交换机]-- G0/0(3.3.3.1) [R1] G0/1(202.1.1.2) -- G1/0/1(202.1.1.1)[防火墙]-- 内网
+\end{lstlisting}
+远程用户所在网段改为 \texttt{3.3.3.0/24}，网关仍为 \texttt{202.1.1.1:2000}，中间由 R1 做三层转发。
+
+\paragraph{9.1\quad 增加的配置命令及原理解释。}
+\begin{lstlisting}
+# 路由器 R1
+[R1] interface GigabitEthernet0/0
+[R1-GigabitEthernet0/0] ip address 3.3.3.1 255.255.255.0     # 远程用户网段网关
+[R1-GigabitEthernet0/0] quit
+[R1] interface GigabitEthernet0/1
+[R1-GigabitEthernet0/1] ip address 202.1.1.2 255.255.255.0   # 与防火墙互联
+[R1-GigabitEthernet0/1] quit
+# R1 已直连两网段，无需额外路由即可转发二者之间流量
+
+# 防火墙：增加去往远程用户网段的回程路由（下一跳指向 R1）
+[F1000] ip route-static 3.3.3.0 255.255.255.0 202.1.1.2
+# 远程 PC1：网关指向 R1
+PC1: ip 3.3.3.11/24  gateway 3.3.3.1
+\end{lstlisting}
+\emph{原理}：SSL VPN 隧道建立在\emph{三层 IP 可达}之上，只要 PC1 能路由到达网关 \texttt{202.1.1.1:2000}、且网关有到 \texttt{3.3.3.0/24} 的\emph{回程路由}，隧道即可跨网段建立。R1 负责 \texttt{3.3.3.0/24} 与 \texttt{202.1.1.0/24} 之间的转发；防火墙需新增静态回程路由，否则 TLS 握手的返回报文无法送回 PC1。SSL VPN 本身封装在标准 TCP:2000 上，能够穿越普通路由器，无需对隧道做特殊处理。
+
+\paragraph{9.2\quad 路由器的路由表（预测 \texttt{display ip routing-table}）。}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+Destination/Mask   Proto   Pre Cost NextHop      Interface
+3.3.3.0/24         Direct  0   0    3.3.3.1      GE0/0
+202.1.1.0/24       Direct  0   0    202.1.1.2    GE0/1
+# 如需访问内网业务网段可加：10.1.0.0/16 -> 202.1.1.1（本实验隧道流量无需）
+\end{lstlisting}
+
+\paragraph{9.3\quad 防火墙的路由表（新增回程路由后）。}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+Destination/Mask   Proto   Pre Cost NextHop      Interface
+3.3.3.0/24         Static  60  0    202.1.1.2    GE1/0/1   <- 新增回程路由
+202.1.1.0/24       Direct  0   0    202.1.1.1    GE1/0/1
+10.1.3.0/24        Direct  0   0    10.1.3.1     GE1/0/2
+10.1.4.0/24        Direct  0   0    10.1.4.1     GE1/0/3
+10.1.5.0/24        Direct  0   0    10.1.5.1     GE1/0/5
+4.4.4.0/24         Direct  0   0    4.4.4.1      SSLVPN-AC1
+\end{lstlisting}
+
+\paragraph{9.4\quad 联通测试。}
+\emph{①} PC1 \texttt{ping 202.1.1.1} 通（经 R1 三层转发）；\emph{②} PC1 用 iNode 连 \texttt{202.1.1.1:2000} 登录成功，说明跨网段隧道建立；\emph{③} 隧道建立后 \texttt{ping 10.1.3.13} 通、访问 \texttt{http://10.1.3.13} 成功。若第 ② 步失败，最常见原因就是防火墙缺少 \texttt{3.3.3.0/24} 回程路由——补上 \texttt{ip route-static} 即可恢复，这也反证了回程路由的必要性。
+
+\subsubsection*{步骤 10\quad 校园网/外网访问校内资源，三种模式对比}
+分别在校园网内（内网直接访问）、外网通过校园 WebVPN、外网通过校园 SSL VPN（\url{http://vpn.xjtu.edu.cn/}）访问同一校内资源，抓包对比三种模式的物理/虚拟网卡参数、路由表、通信协议、数据包源/目的地址。
+
+\paragraph{10.1\quad 内网访问过程及参数。}
+在校园网内，主机用\emph{物理网卡}（如校园网地址 \texttt{10.x.x.x}）直接访问校内资源（如 \texttt{http://lib.xjtu.edu.cn}）。\emph{无虚拟网卡}；路由表默认路由指向校园网关；通信为直接 HTTP/HTTPS；抓包源为主机校园网真实地址、目的为资源服务器真实地址，中间无隧道封装。特点：路径最短、时延最低，但仅在校园网内可用。
+
+\paragraph{10.2\quad 外网 WebVPN 访问过程及参数。}
+在校外用浏览器登录 \url{http://vpn.xjtu.edu.cn/} 认证后，通过门户点击/输入校内资源地址访问。\emph{无虚拟网卡}；物理网卡为公网地址；路由表无内网专用条目；通信为主机与 WebVPN 网关之间的 HTTPS（TLS 加密），网关作反向代理去访问校内资源。抓包：本机侧源=公网地址、目的=\texttt{vpn.xjtu.edu.cn}（TLS 密文，看不到真实校内地址）；校内侧源=WebVPN 代理地址、目的=校内资源。特点：免安装、仅限门户发布的 Web 资源。
+
+\paragraph{10.3\quad 外网 SSLVPN 访问过程及参数。}
+在校外安装并登录 SSL VPN 客户端后，本机出现\emph{虚拟网卡}并获得一个校园内网地址；路由表新增“去往校内网段经虚拟网卡”的条目；通信在物理网卡上表现为与 VPN 网关的 TLS 密文（封装），在虚拟网卡上表现为原始报文明文（源=虚拟网卡内网地址、目的=校内资源）。抓包对照与表~\ref{tab:ipvpn} 同理。特点：等效“把校外主机接入校园网”，可访问授权网段内的各类资源（不限 Web），权限最完整。
+
+\paragraph{三模式小结}三者的本质区别在于\emph{“解封装/代理的位置”与“客户端是否获得内网 IP”}：内网直连无隧道、时延最低但受地域限制；WebVPN 由网关代理、免客户端但只覆盖 Web 资源；SSLVPN 客户端接入通过虚拟网卡获得内网 IP、覆盖面最广。三者在公网段的加密（除内网直连外均为 TLS）、认证与最小授权共同保障了远程访问的机密性、完整性与可控性。
+
+\subsection*{实验结论与心得}
+本实验完整实践了 H3C F1000 防火墙的安全域划分、域间策略、源/目的 NAT 与 SSL VPN 两种接入模式，并延伸完成了跨网段接入与校园网三模式对比。通过对每一步“路由表、连通性、抓包源/目的/端口/加密”的分析，我深刻理解到：连通性由\emph{安全域策略}而非路由决定；安全策略\emph{顺序匹配、命中即止}，具体的拒绝规则必须前置；NAT 在节省地址的同时\emph{隐藏内网结构}；SSL VPN 的两种模式差异集中体现在\emph{是否产生虚拟网卡、内网侧看到的源地址、可访问范围}三点上，而其安全性由\emph{认证、加密、最小授权、边界收敛}四重机制共同保障。这些原理的贯通，使我对“默认拒绝、显式放行、最小权限”的网络安全设计思想有了系统而具体的认识。
+
+\end{document}
