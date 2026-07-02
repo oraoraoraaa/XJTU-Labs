@@ -51,11 +51,16 @@ body {
     padding: 22px 24px 14px;
     background: linear-gradient(120deg, rgba(15, 118, 110, 0.12), rgba(2, 132, 199, 0.12));
     border-bottom: 1px solid rgba(15, 118, 110, 0.14);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .header h1 {
     margin: 0;
-    font-size: 26px;
+    font-size: 24px;
     letter-spacing: 0.5px;
 }
 
@@ -63,6 +68,17 @@ body {
     margin: 8px 0 0;
     color: var(--muted);
     font-size: 14px;
+}
+
+.spaces-chip {
+    background: rgba(15, 118, 110, 0.12);
+    border: 1px solid rgba(15, 118, 110, 0.25);
+    color: var(--accent-2);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .main {
@@ -75,30 +91,90 @@ body {
     margin-bottom: 10px;
 }
 
-.input-wrap {
+/* 图片获取按钮: 拍摄 / 相册 */
+.pick-row {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
-    align-items: center;
 }
 
-input[type="file"] {
-    width: 100%;
-    border: 1px solid #d1d5db;
+.pick-btn {
+    border: 1.5px dashed rgba(15, 118, 110, 0.45);
+    background: rgba(15, 118, 110, 0.05);
+    color: var(--accent-2);
     border-radius: 12px;
-    padding: 10px;
+    padding: 14px 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.pick-btn:hover {
+    background: rgba(15, 118, 110, 0.12);
+    transform: translateY(-1px);
+}
+
+/* 图片预览 */
+.preview-wrap {
+    margin-top: 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
     background: #f8fafc;
+    min-height: 120px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    padding: 8px;
+}
+
+.preview-wrap img {
+    max-width: 100%;
+    max-height: 260px;
+    border-radius: 8px;
+    display: none;
+}
+
+.preview-placeholder {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.hint {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* 入场 / 出场操作按钮 */
+.action-row {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
 }
 
 .upload-btn {
     border: none;
     border-radius: 12px;
-    padding: 11px 18px;
+    padding: 13px 10px;
     color: white;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    font-size: 15px;
     cursor: pointer;
     transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.upload-btn.entry {
+    background: linear-gradient(135deg, #059669, #065f46);
+}
+
+.upload-btn.exit {
+    background: linear-gradient(135deg, #dc6803, #b54708);
+}
+
+.upload-btn.auto {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
 }
 
 .upload-btn:hover {
@@ -108,14 +184,36 @@ input[type="file"] {
 
 .upload-btn:disabled {
     cursor: not-allowed;
-    filter: grayscale(0.1) brightness(0.85);
+    filter: grayscale(0.3) brightness(0.8);
     transform: none;
 }
 
-.hint {
-    margin-top: 10px;
-    color: var(--muted);
-    font-size: 13px;
+/* 上传进度提示 */
+.progress {
+    display: none;
+    margin-top: 14px;
+    align-items: center;
+    gap: 10px;
+    color: var(--accent-2);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.progress.show {
+    display: flex;
+}
+
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(15, 118, 110, 0.25);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 .status-panel {
@@ -138,6 +236,18 @@ input[type="file"] {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size: 13px;
     color: #1e293b;
+}
+
+.footer-link {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.footer-link a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
 }
 
 .modal {
@@ -214,12 +324,8 @@ input[type="file"] {
 }
 
 @media (max-width: 640px) {
-    .input-wrap {
+    .action-row {
         grid-template-columns: 1fr;
-    }
-
-    .upload-btn {
-        width: 100%;
     }
 }
 </style>
@@ -228,22 +334,47 @@ input[type="file"] {
 
 <div class="shell">
     <div class="header">
-        <h1>停车场车牌识别系统</h1>
-        <p>上传车辆车牌图片后，系统将自动识别并执行入场或出场结算。</p>
+        <div>
+            <h1>停车场车牌识别系统</h1>
+            <p>拍摄或选择车牌图片，选择入场 / 出场通道后上传识别。</p>
+        </div>
+        <span class="spaces-chip" id="spaces-chip">车位加载中...</span>
     </div>
 
     <div class="main">
-        <label class="field-label" for="img">车牌图片</label>
-        <div class="input-wrap">
-            <input type="file" id="img" accept="image/*">
-            <button class="upload-btn" id="upload-btn" onclick="upload()">上传识别</button>
+        <label class="field-label">第一步：获取车牌图片</label>
+        <div class="pick-row">
+            <button class="pick-btn" type="button" onclick="cameraInput.click()">📷 拍摄车牌</button>
+            <button class="pick-btn" type="button" onclick="albumInput.click()">🖼 从相册选择</button>
         </div>
-        <p class="hint" id="file-hint">请上传清晰、正向拍摄的车牌图片。</p>
+        <!-- capture=environment 调用手机后置摄像头；无 capture 则打开相册 -->
+        <input type="file" id="camera-input" accept="image/*" capture="environment" hidden>
+        <input type="file" id="album-input" accept="image/*" hidden>
+
+        <div class="preview-wrap">
+            <img id="preview-img" alt="车牌图片预览">
+            <span class="preview-placeholder" id="preview-placeholder">尚未选择图片，预览将显示在这里。</span>
+        </div>
+        <p class="hint" id="file-hint">请拍摄或上传清晰、正向的车牌图片。</p>
+
+        <label class="field-label" style="margin-top:18px;">第二步：选择通道并上传识别</label>
+        <div class="action-row">
+            <button class="upload-btn entry" data-channel="entry" onclick="upload('entry')">入场识别</button>
+            <button class="upload-btn exit" data-channel="exit" onclick="upload('exit')">出场识别</button>
+            <button class="upload-btn auto" data-channel="auto" onclick="upload('auto')">智能判断</button>
+        </div>
+
+        <div class="progress" id="progress">
+            <span class="spinner"></span>
+            <span>图片上传中，服务器识别中，请稍候...</span>
+        </div>
 
         <div class="status-panel">
             <p class="status-title">最近一次响应</p>
             <p id="result">暂无记录</p>
         </div>
+
+        <p class="footer-link"><a href="/admin">管理员后台：查看出入场记录 →</a></p>
     </div>
 </div>
 
@@ -259,17 +390,51 @@ input[type="file"] {
 
 
 <script>
-const fileInput = document.getElementById("img");
-const uploadBtn = document.getElementById("upload-btn");
+const cameraInput = document.getElementById("camera-input");
+const albumInput = document.getElementById("album-input");
+const previewImg = document.getElementById("preview-img");
+const previewPlaceholder = document.getElementById("preview-placeholder");
 const resultEl = document.getElementById("result");
 const fileHint = document.getElementById("file-hint");
+const progressEl = document.getElementById("progress");
+const spacesChip = document.getElementById("spaces-chip");
+const actionBtns = document.querySelectorAll(".action-row .upload-btn");
 
-fileInput.addEventListener("change", () => {
-    const file = fileInput.files[0];
-    fileHint.textContent = file
-        ? `已选择文件: ${file.name} (${Math.round(file.size / 1024)} KB)`
-        : "请上传清晰、正向拍摄的车牌图片。";
-});
+// 当前待上传的图片文件（来自拍摄或相册）
+let selectedFile = null;
+let previewUrl = null;
+
+function onFilePicked(input, sourceName){
+    const file = input.files[0];
+    if (!file) return;
+    selectedFile = file;
+
+    // 图片预览
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(file);
+    previewImg.src = previewUrl;
+    previewImg.style.display = "block";
+    previewPlaceholder.style.display = "none";
+
+    fileHint.textContent = `已${sourceName}: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+    // 清空 value，保证同一文件可重复选择
+    input.value = "";
+}
+
+cameraInput.addEventListener("change", () => onFilePicked(cameraInput, "拍摄图片"));
+albumInput.addEventListener("change", () => onFilePicked(albumInput, "选择图片"));
+
+// 加载剩余车位信息
+async function refreshSpaces(){
+    try {
+        const res = await fetch("/spaces");
+        const data = await res.json();
+        spacesChip.textContent = `剩余车位 ${data.remaining}/${data.total_spots} · 费率 ${data.fee_per_hour} 元/时`;
+    } catch (err) {
+        spacesChip.textContent = "车位信息获取失败";
+    }
+}
+refreshSpaces();
 
 function openModal(title, lines, isError){
     const modal = document.getElementById("msg-modal");
@@ -293,19 +458,20 @@ function closeModal(){
     document.getElementById("msg-modal").classList.remove("show");
 }
 
-async function upload(){
+const CHANNEL_NAMES = { entry: "入场", exit: "出场", auto: "智能判断" };
 
-    const file = fileInput.files[0];
-    if (!file) {
-        openModal("上传失败", ["请先选择一张图片再提交。"], true);
+async function upload(channel){
+    if (!selectedFile) {
+        openModal("上传失败", ["请先拍摄或从相册选择一张车牌图片。"], true);
         return;
     }
 
-    uploadBtn.disabled = true;
-    uploadBtn.textContent = "识别中...";
+    actionBtns.forEach(btn => btn.disabled = true);
+    progressEl.classList.add("show");
 
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("image", selectedFile);
+    formData.append("channel", channel);
 
     try {
         const res = await fetch("/upload", {
@@ -316,7 +482,7 @@ async function upload(){
         const data = await res.json();
         resultEl.textContent = JSON.stringify(data, null, 2);
 
-        const detailLines = [];
+        const detailLines = [`通道: ${CHANNEL_NAMES[channel]}`];
         if (data.msg) {
             detailLines.push(`消息: ${data.msg}`);
         }
@@ -326,23 +492,33 @@ async function upload(){
         if (data.type) {
             detailLines.push(`结果: ${data.type}`);
         }
+        if (data.enter_time) {
+            detailLines.push(`入场时间: ${data.enter_time}`);
+        }
         if (data.time) {
             detailLines.push(`时间: ${data.time}`);
+        }
+        if (data.duration_minutes !== undefined) {
+            detailLines.push(`停车时长: ${data.duration_minutes} 分钟`);
         }
         if (data.fee !== undefined) {
             detailLines.push(`费用: ${data.fee} 元`);
         }
-        if (detailLines.length === 0) {
+        if (data.remaining_spots !== undefined) {
+            detailLines.push(`剩余车位: ${data.remaining_spots}`);
+        }
+        if (detailLines.length === 1) {
             detailLines.push("服务端返回了空消息，请检查后端日志。");
         }
 
         openModal(res.ok ? "处理完成" : "处理失败", detailLines, !res.ok);
+        refreshSpaces();
     } catch (err) {
         resultEl.textContent = `请求异常: ${err}`;
         openModal("网络异常", ["请求未成功，请确认服务器正在运行并重试。"], true);
     } finally {
-        uploadBtn.disabled = false;
-        uploadBtn.textContent = "上传识别";
+        actionBtns.forEach(btn => btn.disabled = false);
+        progressEl.classList.remove("show");
     }
 }
 

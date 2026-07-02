@@ -67,10 +67,11 @@
 系统实现了如下基础能力：
 \begin{enumerate}
   \item 在局域网内启动Web服务，移动端浏览器可访问上传页面。
+  \item 前端提供“拍摄车牌”（调用手机后置摄像头，\texttt{capture="environment"}）和“从相册选择”两种独立取图方式，并在页面内预览所选图片。
   \item 接收用户上传车牌图片并进行OCR识别。
-  \item 根据识别结果自动判断入场或出场。
-  \item 记录入场时间、出场时间和费用，并保存在SQLite数据库中。
-  \item 在前端以弹窗方式展示识别结果、当前时间和费用信息。
+  \item 提供“入场识别”“出场识别”“智能判断”三个操作按钮，分别对应\texttt{channel=entry/exit/auto}三种通道；入场通道校验重复入场，出场通道校验未入场先出场。
+  \item 记录车牌号、入场时间、出场时间、停车时长（分钟）、费用与状态，并持久化保存在SQLite数据库中。
+  \item 在前端以弹窗方式展示识别结果、入/出场状态、停车时长、费用与剩余车位信息。
 \end{enumerate}
 
 \subsection*{2. 高级功能}
@@ -80,8 +81,13 @@
   \item 自动定位车牌候选区域，减少整图识别的噪声干扰。
   \item 采用两阶段OCR：整体OCR优先，失败时执行省份/城市/后缀分区OCR回退。
   \item 针对城市位常见误识别引入映射与打分机制，如\texttt{8->B}、\texttt{1->I}。
-  \item 增加服务端纯文本\texttt{INFO}日志，记录每一步处理路径，便于复现实验与调试。
-  \item 优化前端UI：移动端自适应、状态区域展示、结果弹窗确认按钮、错误高亮提示。
+  \item 增加服务端日志模块：基于\texttt{logging}同时输出到控制台与滚动日志文件\texttt{server.log}，记录每一步处理路径，便于复现实验与调试。
+  \item 优化前端UI：移动端自适应、图片预览、上传进度提示、结果弹窗确认按钮、错误高亮提示。
+  \item 车位管理：服务器维护总车位数与在场车辆数，入场时校验车位是否充足，车位已满返回\texttt{403 lot\_full}；前端首页实时展示剩余车位。
+  \item 管理员后台（\texttt{/admin}）：查看全部出入场记录、在场/剩余车位与累计收费统计，支持在线修改停车费率与总车位数，并可一键导出收费报表CSV（带BOM，Excel可直接打开）。
+  \item 车牌识别缓存：对上传图片按内容做MD5哈希，同一图片再次上传时直接复用识别结果，避免重复OCR。
+  \item 上传目录定期清理：后台守护线程每30分钟清理一次超过24小时的历史图片，避免磁盘占用过大。
+  \item 并发支持：Flask以\texttt{threaded=True}多线程模式运行，OCR初始化与缓存访问均加锁保证线程安全；上传文件以时间戳前缀命名，避免并发上传同名覆盖。
 \end{enumerate}
 
 \section*{五、实验实现}
@@ -94,19 +100,27 @@
 
 \subsection*{2. 实验设计}
 \subsubsection*{（一）协议设计}
-客户端与服务端通过HTTP协议通信。首页\texttt{/}用于返回上传页面模板，识别接口\texttt{/upload}使用\texttt{POST}接收图片。请求体为表单文件字段\texttt{image}。返回体统一为JSON，成功时包含\texttt{plate}、\texttt{type}、\texttt{time}，出场时额外包含\texttt{fee}。错误场景返回\texttt{400}并附带\texttt{msg}文本说明。该设计实现了“业务语义+状态码”的双重表达，便于前端展示与自动化测试。
+客户端与服务端通过HTTP协议通信，主要接口如下：
+\begin{itemize}
+  \item \texttt{GET /}：返回移动端上传页面模板。
+  \item \texttt{POST /upload}：识别接口，请求体为\texttt{multipart/form-data}，包含文件字段\texttt{image}与通道字段\texttt{channel}（取值\texttt{entry}/\texttt{exit}/\texttt{auto}）。成功时返回JSON，入场包含\texttt{plate}、\texttt{type}、\texttt{time}、\texttt{remaining\_spots}，出场额外包含\texttt{fee}、\texttt{duration\_minutes}、\texttt{enter\_time}。
+  \item \texttt{GET /spaces}：返回总车位、在场数、剩余车位与当前费率，供前端首页展示。
+  \item \texttt{GET /records}：查询出入场记录（JSON），支持\texttt{plate}参数模糊过滤。
+  \item \texttt{GET /admin}、\texttt{POST /admin/config}、\texttt{GET /admin/export}：管理员后台页面、费率/车位配置修改与CSV报表导出。
+\end{itemize}
+错误场景返回带语义的错误码与HTTP状态码：参数/图片非法返回\texttt{400}、格式不支持返回\texttt{415}、识别失败返回\texttt{422}、重复入场与未入场先出场返回\texttt{409}、车位已满返回\texttt{403}，并统一附带\texttt{msg}文本说明。该设计实现了“业务语义+状态码”的双重表达，便于前端展示与自动化测试。
 
 \subsubsection*{（二）UI设计}
-页面采用卡片式布局，顶部展示系统标题与说明，中部包含文件选择器和上传按钮，底部显示最近一次JSON响应。识别完成后弹出模态框，集中展示车牌号、处理结果、时间、费用，并提供“确定”按钮关闭。该交互方式相比在页面角落显示文本更容易被用户感知，尤其适合手机端。按钮在上传期间会进入禁用状态并显示“识别中”，可以避免重复提交造成并发写库风险。
+页面采用卡片式布局并按操作步骤组织：顶部展示系统标题与实时剩余车位；第一步为取图区，提供“拍摄车牌”（\texttt{input}标签带\texttt{capture="environment"}，直接调起手机后置摄像头）与“从相册选择”两个独立入口，选定后立即在预览区显示图片缩略；第二步为通道区，提供“入场识别”“出场识别”“智能判断”三个操作按钮，分别以\texttt{channel}参数提交；底部显示最近一次JSON响应，并提供进入管理员后台的入口链接。识别完成后弹出模态框，集中展示车牌号、通道、处理结果、时间、停车时长、费用与剩余车位，并提供“确定”按钮关闭。该交互方式相比在页面角落显示文本更容易被用户感知，尤其适合手机端。上传期间所有操作按钮进入禁用状态并显示旋转进度提示，可以避免重复提交造成并发写库风险。
 
 \subsubsection*{（三）框架结构}
-系统采用单进程Flask开发服务器实现。其优点是结构简单、开发效率高，适合实验演示。服务端核心流程如下：
+系统采用Flask开发服务器的多线程模式（\texttt{threaded=True}）实现，支持多台手机并发上传；OCR初始化与识别缓存均通过互斥锁保证线程安全。其优点是结构简单、开发效率高，适合实验演示。服务端核心流程如下：
 \begin{enumerate}
-  \item 解析上传文件并进行基础合法性校验；
-  \item OpenCV解码图像并保存原图；
-  \item 基于颜色与形态学操作提取候选车牌区域；
-  \item 对候选区域执行规则增强OCR识别；
-  \item 写入/更新SQLite数据库并返回JSON响应。
+  \item 解析上传文件并进行基础合法性校验（通道参数、文件名、扩展名、空文件）；
+  \item OpenCV解码图像，以时间戳前缀命名保存原图（后台线程定期清理过期文件）；
+  \item 按图片内容MD5查询识别缓存，命中则跳过OCR直接复用结果；
+  \item 未命中时基于颜色与形态学操作提取候选车牌区域，执行规则增强OCR识别；
+  \item 执行入场/出场业务逻辑（含车位校验、时长与费用计算），写入/更新SQLite数据库并返回JSON响应。
 \end{enumerate}
 由于本实验数据库访问量较低，采用SQLite即可满足需求。若后续升级到高并发场景，可迁移至MySQL/PostgreSQL并使用连接池。开发服务器不建议直接用于生产，生产环境建议部署Gunicorn/uWSGI并配合Nginx。
 
@@ -195,39 +209,59 @@ def staged_plate_recognition(crop, plate_color="unknown"):
 识别成功后，系统会把车牌号当作主键条件之一去查询数据库，并通过\texttt{status}字段判断这是一辆“在场车辆”还是“已经离场的历史车辆”。这部分逻辑决定了系统是否新增记录、是否结束一次停车计费，以及是否返回费用信息。
 
 \begin{lstlisting}
-c.execute("SELECT * FROM cars WHERE plate=? AND status='在场'", (plate,))
-car = c.fetchone()
+car = c.execute("SELECT * FROM cars WHERE plate=? AND status='在场'",
+                (plate,)).fetchone()
 
-if car is None:
-    c.execute("INSERT INTO cars VALUES(?,?,?,?,?)", (plate, str(now), "", 0, "在场"))
-else:
-    enter_time = datetime.strptime(car[1], "%Y-%m-%d %H:%M:%S.%f")
-    hours = (now - enter_time).total_seconds() / 3600
-    fee = round(hours * 5, 2)
-    c.execute("""
-    UPDATE cars
-    SET exit_time=?, fee=?, status='OUT'
-    WHERE plate=? AND status='在场'
-    """, (str(now), fee, plate))
+def do_entry():
+    # 车位校验: 车位已满则拒绝入场
+    parked = count_parked(c)
+    if parked >= conf["total_spots"]:
+        return jsonify({"error": "lot_full", ...}), 403
+    c.execute("INSERT INTO cars(plate, enter_time, exit_time, "
+              "duration_minutes, fee, status) VALUES(?,?,?,?,?,?)",
+              (plate, now_str, None, None, 0, "在场"))
+
+def do_exit():
+    enter_time = parse_stored_time(car["enter_time"])
+    fee, duration_minutes = calc_fee(enter_time, now, conf["fee_per_hour"])
+    c.execute("""UPDATE cars
+                 SET exit_time=?, duration_minutes=?, fee=?, status='离场'
+                 WHERE plate=? AND status='在场'""",
+              (now_str, duration_minutes, fee, plate))
+
+if channel == 'entry':   # 入场通道: 重复入场返回409
+    ...
+if channel == 'exit':    # 出场通道: 未入场先出场返回409
+    ...
+# auto: 在场则出场，否则入场
 \end{lstlisting}
 
-数据库表\texttt{cars}在\texttt{init\_db()}中创建，字段依次是车牌、入场时间、出场时间、费用和状态。入场时写入一条状态为“在场”的记录；再次识别到同一车牌时，系统把它视为出场请求，读取最早的入场时间，按\texttt{(now - enter\_time).total\_seconds() / 3600}换算出停车小时数，再乘以每小时5元得到费用。
+数据库表\texttt{cars}在\texttt{init\_db()}中创建，字段包括自增主键\texttt{id}、车牌号、入场时间、出场时间、停车时长（分钟）、费用和状态，完整覆盖了实验要求的持久化字段。费率与总车位数存放在\texttt{config}表中，管理员可在后台在线修改并即时生效。入场时先校验剩余车位，再写入一条状态为“在场”的记录；出场时读取入场时间，由\texttt{calc\_fee()}按\texttt{(now - enter\_time).total\_seconds() / 3600}换算停车小时数，乘以当前费率得到费用，并同时落库停车时长。时间统一以\texttt{\%Y-\%m-\%d \%H:\%M:\%S}格式存储，\texttt{parse\_stored\_time()}同时兼容带微秒的历史格式，避免解析异常。
 
-这里的状态设计比较简洁，但足以构成一个最小闭环：只有“在场”状态才允许进入出场结算分支，避免重复扣费或重复写出场信息。也就是说，业务规则不是依赖前端按钮，而是由数据库中的状态字段来保证。
+业务通道由\texttt{channel}参数显式指定：入场通道遇到在场记录返回\texttt{409 duplicate\_entry}，出场通道找不到在场记录返回\texttt{409 exit\_before\_entry}，\texttt{auto}通道则按状态自动判断。只有“在场”状态才允许进入出场结算分支，避免重复扣费或重复写出场信息。也就是说，业务规则不是仅依赖前端按钮，最终由数据库中的状态字段来保证。
 
 \subsubsection*{（五）前端反馈与交互}
 虽然这一部分在\texttt{templates/index.html}中实现，但它与\texttt{app.py}的接口返回是直接配套的：前端通过异步请求把图片上传到\texttt{/upload}，后端返回JSON后，页面再根据字段内容组织弹窗展示。
 
 \begin{lstlisting}
+const formData = new FormData();
+formData.append("image", selectedFile);   // 拍摄或相册选择的图片
+formData.append("channel", channel);      // entry / exit / auto
+
 const res = await fetch("/upload", { method: "POST", body: formData });
 const data = await res.json();
 
 if (data.plate) detailLines.push(`Plate: ${data.plate}`);
 if (data.type) detailLines.push(`Result: ${data.type}`);
 if (data.time) detailLines.push(`Time: ${data.time}`);
+if (data.duration_minutes !== undefined)
+    detailLines.push(`Duration: ${data.duration_minutes} min`);
 if (data.fee !== undefined) detailLines.push(`Fee: ${data.fee} CNY`);
+if (data.remaining_spots !== undefined)
+    detailLines.push(`Remaining: ${data.remaining_spots}`);
 
 openModal(res.ok ? "Done" : "Failed", detailLines, !res.ok);
+refreshSpaces();   // 上传后刷新剩余车位显示
 \end{lstlisting}
 
 从接口契约看，\texttt{plate}、\texttt{type}、\texttt{time}和\texttt{fee}分别对应识别结果、业务类型、时间戳和费用。成功时返回\texttt{200}，失败时返回\texttt{400}并携带可读错误信息，因此前端既能展示业务结果，也能把失败原因直接反馈给用户。这种设计使手机端交互比较清晰，同时也方便在浏览器开发者工具中核对返回数据。
@@ -441,6 +475,8 @@ openModal(res.ok ? "Done" : "Failed", detailLines, !res.ok);
   \item 在测试结果上，三组样本入场出场流程均正确完成，说明系统闭环运行稳定。
 \end{itemize}
 
+在实验要求的加分项方向上，本系统已实现：车位管理（总车位/剩余车位维护与入场校验）、管理员后台（记录查看、费率与车位配置修改、收费报表CSV导出）、车牌识别缓存（同图免重复识别）、上传图片定期清理、文件日志模块以及多线程并发处理。
+
 总体而言，本实验达到了预期教学目标，具备继续扩展为课程项目或小型演示系统的基础。
 
 \section*{八、总结及心得体会}
@@ -454,8 +490,8 @@ openModal(res.ok ? "Done" : "Failed", detailLines, !res.ok);
 \begin{enumerate}
   \item 增加更丰富样本集，评估不同光照、角度、遮挡条件下的识别性能；
   \item 引入按车型、停车时段的差异化计费策略；
-  \item 将开发服务器迁移到生产级WSGI部署，增强并发处理能力；
-  \item 增加历史记录查询页面，支持按车牌检索与统计导出。
+  \item 将开发服务器迁移到生产级WSGI部署（如Gunicorn），进一步增强并发处理能力；
+  \item 在管理员后台基础上增加登录鉴权、按时间区间统计与图表化报表。
 \end{enumerate}
 
 总的来说，本实验不仅完成了功能实现，更重要的是建立了“问题发现—日志定位—规则修正—回归测试”的工程思维路径，这对后续课程设计与实际项目开发都具有长期价值。
@@ -464,9 +500,11 @@ openModal(res.ok ? "Done" : "Failed", detailLines, !res.ok);
 \subsection*{1. 源码文件说明}
 实验核心源码包括：
 \begin{itemize}
-  \item \texttt{app.py}：服务端主程序，包含OCR识别、规则过滤、数据库读写与接口逻辑。
-  \item \texttt{templates/index.html}：前端页面，包含上传交互、结果展示和弹窗。
-  \item \texttt{parking.db}：SQLite数据库文件。
+  \item \texttt{app.py}：服务端主程序，包含OCR识别、规则过滤、识别缓存、车位管理、数据库读写、日志模块、上传清理与全部接口逻辑。
+  \item \texttt{templates/index.html}：移动端页面，包含拍摄/相册取图、图片预览、入场/出场/智能通道、进度提示、结果弹窗与剩余车位展示。
+  \item \texttt{templates/admin.html}：管理员后台页面，包含记录列表、车位/收入统计、费率配置与报表导出入口。
+  \item \texttt{parking.db}：SQLite数据库文件（\texttt{cars}记录表与\texttt{config}配置表）。
+  \item \texttt{server.log}：服务端滚动日志文件。
 \end{itemize}
 
 \subsection*{2. 关键附件嵌入示例（日志片段）}

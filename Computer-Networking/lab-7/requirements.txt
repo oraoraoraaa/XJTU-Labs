@@ -1,5 +1,6 @@
-opencv-python
-easyocr
 flask
+easyocr
+opencv-python
+numpy
 pillow
 certifi
