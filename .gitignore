@@ -33,3 +33,8 @@ Database-System/JDBC/generate-data/sql_out
 # Computer Vision
 # DATASET
 Computer-Vision/z-final-project/DATASET/appa-real-release
+
+# Computer Organization: keep only Vivado source folders in Verilog projects
+Computer-Organization/**/*-verilog/*
+!Computer-Organization/**/*-verilog/*.srcs/
+
