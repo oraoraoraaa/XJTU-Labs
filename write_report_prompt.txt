@@ -16,4 +16,12 @@ Use code snippets for clearer explanations when appropriate.
 
 The overall language style should be clear and simple, BUT this doesn't mean the lab report should be short. Make the length appropriate.
 
+Report prose should explain the actual implementation and results directly, in a natural style intended for human readers. When continuing an existing report, read the user's revised text and preserve its wording style and level of detail.
+
+Avoid repeatedly qualifying findings with defensive suffixes such as "the result is A, but this does not necessarily prove B", "the screenshot shows A but does not show B", or "proving B would require additional verification". Do not introduce unrequested alternative claims merely to disclaim them. Describe what was implemented, what happened, and how it relates to the experiment; do not turn each result explanation into an audit of what the evidence cannot establish.
+
+Keep factual accuracy: do not invent results, conceal actual failures, or claim work that was not performed. Include a limitation or prerequisite only when it materially affects the stated result, reproducibility, or understanding of the implementation. State it briefly and concretely in the appropriate place, rather than appending speculative caveats to otherwise clear conclusions. Necessary technical distinctions and explanations of error handling should remain.
+
+These writing-style instructions apply to the report and other reader-facing document prose. They do not restrict our chat: continue to explain relevant risks, uncertainties, and tradeoffs candidly when discussing the work with the user.
+
 Write in Chinese.

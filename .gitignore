@@ -6,6 +6,22 @@ venv
 .venv
 __pycache__
 
+# OS monitoring lab: local Python setup, caches, and generated files
+Operating-System/monitor-mcp/.env
+Operating-System/monitor-mcp/.env.*
+!Operating-System/monitor-mcp/.env.example
+Operating-System/monitor-mcp/.uv-cache/
+Operating-System/monitor-mcp/.pytest_cache/
+Operating-System/monitor-mcp/.ruff_cache/
+Operating-System/monitor-mcp/.mypy_cache/
+Operating-System/monitor-mcp/**/*.py[cod]
+Operating-System/monitor-mcp/*.egg-info/
+Operating-System/monitor-mcp/build/
+Operating-System/monitor-mcp/dist/
+Operating-System/monitor-mcp/.coverage
+Operating-System/monitor-mcp/htmlcov/
+Operating-System/monitor-mcp/*.log
+
 # Rust
 target
 users.db
