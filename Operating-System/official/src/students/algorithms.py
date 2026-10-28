@@ -1,12 +1,23 @@
 """学生算法实现区：只提供契约、输入样例和约束，不含完整算法答案。"""
-from lab_common import integer,StudentTaskPending
 
-REFERENCE=[7,0,1,2,0,3,0,4,2,3,0,3,2]
-JOBS=[dict(id='A',arrival=0,burst=5),dict(id='B',arrival=1,burst=3),dict(id='C',arrival=2,burst=1)]
-DISK_OPS=[('create','A',8),('create','B',5),('create','C',6),('delete','B',0),('create','D',7)]
+from lab_common import integer, StudentTaskPending
+
+REFERENCE = [7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2]
+JOBS = [
+    dict(id="A", arrival=0, burst=5),
+    dict(id="B", arrival=1, burst=3),
+    dict(id="C", arrival=2, burst=1),
+]
+DISK_OPS = [
+    ("create", "A", 8),
+    ("create", "B", 5),
+    ("create", "C", 6),
+    ("delete", "B", 0),
+    ("create", "D", 7),
+]
 
 
-def page_replace(pages,frames=3,algorithm='FIFO',seed=42) -> dict:
+def page_replace(pages, frames=3, algorithm="FIFO", seed=42) -> dict:
     """【TODO A1】页面置换教学模拟，纯函数，不读真实内存、不改内核。
 
     基础FIFO/LRU/CLOCK/OPT；进阶RANDOM/SECOND_CHANCE/HYBRID按课程要求实现。
@@ -20,12 +31,13 @@ def page_replace(pages,frames=3,algorithm='FIFO',seed=42) -> dict:
     OPT可预知未来，须说明假设；HYBRID启发式自行定义规则，不能宣称总更优。
     提示：先手算短序列并保存逐步状态，再写策略；不要只返回一个缺页总数。
     """
-    integer(frames,1,16,'frames');integer(seed,0,2**32-1,'seed')
+    integer(frames, 1, 16, "frames")
+    integer(seed, 0, 2**32 - 1, "seed")
     # TODO：输入校验、策略状态与每次引用的轨迹。可分阶段完成各算法。
-    raise StudentTaskPending('A1','students/algorithms.py:page_replace')
+    raise StudentTaskPending("A1", "students/algorithms.py:page_replace")
 
 
-def scheduler(jobs,algorithm='RR',quantum=2,boost_interval=20) -> dict:
+def scheduler(jobs, algorithm="RR", quantum=2, boost_interval=20) -> dict:
     """【TODO A2】单CPU离散tick调度：FCFS/SJF/RR基础，MLFQ进阶。
 
     jobs为1..12字典，每项id(唯一、1..12字符、禁用IDLE)、arrival(0..50)、
@@ -41,12 +53,15 @@ def scheduler(jobs,algorithm='RR',quantum=2,boost_interval=20) -> dict:
     响应=首次运行-到达；周转=完成-到达；等待不含IO；周转=等待+CPU+IO。
     无就绪任务记录IDLE；固定模拟上限避免无限循环。只比较有限输入，不证明无饥饿。
     """
-    integer(quantum,1,10,'quantum');integer(boost_interval,0,100,'boost_interval')
+    integer(quantum, 1, 10, "quantum")
+    integer(boost_interval, 0, 100, "boost_interval")
     # TODO：校验输入，维护pending/ready/running/blocked/done，生成轨迹和指标。
-    raise StudentTaskPending('A2','students/algorithms.py:scheduler')
+    raise StudentTaskPending("A2", "students/algorithms.py:scheduler")
 
 
-def disk_allocate(strategy='contiguous',blocks=24,operations=None,block_size=4096) -> dict:
+def disk_allocate(
+    strategy="contiguous", blocks=24, operations=None, block_size=4096
+) -> dict:
     """【TODO A3】抽象磁盘块的连续/链接/单级索引分配，不改真实磁盘。
 
     operations=None采用DISK_OPS。每项action=create/delete、name；create的blocks与
@@ -62,6 +77,7 @@ def disk_allocate(strategy='contiguous',blocks=24,operations=None,block_size=409
     必须说明它是模拟指标。选做toy_head_path/distance不能标为SSD延迟。
     提示：先设计空闲块表示和事务式分配，画出同操作序列下三种策略的块图。
     """
-    integer(blocks,1,128,'blocks');integer(block_size,64,65536,'block_size')
+    integer(blocks, 1, 128, "blocks")
+    integer(block_size, 64, 65536, "block_size")
     # TODO：分配、释放、失败回滚、空间成本与逐步块图。
-    raise StudentTaskPending('A3','students/algorithms.py:disk_allocate')
+    raise StudentTaskPending("A3", "students/algorithms.py:disk_allocate")

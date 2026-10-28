@@ -1,4 +1,5 @@
 """交互部分的选做辅助任务。未完成时Host有明确的默认JSON展示，不阻塞主链路。"""
+
 from lab_common import StudentTaskPending
 
 
@@ -10,7 +11,7 @@ def summarize_evidence(trace: list[dict]) -> str:
     返回纯文本<=4000字符，不渲染HTML，不读取Key；不需要再次连接模型。
     Host已提供JSON回退，N1未实现不会导致实验停止。
     """
-    raise StudentTaskPending('N1','students/interaction_helpers.py:summarize_evidence')
+    raise StudentTaskPending("N1", "students/interaction_helpers.py:summarize_evidence")
 
 
 def export_report_markdown(report: dict) -> str:
@@ -20,4 +21,6 @@ def export_report_markdown(report: dict) -> str:
     真实数据、模拟、模型原文、人工分析分别设置区域；人工纠错留空供本人填写。
     此函数供学生自行接到导出按钮/命令中，CLI与Web基础链路不依赖它。
     """
-    raise StudentTaskPending('N2','students/interaction_helpers.py:export_report_markdown')
+    raise StudentTaskPending(
+        "N2", "students/interaction_helpers.py:export_report_markdown"
+    )
