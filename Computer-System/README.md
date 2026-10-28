@@ -46,6 +46,36 @@ lab experiments. Afterward, source `setup.sh` in your terminal to load its expor
 
 ## Run lab commands
 
+Build the lab 1 benchmarks and run Task 1:
+
+```sh
+cd lab-1
+./run.sh
+```
+
+The runner uses seed `2799`, stops if compilation fails, saves simulation output
+under `out/task1_o3_n8_seed2799/`, and prints all three statistics blocks.
+It also works when invoked by its full path from another directory.
+
+`bench/build.sh` uses a local `riscv64-linux-gnu-gcc` or
+`riscv64-unknown-linux-gnu-gcc` when available (`CROSS` can select another prefix).
+The Homebrew `riscv64-unknown-elf-gcc` is a bare-metal compiler; this lab needs
+Linux/glibc binaries. Without a local Linux compiler, the helper builds them
+with GCC 12 in a Debian Bookworm Docker image. On macOS with Colima installed,
+it starts a separate `cssys` profile (2 CPUs, 2 GiB RAM, 10 GiB virtual disk),
+without changing your active Docker context. The first build needs internet
+access; subsequent builds reuse the image. gem5 still runs natively on the Mac.
+Use the same compiler for all compared binaries because compiler versions and
+libc change code layout and measured performance.
+
+For other benchmark targets, pass the normal Makefile targets to the helper:
+
+```sh
+./bench/build.sh all noroi noalign
+# Stop the compiler VM when finished (gem5 does not need it):
+colima stop --profile cssys
+```
+
 Run simulations and invoke `framework/sweep.py` through the links inside the
 lab directory. This keeps that lab's `out/` and `results/` files together.
 The shared `bench/bin/` binaries and simulator build are ignored by Git;

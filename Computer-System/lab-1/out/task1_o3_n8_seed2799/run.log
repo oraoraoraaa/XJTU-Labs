@@ -1,0 +1,29 @@
+warn: Base 10 memory/cache size 512MB will be cast to base 2 size 512MiB.
+warn: Base 10 memory/cache size 32kB will be cast to base 2 size 32KiB.
+warn: Base 10 memory/cache size 32kB will be cast to base 2 size 32KiB.
+warn: Base 10 memory/cache size 256kB will be cast to base 2 size 256KiB.
+Global frequency set at 1000000000000 ticks per second
+warn: No dot file generated. Please install pydot to generate the dot file and pdf.
+src/mem/dram_interface.cc:692: warn: DRAM device capacity (8192 Mbytes) does not match the address range assigned (512 Mbytes)
+src/arch/riscv/isa.cc:320: info: RVV enabled, VLEN = 256 bits, ELEN = 64 bits
+src/base/statistics.hh:279: warn: One of the stats is a legacy stat. Legacy stat is a stat that does not belong to any statistics::Group. Legacy stat is deprecated.
+system.remote_gdb: Listening for connections on port 7000
+gem5 Simulator System.  https://www.gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 25.0.0.1
+gem5 compiled Oct 28 2026 22:33:10
+gem5 started Oct 28 2026 23:12:53
+gem5 executing on MacBook-Air-M4.local, pid 50224
+command line: /Users/rinalic/Local/Github/XJTU-Labs/Computer-System/gem5/build/RISCV/gem5.opt --outdir=out/task1_o3_n8_seed2799 framework/cssys_se.py --cmd bench/bin/riscv/qnn --options '8 2799' --cpu o3
+
+[cssys] start: cpu=o3 freq=2GHz l1d=32kB/2way l2=256kB bp=tournament
+src/sim/syscall_emul.cc:98: warn: ignoring syscall set_robust_list(...)
+      (further warnings will be suppressed)
+src/sim/syscall_emul.hh:1123: warn: readlink() called on '/proc/self/exe' may yield unexpected results in various settings.
+      Returning '/Users/rinalic/Local/Github/XJTU-Labs/Computer-System/bench/bin/riscv/qnn'
+src/sim/mem_state.cc:443: info: Increasing stack size by one page.
+src/sim/syscall_emul.cc:86: warn: ignoring syscall mprotect(...)
+qnn samples=8 seed=0x00000aef checksum=0x55357a77
+class histogram: 0 1 0 2 1 0 0 0 0 4
+[cssys] done @ tick 940217000, cause: exiting with last active thread context

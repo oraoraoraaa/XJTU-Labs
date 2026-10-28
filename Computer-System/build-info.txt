@@ -1,7 +1,7 @@
 Build information:
 
 gem5 version 25.0.0.1
-compiled Oct 28 2026 21:40:05
+compiled Oct 28 2026 22:33:10
 build options:
     ARMLMD_LICENSE_COUNT = 0
     ARMLMD_LICENSE_FILE = 
@@ -10,19 +10,18 @@ build options:
     BUILD_GPU = False
     BUILD_ISA = True
     BUILD_TLM = False
-    HAVE_CAPSTONE = True
+    HAVE_CAPSTONE = False
     HAVE_DEPRECATED_NAMESPACE = True
     HAVE_FENV = True
-    HAVE_HDF5 = True
-    HAVE_KVM = True
-    HAVE_PERF_ATTR_EXCLUDE_HOST = 1
-    HAVE_PNG = True
-    HAVE_POSIX_CLOCK = True
-    HAVE_PROTOBUF = True
-    HAVE_SYSTEMC = True
-    HAVE_TUNTAP = True
-    HAVE_VALGRIND = True
-    KVM_ISA = x86
+    HAVE_HDF5 = False
+    HAVE_KVM = False
+    HAVE_PNG = False
+    HAVE_POSIX_CLOCK = False
+    HAVE_PROTOBUF = False
+    HAVE_SYSTEMC = False
+    HAVE_TUNTAP = False
+    HAVE_VALGRIND = False
+    KVM_ISA = 
     M5_BUILD_CACHE = 
     MAXCORE_HOME = 
     NUMBER_BITS_PER_SET = 64
@@ -49,15 +48,14 @@ build options:
     USE_ARM_ISA = False
     USE_CAPSTONE = False
     USE_EFENCE = False
-    USE_KVM = True
+    USE_KVM = False
     USE_MIPS_ISA = False
     USE_MULTIPLE_PROTOCOLS = True
     USE_POSIX_CLOCK = False
     USE_POWER_ISA = False
     USE_RISCV_ISA = True
     USE_SPARC_ISA = False
-    USE_SYSTEMC = True
+    USE_SYSTEMC = False
     USE_TEST_OBJECTS = False
     USE_X86_ISA = False
     VEGA_GPU_ISA = False
-
