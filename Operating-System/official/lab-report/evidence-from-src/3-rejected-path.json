@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "kind": "observation",
+  "sampled_at": "2026-10-28T07:17:13.681798+00:00",
+  "platform": "Linux",
+  "source": "get_filesystem_info",
+  "units": {},
+  "data": null,
+  "error": "ValueError: path must stay inside OSLAB_ROOT",
+  "limitations": []
+}

@@ -1,0 +1,58 @@
+{
+  "mode": "mock_llm_real_mcp",
+  "question": "查询当前内存快照并说明采样局限。",
+  "status": "not_implemented",
+  "error": null,
+  "model_requests": 2,
+  "tool_calls": 2,
+  "evidence_count": 1,
+  "trace": [
+    {
+      "round": 1,
+      "tool_call_id": "pending_time",
+      "tool": "get_time",
+      "arguments": "{}",
+      "result": {
+        "ok": true,
+        "kind": "status",
+        "sampled_at": "2026-10-28T09:41:32.706201+00:00",
+        "platform": "Linux",
+        "source": "Python datetime",
+        "units": {},
+        "data": {
+          "timezone": "UTC"
+        },
+        "error": null,
+        "limitations": []
+      }
+    },
+    {
+      "round": 1,
+      "tool_call_id": "pending_tree",
+      "tool": "get_process_tree",
+      "arguments": "{}",
+      "result": {
+        "ok": false,
+        "kind": "status",
+        "sampled_at": "2026-10-28T09:41:32.707945+00:00",
+        "platform": "Linux",
+        "source": "get_process_tree",
+        "units": {},
+        "data": null,
+        "error": "NOT_IMPLEMENTED",
+        "limitations": [],
+        "task": "P1",
+        "location": "students/process.py:get_process_tree",
+        "message": "TODO P1：请完成 students/process.py:get_process_tree，当前未执行该功能。"
+      }
+    }
+  ],
+  "answer": "【本次任务未完整完成，请检查trace】\n【离线模型模拟，非云端推理】\n已收到真实MCP工具返回；仅演示协议闭环，请核对每个结果的ok/error。\n[{\"ok\":true,\"kind\":\"status\",\"sampled_at\":\"2026-10-28T09:41:32.706201+00:00\",\"platform\":\"Linux\",\"source\":\"Python datetime\",\"units\":{},\"data\":{\"timezone\":\"UTC\"},\"error\":null,\"limitations\":[]},{\"ok\":false,\"kind\":\"status\",\"sampled_at\":\"2026-10-28T09:41:32.707945+00:00\",\"platform\":\"Linux\",\"source\":\"get_process_tree\",\"units\":{},\"data\":null,\"error\":\"NOT_IMPLEMENTED\",\"limitations\":[],\"task\":\"P1\",\"location\":\"students/process.py:get_process_tree\",\"message\":\"TODO P1：请完成 students/process.py:get_process_tree，当前未执行该功能。\"}]",
+  "model_usage": [],
+  "evidence_display": {
+    "mode": "provided_json_fallback",
+    "text": "[{\"round\": 1, \"tool_call_id\": \"pending_time\", \"tool\": \"get_time\", \"arguments\": \"{}\", \"result\": {\"ok\": true, \"kind\": \"status\", \"sampled_at\": \"2026-10-28T09:41:32.706201+00:00\", \"platform\": \"Linux\", \"source\": \"Python datetime\", \"units\": {}, \"data\": {\"timezone\": \"UTC\"}, \"error\": null, \"limitations\": []}}, {\"round\": 1, \"tool_call_id\": \"pending_tree\", \"tool\": \"get_process_tree\", \"arguments\": \"{}\", \"result\": {\"ok\": false, \"kind\": \"status\", \"sampled_at\": \"2026-10-28T09:41:32.707945+00:00\", \"platform\": \"Linux\", \"source\": \"get_process_tree\", \"units\": {}, \"data\": null, \"error\": \"NOT_IMPLEMENTED\", \"limitations\": [], \"task\": \"P1\", \"location\": \"students/process.py:get_process_tree\", \"message\": \"TODO P1：请完成 students/process.py:get_process_tree，当前未执行该功能。\"}}]",
+    "optional_task_pending": true,
+    "message": "TODO N1：请完成 students/interaction_helpers.py:summarize_evidence，当前未执行该功能。"
+  }
+}
