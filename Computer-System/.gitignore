@@ -1,0 +1,10 @@
+# Local simulator sources and build environment
+/gem5/
+/.venv/
+# Shared generated binaries
+/bench/bin/
+# Per-lab raw simulator output; retain results/*.csv for submission
+/lab-*/out/
+/lab-*/m5out/
+__pycache__/
+*.py[cod]
