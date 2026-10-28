@@ -47,18 +47,12 @@ log_dir="$project_root/lab-1/out/setup"
 mkdir -p "$log_dir"
 log_file="$log_dir/gem5-build-$(date +%Y%m%d-%H%M%S)-$$.log"
 
-export PYTHON_CONFIG="$(python -c 'import sysconfig; print(sysconfig.get_config_var("BINDIR") + "/python3.11-config")')"
-PYTHON_LIBDIR="$(python -c 'import sysconfig; print(sysconfig.get_config_var("LIBDIR"))')"
-export LD_LIBRARY_PATH="$PYTHON_LIBDIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-
 cd -- "$project_root/gem5"
 printf 'Building gem5 with %s jobs. Log: %s\n' "$build_jobs" "$log_file"
 if ! scons build/RISCV/gem5.opt -j"$build_jobs" 2>&1 | tee "$log_file"; then
     printf 'ERROR: gem5 build failed. Inspect the first error in %s.\nCompleted work is retained; rerun this script after fixing the cause.\n' "$log_file" >&2
     exit 1
 fi
-
-export GEM5_BIN="$project_root/gem5/build/RISCV/gem5.opt"
 
 if ! build_info="$("$GEM5_BIN" --build-info)"; then
     printf 'ERROR: build finished but gem5 --build-info failed.\n' >&2

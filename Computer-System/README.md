@@ -16,8 +16,10 @@ cd lab-1
 From another directory, source the script by its full path. It leaves your
 working directory and shell options unchanged. It checks the pinned Python
 version, development headers, shared library, and any existing gem5 executable.
-It sets `PYTHON_CONFIG`, `LD_LIBRARY_PATH`, and `GEM5_BIN`. Sourcing it repeatedly
-does not duplicate the Python library directory in `LD_LIBRARY_PATH`.
+It sets `PYTHON_CONFIG`, `LIBRARY_PATH`, and `GEM5_BIN` on Linux and macOS,
+plus `LD_LIBRARY_PATH` for runtime library loading on Linux. `LIBRARY_PATH`
+lets the linker find uv's Python library even when `python-config` omits its
+directory on macOS. Sourcing it repeatedly does not duplicate library paths.
 The build script skips checking an older simulator executable while loading
 the environment, allowing a broken or missing executable to be rebuilt.
 

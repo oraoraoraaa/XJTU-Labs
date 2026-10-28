@@ -17,8 +17,8 @@ else
 fi
 
 _cssys_setup() {
-    local script_path project_root python_bin python_config python_libdir
-    local library_path build_info for_build="${CSSYS_SETUP_FOR_BUILD:-0}"
+    local script_path project_root python_bin python_config python_libdir host_os
+    local library_path library_search_path build_info for_build="${CSSYS_SETUP_FOR_BUILD:-0}"
     if [ -n "${BASH_VERSION-}" ]; then
         script_path="${BASH_SOURCE[0]}"
     else
@@ -62,11 +62,21 @@ PY
         printf 'ERROR: Python configuration is missing or not executable: %s\n' "$python_config" >&2
         return 1
     fi
-    library_path="${LD_LIBRARY_PATH-}"
-    case ":$library_path:" in
+    # uv's macOS python-config can omit -L for its own shared library.
+    # Both Clang and GCC honor LIBRARY_PATH when linking embedded Python.
+    library_search_path="${LIBRARY_PATH-}"
+    case ":$library_search_path:" in
         *":$python_libdir:"*) ;;
-        *) library_path="$python_libdir${library_path:+:$library_path}" ;;
+        *) library_search_path="$python_libdir${library_search_path:+:$library_search_path}" ;;
     esac
+    library_path="${LD_LIBRARY_PATH-}"
+    host_os="$(uname -s)"
+    if [ "$host_os" = Linux ]; then
+        case ":$library_path:" in
+            *":$python_libdir:"*) ;;
+            *) library_path="$python_libdir${library_path:+:$library_path}" ;;
+        esac
+    fi
 
     if [ "$for_build" = 1 ]; then
         : # A rebuild must remain possible even if an older executable is broken.
@@ -90,7 +100,10 @@ PY
 
     . "$project_root/.venv/bin/activate" || return 1
     export PYTHON_CONFIG="$python_config"
-    export LD_LIBRARY_PATH="$library_path"
+    export LIBRARY_PATH="$library_search_path"
+    if [ "$host_os" = Linux ]; then
+        export LD_LIBRARY_PATH="$library_path"
+    fi
     export GEM5_BIN="$project_root/gem5/build/RISCV/gem5.opt"
     printf 'CSSys environment loaded: Python %s\nGEM5_BIN=%s\n' \
         "$("$python_bin" --version 2>&1 | cut -d ' ' -f 2)" "$GEM5_BIN"
