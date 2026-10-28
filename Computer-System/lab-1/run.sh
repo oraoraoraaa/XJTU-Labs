@@ -3,6 +3,9 @@ set -euo pipefail
 
 # Keep paths (including the simulated argv) consistent from any working directory.
 LAB_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+RESULT_DIR="$LAB_DIR/result"
+mkdir -p "$RESULT_DIR"
+
 cd "$LAB_DIR"
 source ../setup.sh
 
@@ -20,6 +23,6 @@ mkdir -p "$OUT_DIR"
   2>&1 | tee "$OUT_DIR/run.log"
 
 for block in 0 1 2; do
-  printf '\nStatistics block %s:\n' "$block"
-  python framework/stats.py "$OUT_DIR/stats.txt" "$block"
+  printf '\nStatistics block %s:\n' "$block" >> "$LAB_DIR/result/stats-view.txt"
+  python framework/stats.py "$OUT_DIR/stats.txt" "$block" >> "$LAB_DIR/result/stats-view.txt"
 done

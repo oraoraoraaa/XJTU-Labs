@@ -13,8 +13,8 @@ gem5 is copyrighted software; use the --copyright option for details.
 
 gem5 version 25.0.0.1
 gem5 compiled Oct 28 2026 22:33:10
-gem5 started Oct 28 2026 23:12:53
-gem5 executing on MacBook-Air-M4.local, pid 50224
+gem5 started Oct 28 2026 23:31:25
+gem5 executing on MacBook-Air-M4.local, pid 58086
 command line: /Users/rinalic/Local/Github/XJTU-Labs/Computer-System/gem5/build/RISCV/gem5.opt --outdir=out/task1_o3_n8_seed2799 framework/cssys_se.py --cmd bench/bin/riscv/qnn --options '8 2799' --cpu o3
 
 [cssys] start: cpu=o3 freq=2GHz l1d=32kB/2way l2=256kB bp=tournament
