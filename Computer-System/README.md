@@ -50,11 +50,12 @@ Build the lab 1 benchmarks and run Task 1:
 
 ```sh
 cd lab-1
-./run.sh
+./run.sh task1
 ```
 
 The runner uses seed `2799`, stops if compilation fails, saves simulation output
-under `out/task1_o3_n8_seed2799/`, and prints all three statistics blocks.
+under `out/task1_o3_n8_seed2799/`, and writes the parsed statistics summary to
+`result/task1_o3_n8_seed2799.txt`. Use `./run.sh --help` for the other tasks.
 It also works when invoked by its full path from another directory.
 
 `bench/build.sh` uses a local `riscv64-linux-gnu-gcc` or
