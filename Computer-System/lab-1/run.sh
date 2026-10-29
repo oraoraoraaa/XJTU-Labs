@@ -14,7 +14,8 @@ Tasks:
   task1     Run qnn with 8 samples
   task2b    Run qnn with 64 samples
   task2c    Compare 4 binaries with 8 samples
-  task3     Sweep atomic, timing, minor, and o3; print ROI metrics
+  task3     Sweep four CPU models; save ROI metrics and scatter plot
+  task3plot Plot the existing Task 3 CSV without rerunning simulations
   task4     Compare 16kB and 128kB L1D on timing, minor, and o3
   task5     Run 2, 4, 8, 16, 32 samples sequentially; save CSV and plots
   task6     Compare 16kB and 128kB L1D using dependent pointer chasing
@@ -39,7 +40,7 @@ SEED=2799
 
 while (( $# > 0 )); do
   case "$1" in
-    task1|task2b|task2c|task3|task4|task5|task6|symbols|icache|all)
+    task1|task2b|task2c|task3|task3plot|task4|task5|task6|symbols|icache|all)
       if [[ -n "$TASK" ]]; then
         printf 'ERROR: Choose only one task.\n' >&2
         exit 2
@@ -171,6 +172,16 @@ task3() {
     insts cycles ipc host_seconds host_inst_rate \
     l1d_miss_rate l1d_mshr_mpki \
     | tee "$RESULT_DIR/${name}.txt"
+
+  plot_task3
+}
+
+plot_task3() {
+  local name="task3_lab1_cpu_seed${SEED}"
+  uv run --no-project --with matplotlib python "$LAB_DIR/task3_plot.py" \
+    --input "$RESULT_DIR/${name}.csv" \
+    --output "$RESULT_DIR/${name}.png" \
+    --report-output "$LAB_DIR/lab-report/images/${name}.png"
 }
 
 task4() {
@@ -291,6 +302,7 @@ case "$TASK" in
   task2b) task2b ;;
   task2c) task2c ;;
   task3) task3 ;;
+  task3plot) plot_task3 ;;
   task4) task4 ;;
   task5) task5 ;;
   task6) task6 ;;
