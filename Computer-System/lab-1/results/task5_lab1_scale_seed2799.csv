@@ -1,0 +1,6 @@
+samples,seed,insts,cycles,ipc,cycles_per_sample,roi_host_seconds,startup_host_seconds,shutdown_host_seconds,total_host_seconds,wall_seconds,l1i_misses,bp_mpki,l1d_mshr_mpki,stats_path
+2,2799,1450200,275460,5.264648,137730.0,1.19,0.97,0.02,2.18,2.393042,9,0.24893118190594402,2.2190042752723764,/Users/rinalic/Local/Github/XJTU-Labs/Computer-System/lab-1/out/task5_o3_n2_seed2799/stats.txt
+4,2799,2900385,550767,5.266083,137691.75,2.36,0.92,0.02,3.3,3.505885,9,0.24789812386976212,2.214188805968863,/Users/rinalic/Local/Github/XJTU-Labs/Computer-System/lab-1/out/task5_o3_n4_seed2799/stats.txt
+8,2799,5800766,1101594,5.265793,137699.25,4.64,0.93,0.02,5.589999999999999,5.795646,9,0.24996698711859777,2.2114320763843947,/Users/rinalic/Local/Github/XJTU-Labs/Computer-System/lab-1/out/task5_o3_n8_seed2799/stats.txt
+16,2799,11601526,2202119,5.268347,137632.4375,9.18,0.88,0.02,10.08,10.29525,9,0.24600212075549371,2.2103126778322095,/Users/rinalic/Local/Github/XJTU-Labs/Computer-System/lab-1/out/task5_o3_n16_seed2799/stats.txt
+32,2799,23203018,4403527,5.269189,137610.21875,18.55,0.97,0.02,19.54,19.760948,9,0.243890686978737,2.209583253350922,/Users/rinalic/Local/Github/XJTU-Labs/Computer-System/lab-1/out/task5_o3_n32_seed2799/stats.txt

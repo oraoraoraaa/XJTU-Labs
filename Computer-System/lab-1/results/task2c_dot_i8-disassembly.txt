@@ -1,0 +1,148 @@
+
+=== qnn ===
+
+bin/riscv/qnn:     file format elf64-littleriscv
+
+
+Disassembly of section .text:
+
+0000000000010a80 <dot_i8>:
+   10a80:	08c05063          	blez	a2,10b00 <dot_i8+0x80>
+   10a84:	87aa                	mv	a5,a0
+   10a86:	962a                	add	a2,a2,a0
+   10a88:	4501                	li	a0,0
+   10a8a:	00000013          	nop
+   10a8e:	00000013          	nop
+   10a92:	00000013          	nop
+   10a96:	00000013          	nop
+   10a9a:	00000013          	nop
+   10a9e:	00000013          	nop
+   10aa2:	00000013          	nop
+   10aa6:	00000013          	nop
+   10aaa:	00000013          	nop
+   10aae:	00000013          	nop
+   10ab2:	00000013          	nop
+   10ab6:	00000013          	nop
+   10aba:	00000013          	nop
+   10abe:	0001                	nop
+   10ac0:	00078703          	lb	a4,0(a5)
+   10ac4:	00058683          	lb	a3,0(a1)
+   10ac8:	0785                	add	a5,a5,1
+   10aca:	0585                	add	a1,a1,1
+   10acc:	02d7073b          	mulw	a4,a4,a3
+   10ad0:	9d39                	addw	a0,a0,a4
+   10ad2:	fef617e3          	bne	a2,a5,10ac0 <dot_i8+0x40>
+   10ad6:	8082                	ret
+   10ad8:	00000013          	nop
+   10adc:	00000013          	nop
+   10ae0:	00000013          	nop
+   10ae4:	00000013          	nop
+   10ae8:	00000013          	nop
+   10aec:	00000013          	nop
+   10af0:	00000013          	nop
+   10af4:	00000013          	nop
+   10af8:	00000013          	nop
+   10afc:	00000013          	nop
+   10b00:	4501                	li	a0,0
+   10b02:	8082                	ret
+
+Disassembly of section __libc_freeres_fn:
+
+=== qnn_noroi ===
+
+bin/riscv/qnn_noroi:     file format elf64-littleriscv
+
+
+Disassembly of section .text:
+
+0000000000010a80 <dot_i8>:
+   10a80:	08c05063          	blez	a2,10b00 <dot_i8+0x80>
+   10a84:	87aa                	mv	a5,a0
+   10a86:	962a                	add	a2,a2,a0
+   10a88:	4501                	li	a0,0
+   10a8a:	00000013          	nop
+   10a8e:	00000013          	nop
+   10a92:	00000013          	nop
+   10a96:	00000013          	nop
+   10a9a:	00000013          	nop
+   10a9e:	00000013          	nop
+   10aa2:	00000013          	nop
+   10aa6:	00000013          	nop
+   10aaa:	00000013          	nop
+   10aae:	00000013          	nop
+   10ab2:	00000013          	nop
+   10ab6:	00000013          	nop
+   10aba:	00000013          	nop
+   10abe:	0001                	nop
+   10ac0:	00078703          	lb	a4,0(a5)
+   10ac4:	00058683          	lb	a3,0(a1)
+   10ac8:	0785                	add	a5,a5,1
+   10aca:	0585                	add	a1,a1,1
+   10acc:	02d7073b          	mulw	a4,a4,a3
+   10ad0:	9d39                	addw	a0,a0,a4
+   10ad2:	fef617e3          	bne	a2,a5,10ac0 <dot_i8+0x40>
+   10ad6:	8082                	ret
+   10ad8:	00000013          	nop
+   10adc:	00000013          	nop
+   10ae0:	00000013          	nop
+   10ae4:	00000013          	nop
+   10ae8:	00000013          	nop
+   10aec:	00000013          	nop
+   10af0:	00000013          	nop
+   10af4:	00000013          	nop
+   10af8:	00000013          	nop
+   10afc:	00000013          	nop
+   10b00:	4501                	li	a0,0
+   10b02:	8082                	ret
+
+Disassembly of section __libc_freeres_fn:
+
+=== qnn_noalign ===
+
+bin/riscv/qnn_noalign:     file format elf64-littleriscv
+
+
+Disassembly of section .text:
+
+0000000000010936 <dot_i8>:
+   10936:	02c05163          	blez	a2,10958 <dot_i8+0x22>
+   1093a:	87aa                	mv	a5,a0
+   1093c:	962a                	add	a2,a2,a0
+   1093e:	4501                	li	a0,0
+   10940:	00078703          	lb	a4,0(a5)
+   10944:	00058683          	lb	a3,0(a1)
+   10948:	0785                	add	a5,a5,1
+   1094a:	0585                	add	a1,a1,1
+   1094c:	02d7073b          	mulw	a4,a4,a3
+   10950:	9d39                	addw	a0,a0,a4
+   10952:	fef617e3          	bne	a2,a5,10940 <dot_i8+0xa>
+   10956:	8082                	ret
+   10958:	4501                	li	a0,0
+   1095a:	8082                	ret
+
+Disassembly of section __libc_freeres_fn:
+
+=== qnn_noalign_noroi ===
+
+bin/riscv/qnn_noalign_noroi:     file format elf64-littleriscv
+
+
+Disassembly of section .text:
+
+0000000000010926 <dot_i8>:
+   10926:	02c05163          	blez	a2,10948 <dot_i8+0x22>
+   1092a:	87aa                	mv	a5,a0
+   1092c:	962a                	add	a2,a2,a0
+   1092e:	4501                	li	a0,0
+   10930:	00078703          	lb	a4,0(a5)
+   10934:	00058683          	lb	a3,0(a1)
+   10938:	0785                	add	a5,a5,1
+   1093a:	0585                	add	a1,a1,1
+   1093c:	02d7073b          	mulw	a4,a4,a3
+   10940:	9d39                	addw	a0,a0,a4
+   10942:	fef617e3          	bne	a2,a5,10930 <dot_i8+0xa>
+   10946:	8082                	ret
+   10948:	4501                	li	a0,0
+   1094a:	8082                	ret
+
+Disassembly of section __libc_freeres_fn:

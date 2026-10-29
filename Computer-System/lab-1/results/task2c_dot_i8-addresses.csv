@@ -1,0 +1,5 @@
+binary,function_address_hex,function_address_mod64
+qnn,0x0000000000010a80,0
+qnn_noroi,0x0000000000010a80,0
+qnn_noalign,0x0000000000010936,54
+qnn_noalign_noroi,0x0000000000010926,38
