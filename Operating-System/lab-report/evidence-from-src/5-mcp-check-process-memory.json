@@ -1,0 +1,60 @@
+{
+  "ok": true,
+  "kind": "observation",
+  "sampled_at": "2026-11-01T08:52:51.099948+00:00",
+  "platform": "Linux",
+  "source": "psutil.Process.memory_info / /proc/PID/smaps",
+  "units": {
+    "memory": "bytes",
+    "maps": "KiB"
+  },
+  "data": {
+    "pid": 990262,
+    "name": "bash",
+    "memory": {
+      "rss": 12431360,
+      "vms": 23605248,
+      "shared": 11698176,
+      "text": 794624,
+      "lib": 0,
+      "data": 847872,
+      "dirty": 0
+    },
+    "maps": [
+      {
+        "address": "55efb6b01000-55efb6b31000",
+        "permissions": "r--p",
+        "label": "bash",
+        "Size_KiB": 192,
+        "Rss_KiB": 192,
+        "Pss_KiB": 192,
+        "Private_Dirty_KiB": 0
+      },
+      {
+        "address": "55efb6b31000-55efb6bf3000",
+        "permissions": "r-xp",
+        "label": "bash",
+        "Size_KiB": 776,
+        "Rss_KiB": 776,
+        "Pss_KiB": 468,
+        "Private_Dirty_KiB": 0
+      },
+      {
+        "address": "55efb6bf3000-55efb6c2c000",
+        "permissions": "r--p",
+        "label": "bash",
+        "Size_KiB": 228,
+        "Rss_KiB": 116,
+        "Pss_KiB": 70,
+        "Private_Dirty_KiB": 0
+      }
+    ],
+    "maps_partial": true
+  },
+  "error": null,
+  "limitations": [
+    "RSS includes shared pages and is not exclusively private memory.",
+    "Process information and mappings are collected at different instants.",
+    "maps_partial indicates that the mapping list may be incomplete."
+  ]
+}

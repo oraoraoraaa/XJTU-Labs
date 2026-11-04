@@ -1,0 +1,31 @@
+{
+  "ok": true,
+  "kind": "observation",
+  "sampled_at": "2026-10-31T01:51:50.405907+00:00",
+  "platform": "Linux",
+  "source": "psutil.virtual_memory / swap_memory",
+  "units": {
+    "memory": "bytes",
+    "percent": "percent"
+  },
+  "data": {
+    "total": 1527984128,
+    "available": 1127997440,
+    "used": 399986688,
+    "free": 524288000,
+    "percent": 26.2,
+    "swap": {
+      "total": 0,
+      "used": 0,
+      "free": 0,
+      "percent": 0.0,
+      "sin": 0,
+      "sout": 0
+    }
+  },
+  "error": null,
+  "limitations": [
+    "available是估计值；一次快照不足以证明抖动。",
+    "swap.total=0表示未配置可用交换区，不能据此断言无缺页。"
+  ]
+}

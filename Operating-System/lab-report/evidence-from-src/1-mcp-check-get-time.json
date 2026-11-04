@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "kind": "status",
+  "sampled_at": "2026-10-31T01:06:00.628246+00:00",
+  "platform": "Linux",
+  "source": "Python datetime",
+  "units": {},
+  "data": {
+    "timezone": "UTC"
+  },
+  "error": null,
+  "limitations": []
+}

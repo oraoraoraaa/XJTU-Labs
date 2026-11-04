@@ -1,0 +1,241 @@
+{
+  "model_response": {
+    "id": "11b58169-0f68-4939-b7fc-36788732659b",
+    "access_programs": null,
+    "created_at": 1793704568.0,
+    "error": null,
+    "incomplete_details": null,
+    "instructions": null,
+    "metadata": {},
+    "model": "deepseek-flash",
+    "object": "response",
+    "output": [
+      {
+        "id": "6c763c01-f654-4e8d-ba2e-95e1982323d1",
+        "content": [
+          {
+            "annotations": [],
+            "text": "I'll check the current UTC time on your machine.",
+            "type": "output_text",
+            "logprobs": []
+          }
+        ],
+        "role": "assistant",
+        "status": "completed",
+        "type": "message",
+        "phase": "commentary"
+      },
+      {
+        "arguments": "{}",
+        "call_id": "call_00_ET_DQHRNx8MPqMcZK1uYsxm8583",
+        "name": "get_time",
+        "type": "function_call",
+        "id": "4d6377f1-5ba9-41c1-8d5f-70ecc472153c",
+        "async_": null,
+        "caller": null,
+        "namespace": null,
+        "status": "completed"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "temperature": 1.0,
+    "tool_choice": "auto",
+    "tools": [
+      {
+        "name": "get_time",
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "strict": false,
+        "type": "functiown",
+        "allowed_callers": null,
+        "async_": null,
+        "defer_loading": null,
+        "description": "Read the current UTC time from the openEuler lab machine.",
+        "output_schema": null
+      }
+    ],
+    "top_p": 1.0,
+    "background": false,
+    "completed_at": 1793704569.0,
+    "conversation": null,
+    "max_output_tokens": null,
+    "max_tool_calls": null,
+    "moderation": null,
+    "previous_response_id": null,
+    "prompt": null,
+    "prompt_cache_diagnostics": null,
+    "prompt_cache_key": null,
+    "prompt_cache_options": null,
+    "prompt_cache_retention": null,
+    "reasoning": {
+      "context": null,
+      "effort": null,
+      "generate_summary": null,
+      "mode": null,
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "status": "completed",
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": null
+    },
+    "tool_usage": null,
+    "top_logprobs": 0,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 306,
+      "input_tokens_details": {
+        "cache_write_tokens": null,
+        "cached_tokens": 128
+      },
+      "output_tokens": 32,
+      "output_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "total_tokens": 338
+    },
+    "user": null,
+    "content_filters": null,
+    "frequency_penalty": 0.0,
+    "presence_penalty": 0.0,
+    "store": false
+  },
+  "tool_trace": [
+    {
+      "call_id": "call_00_ET_DQHRNx8MPqMcZK1uYsxm8583",
+      "name": "get_time",
+      "arguments": {},
+      "result": {
+        "ok": true,
+        "kind": "status",
+        "sampled_at": "2026-11-03T11:16:09.842270+00:00",
+        "platform": "Linux",
+        "source": "Python datetime",
+        "units": {},
+        "data": {
+          "timezone": "UTC"
+        },
+        "error": null,
+        "limitations": []
+      }
+    }
+  ],
+  "final_response": {
+    "id": "9217feb1-a6ed-40a3-96e8-882872f8d0f6",
+    "access_programs": null,
+    "created_at": 1793704569.0,
+    "error": null,
+    "incomplete_details": null,
+    "instructions": null,
+    "metadata": {},
+    "model": "deepseek-flash",
+    "object": "response",
+    "output": [
+      {
+        "id": "330b3dc8-6984-4ad9-aeca-18efeebcc97f",
+        "summary": [],
+        "type": "reasoning",
+        "content": [
+          {
+            "text": "The tool returned the time. The current UTC time is 2026-11-03T11:16:09.842270+00:00. Wait, that seems odd\u2014dates in the future? But I report it. Actually the tool output says 2026. I'll report as given. Hmm, but maybe this is a simulated environment. Report the value.",
+            "type": "reasoning_text"
+          }
+        ],
+        "encrypted_content": "9217feb1-a6ed-40a3-96e8-882872f8d0f6-0",
+        "status": "completed"
+      },
+      {
+        "id": "6e9d5b18-adee-45c6-8098-b583da6ed592",
+        "content": [
+          {
+            "annotations": [],
+            "text": "Based on the `get_time` tool, the current UTC time on your openEuler lab machine is:\n\n**2026-11-03 11:16:09 UTC**\n\n(Exact sampled value: `2026-11-03T11:16:09.842270+00:00`, source: Python datetime, timezone: UTC)",
+            "type": "output_text",
+            "logprobs": []
+          }
+        ],
+        "role": "assistant",
+        "status": "completed",
+        "type": "message",
+        "phase": "final_answer"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "temperature": 1.0,
+    "tool_choice": "none",
+    "tools": [
+      {
+        "name": "get_time",
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "strict": false,
+        "type": "function",
+        "allowed_callers": null,
+        "async_": null,
+        "defer_loading": null,
+        "description": "Read the current UTC time from the openEuler lab machine.",
+        "output_schema": null
+      }
+    ],
+    "top_p": 1.0,
+    "background": false,
+    "completed_at": 1793704571.0,
+    "conversation": null,
+    "max_output_tokens": null,
+    "max_tool_calls": null,
+    "moderation": null,
+    "previous_response_id": null,
+    "prompt": null,
+    "prompt_cache_diagnostics": null,
+    "prompt_cache_key": null,
+    "prompt_cache_options": null,
+    "prompt_cache_retention": null,
+    "reasoning": {
+      "context": null,
+      "effort": null,
+      "generate_summary": null,
+      "mode": null,
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "status": "completed",
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": null
+    },
+    "tool_usage": null,
+    "top_logprobs": 0,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 169,
+      "input_tokens_details": {
+        "cache_write_tokens": null,
+        "cached_tokens": 0
+      },
+      "output_tokens": 153,
+      "output_tokens_details": {
+        "reasoning_tokens": 78
+      },
+      "total_tokens": 322
+    },
+    "user": null,
+    "content_filters": null,
+    "frequency_penalty": 0.0,
+    "presence_penalty": 0.0,
+    "store": false
+  },
+  "answer": "Based on the `get_time` tool, the current UTC time on your openEuler lab machine is:\n\n**2026-11-03 11:16:09 UTC**\n\n(Exact sampled value: `2026-11-03T11:16:09.842270+00:00`, source: Python datetime, timezone: UTC)"
+}

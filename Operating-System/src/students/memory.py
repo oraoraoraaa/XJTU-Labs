@@ -1,5 +1,8 @@
 """内存实验。get_memory_info是已提供的示例，其余TODO由学生完成。"""
 
+import os
+import re
+
 from lab_common import (
     psutil,
     result,
@@ -41,11 +44,42 @@ def list_top_processes(limit: int = 5) -> dict:
         'rss':int}], 'excluded':int},units={'rss':'bytes'})，kind=observation。
     行为：只统计当前真实UID；RSS降序；少于limit时返回全部实际项。
     边界：遍历时进程可退出或拒绝访问，跳过并记录excluded；不能伪造PID。
-    提示：查看psutil.process_iter，避免向模型发送命令行或环境中的秘密。
     """
     integer(limit, 1, 10, "limit")
-    # TODO：过滤、采样和排序；每项结果必须来自当前真实进程。
-    raise StudentTaskPending("M1", "students/memory.py:list_top_processes")
+
+    my_uid = os.getuid()
+    rows = []
+    excluded = 0
+
+    for proc in psutil.process_iter():
+        try:
+            if proc.uids().real != my_uid:
+                continue
+            row = {
+                "pid": proc.pid,
+                "ppid": proc.ppid(),
+                "name": proc.name(),
+                "rss": proc.memory_info().rss,
+            }
+            rows.append(row)
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            excluded += 1
+
+    ranked = sorted(rows, key=lambda x: x["rss"], reverse=True)
+    ranked = ranked[:limit]
+
+    return result(
+        "psutil.process_iter / Process.memory_info",
+        data={
+            "processes": ranked,
+            "excluded": excluded,
+        },
+        units={"rss": "bytes"},
+        limitations=[
+            "Processes are measured one after another.",
+            "RSS includes shared pages.",
+        ],
+    )
 
 
 def parse_smaps(text: str, limit: int = 12) -> list:
@@ -58,8 +92,44 @@ def parse_smaps(text: str, limit: int = 12) -> list:
     这是纯解析函数，可在任意平台用人工短文本独立测试。
     """
     integer(limit, 1, 20, "limit")
-    # TODO：识别映射头与后续指标的所属关系，截断需由调用者声明。
-    raise StudentTaskPending("M2a", "students/memory.py:parse_smaps")
+
+    mappings = []
+    current: dict[str, str | int] = {}
+
+    for raw_line in text.splitlines():
+        # skip empty lines
+        line = raw_line.strip()
+        if not line:
+            continue
+
+        # is header
+        if re.match(r"^[0-9a-fA-F]+-[0-9a-fA-F]+\s", line):
+            # A new header finishes the previous mappings
+            if current:
+                mappings.append(current)
+                if len(mappings) == limit:
+                    return mappings
+
+            fields = line.split(maxsplit=5)
+            current = {
+                "address": fields[0],
+                "permissions": fields[1],
+                "label": "",
+            }
+            if len(fields) == 6:
+                current["label"] = os.path.basename(fields[5])
+
+        # is measurement of the current mapping
+        elif current and ":" in line:
+            name, remainder = line.split(":", 1)
+            if name in ("Size", "Rss", "Pss", "Private_Dirty"):
+                current[f"{name}_KiB"] = int(remainder.split()[0])
+
+    # end of input
+    if current:
+        mappings.append(current)
+
+    return mappings
 
 
 def get_process_memory(pid: int, max_maps: int = 12) -> dict:
@@ -73,8 +143,45 @@ def get_process_memory(pid: int, max_maps: int = 12) -> dict:
     """
     integer(max_maps, 1, 20, "max_maps")
     proc = own_process(pid)
-    # TODO：真实读取proc、调用自己的parse_smaps，再使用result封装。
-    raise StudentTaskPending("M2", "students/memory.py:get_process_memory")
+
+    path = f"/proc/{pid}/smaps"
+    with open(path, "rb") as stream:
+        raw = stream.read(2_000_000)
+
+    # cut because byte cap reached
+    byte_cap_reached = len(raw) == 2_000_000
+    if byte_cap_reached:
+        last_line = raw.rfind(b"\n")
+        raw = raw[: last_line + 1]
+
+    text = raw.decode(encoding="utf-8", errors="replace")
+
+    mapping_count = 0
+    for line in text.splitlines():
+        if re.match(r"^[0-9a-fA-F]+-[0-9a-fA-F]+\s", line):
+            mapping_count += 1
+
+    smaps_list = parse_smaps(text, limit=max_maps)
+
+    return result(
+        "psutil.Process.memory_info / /proc/PID/smaps",
+        data={
+            "pid": pid,
+            "name": proc.name(),
+            "memory": proc.memory_info()._asdict(),
+            "maps": smaps_list,
+            "maps_partial": byte_cap_reached or mapping_count > max_maps,
+        },
+        units={
+            "memory": "bytes",
+            "maps": "KiB",
+        },
+        limitations=[
+            "RSS includes shared pages and is not exclusively private memory.",
+            "Process information and mappings are collected at different instants.",
+            "maps_partial indicates that the mapping list may be incomplete.",
+        ],
+    )
 
 
 def analyze_memory_patterns(pages: list[int] | None = None) -> dict:

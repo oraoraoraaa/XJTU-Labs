@@ -1,0 +1,38 @@
+{
+  "ok": true,
+  "kind": "observation",
+  "sampled_at": "2026-10-31T07:37:12.166133+00:00",
+  "platform": "Linux",
+  "source": "psutil.process_iter / Process.memory_info",
+  "units": {
+    "rss": "bytes"
+  },
+  "data": {
+    "processes": [
+      {
+        "pid": 778246,
+        "ppid": 778245,
+        "name": "python",
+        "rss": 66252800
+      },
+      {
+        "pid": 778245,
+        "ppid": 776620,
+        "name": "python",
+        "rss": 64106496
+      },
+      {
+        "pid": 776620,
+        "ppid": 776619,
+        "name": "bash",
+        "rss": 12443648
+      }
+    ],
+    "excluded": 0
+  },
+  "error": null,
+  "limitations": [
+    "Processes are measured one after another.",
+    "RSS includes shared pages."
+  ]
+}

@@ -10,3 +10,6 @@ config.classroom.json
 *.pem
 *.key
 .DS_Store
+tmp.py
+response.json
+*connection_test.py
