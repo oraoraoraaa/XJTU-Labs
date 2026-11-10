@@ -1040,25 +1040,4 @@ endmodule
 \end{lstlisting}
 先输入讲义示例1001101，再遍历全部六位序列。参考模型只记录前一位是否为0，并在采样后比较两个实现的状态与输出。复位后的空闲输入为1。
 
-\subsection*{A.3 运行方法}
-在Vivado的Tcl控制台中，可通过以下命令载入设计和测试平台，再选择某个测试顶层运行：
-\begin{lstlisting}[language={}]
-source D:/Local/Github/XJTU-Labs/Computer-Organization/lab-2/setup_lab2.tcl
-lab2_sim tb_counter_mod99
-\end{lstlisting}
-第一条命令将设计文件和测试平台注册到工程，第二条命令选择模99计数器测试平台、启动行为仿真并运行至结束。将顶层名称替换为其他测试平台名称，即可查看对应任务。
-
-全部测试也可通过PowerShell脚本统一执行：
-\begin{lstlisting}[language={}]
-.\run_all.ps1
-\end{lstlisting}
-脚本分别调用Verilog编译器、展开器和XSim，对每个测试平台检查是否出现对应的通过信息。任一阶段失败即停止，九个测试平台都通过时才输出完整的通过汇总。
-
-已经保存的结果可直接在Vivado中打开，不必重新产生激励：
-\begin{lstlisting}[language={}]
-source D:/Local/Github/XJTU-Labs/Computer-Organization/lab-2/view_results.tcl
-lab2_view 6-tb-counter-mod99
-\end{lstlisting}
-这两条命令载入结果查看函数，打开已记录的计数器波形数据库，并应用与正文回绕截图相同的信号列表和显示区间。
-
 \end{document}
