@@ -1,0 +1,12 @@
+Vivado XSim 2026.1 - Lab 2 self-checking behavioral simulations
+Clock period: 10 ns. Student-ID modulus: 99.
+PASS tb_counter_mod99: 198 natural counts, 3 feedback wraps, control checks
+PASS tb_d_ff_control: 9 enable/reset/timing checks
+PASS tb_d_latch_reset: 9 transparency/hold/reset checks
+PASS tb_fsm_div3: case/ring equivalence, 12 transitions, asynchronous reset
+PASS tb_latch_vs_ff: 7 latch/flip-flop timing checks
+PASS tb_register_n: 8 capture/hold/high-impedance checks
+PASS tb_sequence_01: sample 1001101 + all 64 six-bit streams (384 bits)
+PASS tb_shift_register: directed timing + 128 mode/data/serial cases
+PASS tb_sr_latch: 8 input/hold/forbidden checks
+ALL 9 TESTBENCHES PASSED

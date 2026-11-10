@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wave_config>
+  <wave_state>
+   </wave_state>
+  <db_ref_list>
+    <db_ref path="D:/Local/Github/XJTU-Labs/Computer-Organization/lab-2/lab2-verilog/.verification/tb_register_n.wdb" id="1">
+      <top_modules>
+        <top_module name="tb_register_n" />
+      </top_modules>
+    </db_ref>
+  </db_ref_list>
+  <zoom_setting>
+    <ZoomStartTime time="0.000 ns" />
+    <ZoomEndTime time="60.000 ns" />
+    <Cursor1Time time="0.000 ns" />
+  </zoom_setting>
+  <column_width_setting>
+    <NameColumnWidth column_width="220" />
+    <ValueColumnWidth column_width="85" />
+  </column_width_setting>
+  <WVObjectSize size="5" />
+  <wvobject fp_name="/tb_register_n/clk" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">clk</obj_property>
+    <obj_property name="ObjectShortName">clk</obj_property>
+    <obj_property name="label">clk</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_register_n/oe" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">oe</obj_property>
+    <obj_property name="ObjectShortName">oe</obj_property>
+    <obj_property name="label">oe</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_register_n/d" type="array">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">d[7:0]</obj_property>
+    <obj_property name="ObjectShortName">d[7:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+    <obj_property name="label">d</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_register_n/dut/stored" type="array">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">stored[7:0]</obj_property>
+    <obj_property name="ObjectShortName">stored[7:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+    <obj_property name="label">stored</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_register_n/q" type="array">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">q[7:0]</obj_property>
+    <obj_property name="ObjectShortName">q[7:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+    <obj_property name="label">q</obj_property>
+  </wvobject>
+</wave_config>

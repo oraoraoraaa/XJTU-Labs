@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wave_config>
+  <wave_state>
+   </wave_state>
+  <db_ref_list>
+    <db_ref path="D:/Local/Github/XJTU-Labs/Computer-Organization/lab-2/lab2-verilog/.verification/tb_shift_register.wdb" id="1">
+      <top_modules>
+        <top_module name="tb_shift_register" />
+      </top_modules>
+    </db_ref>
+  </db_ref_list>
+  <zoom_setting>
+    <ZoomStartTime time="0.000 ns" />
+    <ZoomEndTime time="110.000 ns" />
+    <Cursor1Time time="0.000 ns" />
+  </zoom_setting>
+  <column_width_setting>
+    <NameColumnWidth column_width="220" />
+    <ValueColumnWidth column_width="85" />
+  </column_width_setting>
+  <WVObjectSize size="7" />
+  <wvobject fp_name="/tb_shift_register/clk" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">clk</obj_property>
+    <obj_property name="ObjectShortName">clk</obj_property>
+    <obj_property name="label">clk</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_shift_register/rst" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">rst</obj_property>
+    <obj_property name="ObjectShortName">rst</obj_property>
+    <obj_property name="label">rst</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_shift_register/mode" type="array">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">mode[1:0]</obj_property>
+    <obj_property name="ObjectShortName">mode[1:0]</obj_property>
+    <obj_property name="Radix">BINARYRADIX</obj_property>
+    <obj_property name="label">mode</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_shift_register/d" type="array">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">d[3:0]</obj_property>
+    <obj_property name="ObjectShortName">d[3:0]</obj_property>
+    <obj_property name="Radix">BINARYRADIX</obj_property>
+    <obj_property name="label">d</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_shift_register/dsl" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">dsl</obj_property>
+    <obj_property name="ObjectShortName">dsl</obj_property>
+    <obj_property name="label">dsl</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_shift_register/dsr" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">dsr</obj_property>
+    <obj_property name="ObjectShortName">dsr</obj_property>
+    <obj_property name="label">dsr</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_shift_register/q" type="array">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">q[3:0]</obj_property>
+    <obj_property name="ObjectShortName">q[3:0]</obj_property>
+    <obj_property name="Radix">BINARYRADIX</obj_property>
+    <obj_property name="label">q</obj_property>
+  </wvobject>
+</wave_config>

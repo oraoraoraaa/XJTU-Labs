@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wave_config>
+  <wave_state>
+   </wave_state>
+  <db_ref_list>
+    <db_ref path="D:/Local/Github/XJTU-Labs/Computer-Organization/lab-2/lab2-verilog/.verification/tb_sequence_01.wdb" id="1">
+      <top_modules>
+        <top_module name="tb_sequence_01" />
+      </top_modules>
+    </db_ref>
+  </db_ref_list>
+  <zoom_setting>
+    <ZoomStartTime time="0.000 ns" />
+    <ZoomEndTime time="90.000 ns" />
+    <Cursor1Time time="0.000 ns" />
+  </zoom_setting>
+  <column_width_setting>
+    <NameColumnWidth column_width="220" />
+    <ValueColumnWidth column_width="85" />
+  </column_width_setting>
+  <WVObjectSize size="9" />
+  <wvobject fp_name="/tb_sequence_01/clk" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">clk</obj_property>
+    <obj_property name="ObjectShortName">clk</obj_property>
+    <obj_property name="label">clk</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_sequence_01/rst" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">rst</obj_property>
+    <obj_property name="ObjectShortName">rst</obj_property>
+    <obj_property name="label">rst</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_sequence_01/a" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">a</obj_property>
+    <obj_property name="ObjectShortName">a</obj_property>
+    <obj_property name="label">a</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_sequence_01/u_case/state" type="array">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">state[1:0]</obj_property>
+    <obj_property name="ObjectShortName">state[1:0]</obj_property>
+    <obj_property name="Radix">BINARYRADIX</obj_property>
+    <obj_property name="label">case_state</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_sequence_01/u_case/nextstate" type="array">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">nextstate[1:0]</obj_property>
+    <obj_property name="ObjectShortName">nextstate[1:0]</obj_property>
+    <obj_property name="Radix">BINARYRADIX</obj_property>
+    <obj_property name="label">nextstate</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_sequence_01/u_equations/state" type="array">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">state[1:0]</obj_property>
+    <obj_property name="ObjectShortName">state[1:0]</obj_property>
+    <obj_property name="Radix">BINARYRADIX</obj_property>
+    <obj_property name="label">equation_state</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_sequence_01/y_case" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">y_case</obj_property>
+    <obj_property name="ObjectShortName">y_case</obj_property>
+    <obj_property name="label">y_case</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_sequence_01/y_equations" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">y_equations</obj_property>
+    <obj_property name="ObjectShortName">y_equations</obj_property>
+    <obj_property name="label">y_equations</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_sequence_01/expected" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">expected</obj_property>
+    <obj_property name="ObjectShortName">expected</obj_property>
+    <obj_property name="label">expected</obj_property>
+  </wvobject>
+</wave_config>

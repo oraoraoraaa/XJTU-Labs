@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wave_config>
+  <wave_state>
+   </wave_state>
+  <db_ref_list>
+    <db_ref path="D:/Local/Github/XJTU-Labs/Computer-Organization/lab-2/lab2-verilog/.verification/tb_sr_latch.wdb" id="1">
+      <top_modules>
+        <top_module name="tb_sr_latch" />
+      </top_modules>
+    </db_ref>
+  </db_ref_list>
+  <zoom_setting>
+    <ZoomStartTime time="0.000 ns" />
+    <ZoomEndTime time="80.000 ns" />
+    <Cursor1Time time="0.000 ns" />
+  </zoom_setting>
+  <column_width_setting>
+    <NameColumnWidth column_width="220" />
+    <ValueColumnWidth column_width="85" />
+  </column_width_setting>
+  <WVObjectSize size="4" />
+  <wvobject fp_name="/tb_sr_latch/s" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">s</obj_property>
+    <obj_property name="ObjectShortName">s</obj_property>
+    <obj_property name="label">s</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_sr_latch/r" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">r</obj_property>
+    <obj_property name="ObjectShortName">r</obj_property>
+    <obj_property name="label">r</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_sr_latch/q" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">q</obj_property>
+    <obj_property name="ObjectShortName">q</obj_property>
+    <obj_property name="label">q</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_sr_latch/qn" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">qn</obj_property>
+    <obj_property name="ObjectShortName">qn</obj_property>
+    <obj_property name="label">qn</obj_property>
+  </wvobject>
+</wave_config>

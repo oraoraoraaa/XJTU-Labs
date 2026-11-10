@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wave_config>
+  <wave_state>
+   </wave_state>
+  <db_ref_list>
+    <db_ref path="D:/Local/Github/XJTU-Labs/Computer-Organization/lab-2/lab2-verilog/.verification/tb_counter_mod99.wdb" id="1">
+      <top_modules>
+        <top_module name="tb_counter_mod99" />
+      </top_modules>
+    </db_ref>
+  </db_ref_list>
+  <zoom_setting>
+    <ZoomStartTime time="1970.000 ns" />
+    <ZoomEndTime time="2090.000 ns" />
+    <Cursor1Time time="1970.000 ns" />
+  </zoom_setting>
+  <column_width_setting>
+    <NameColumnWidth column_width="220" />
+    <ValueColumnWidth column_width="85" />
+  </column_width_setting>
+  <WVObjectSize size="10" />
+  <wvobject fp_name="/tb_counter_mod99/clk" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">clk</obj_property>
+    <obj_property name="ObjectShortName">clk</obj_property>
+    <obj_property name="label">clk</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_counter_mod99/cr_n" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">cr_n</obj_property>
+    <obj_property name="ObjectShortName">cr_n</obj_property>
+    <obj_property name="label">cr_n</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_counter_mod99/pe_n" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">pe_n</obj_property>
+    <obj_property name="ObjectShortName">pe_n</obj_property>
+    <obj_property name="label">pe_n</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_counter_mod99/cep" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">cep</obj_property>
+    <obj_property name="ObjectShortName">cep</obj_property>
+    <obj_property name="label">cep</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_counter_mod99/cet" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">cet</obj_property>
+    <obj_property name="ObjectShortName">cet</obj_property>
+    <obj_property name="label">cet</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_counter_mod99/d" type="array">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">d[6:0]</obj_property>
+    <obj_property name="ObjectShortName">d[6:0]</obj_property>
+    <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+    <obj_property name="label">d_decimal</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_counter_mod99/q" type="array">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">q[6:0]</obj_property>
+    <obj_property name="ObjectShortName">q[6:0]</obj_property>
+    <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+    <obj_property name="label">q_decimal</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_counter_mod99/tc" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">tc</obj_property>
+    <obj_property name="ObjectShortName">tc</obj_property>
+    <obj_property name="label">tc</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_counter_mod99/feedback_clear" type="logic">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">feedback_clear</obj_property>
+    <obj_property name="ObjectShortName">feedback_clear</obj_property>
+    <obj_property name="label">feedback_clear</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_counter_mod99/wraps" type="array">
+    <obj_property name="DisplayName">label</obj_property>
+    <obj_property name="ElementShortName">wraps[31:0]</obj_property>
+    <obj_property name="ObjectShortName">wraps[31:0]</obj_property>
+    <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+    <obj_property name="label">wraps</obj_property>
+  </wvobject>
+</wave_config>
