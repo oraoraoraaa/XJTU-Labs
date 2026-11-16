@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<wave_config>
+  <wave_state>
+   </wave_state>
+  <db_ref_list>
+    <db_ref path="D:/Local/Github/XJTU-Labs/Computer-Organization/lab-4/lab4-verilog/.verification/tb_instruction_memory.wdb" id="1">
+      <top_modules>
+        <top_module name="tb_instruction_memory" />
+      </top_modules>
+    </db_ref>
+  </db_ref_list>
+  <zoom_setting>
+    <ZoomStartTime time="0.000 ns" />
+    <ZoomEndTime time="90.000 ns" />
+    <Cursor1Time time="0.000 ns" />
+  </zoom_setting>
+  <column_width_setting>
+   </column_width_setting>
+  <WVObjectSize size="3" />
+  <wvobject fp_name="/tb_instruction_memory/addr" type="array">
+    <obj_property name="ElementShortName">addr[5:0]</obj_property>
+    <obj_property name="ObjectShortName">addr[5:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_instruction_memory/rd" type="array">
+    <obj_property name="ElementShortName">rd[31:0]</obj_property>
+    <obj_property name="ObjectShortName">rd[31:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_instruction_memory/expected" type="array">
+    <obj_property name="ElementShortName">expected[31:0]</obj_property>
+    <obj_property name="ObjectShortName">expected[31:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+</wave_config>

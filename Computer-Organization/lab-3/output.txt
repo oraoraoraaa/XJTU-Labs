@@ -1,0 +1,7 @@
+Vivado XSim 2026.1 - Lab 3 self-checking behavioral simulations
+Combinational circuits; stimulus interval 10 ns.
+PASS tb_adders: 4 directed + 512 exhaustive + 1000 random; widths 4/16/32 and CLA4
+PASS tb_alu_bus: disable/re-enable, 8 one-hot selections, reserved opcode
+PASS tb_alu32: 20 directed + 32000 random opcode checks; all results/flags and bus equivalence
+PASS tb_full_adder: all 8 truth-table rows
+ALL 4 TESTBENCHES PASSED

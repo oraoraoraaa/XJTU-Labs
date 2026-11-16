@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='utf-8'?>
+<wave_config>
+  <wave_state>
+   </wave_state>
+  <db_ref_list>
+    <db_ref path="D:/Local/Github/XJTU-Labs/Computer-Organization/lab-4/lab4-verilog/.verification/tb_ram_4kx32.wdb" id="1">
+      <top_modules>
+        <top_module name="tb_ram_4kx32" />
+      </top_modules>
+    </db_ref>
+  </db_ref_list>
+  <zoom_setting>
+    <ZoomStartTime time="0.000 ns" />
+    <ZoomEndTime time="100.000 ns" />
+    <Cursor1Time time="0.000 ns" />
+  </zoom_setting>
+  <column_width_setting>
+   </column_width_setting>
+  <WVObjectSize size="9" />
+  <wvobject fp_name="/tb_ram_4kx32/clk" type="logic">
+    <obj_property name="ElementShortName">clk</obj_property>
+    <obj_property name="ObjectShortName">clk</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_ram_4kx32/rst" type="logic">
+    <obj_property name="ElementShortName">rst</obj_property>
+    <obj_property name="ObjectShortName">rst</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_ram_4kx32/cs" type="logic">
+    <obj_property name="ElementShortName">cs</obj_property>
+    <obj_property name="ObjectShortName">cs</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_ram_4kx32/re" type="logic">
+    <obj_property name="ElementShortName">re</obj_property>
+    <obj_property name="ObjectShortName">re</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_ram_4kx32/we" type="logic">
+    <obj_property name="ElementShortName">we</obj_property>
+    <obj_property name="ObjectShortName">we</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_ram_4kx32/addr" type="array">
+    <obj_property name="ElementShortName">addr[11:0]</obj_property>
+    <obj_property name="ObjectShortName">addr[11:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_ram_4kx32/dut/bank_cs" type="array">
+    <obj_property name="ElementShortName">bank_cs[3:0]</obj_property>
+    <obj_property name="ObjectShortName">bank_cs[3:0]</obj_property>
+    <obj_property name="Radix">BINARYRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_ram_4kx32/din" type="array">
+    <obj_property name="ElementShortName">din[31:0]</obj_property>
+    <obj_property name="ObjectShortName">din[31:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_ram_4kx32/dout" type="array">
+    <obj_property name="ElementShortName">dout[31:0]</obj_property>
+    <obj_property name="ObjectShortName">dout[31:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+</wave_config>

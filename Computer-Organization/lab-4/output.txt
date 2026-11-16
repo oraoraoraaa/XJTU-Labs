@@ -1,0 +1,8 @@
+Vivado XSim 2026.1 - Lab 4 self-checking behavioral simulations
+Clock period 10 ns; synchronous writes and asynchronous reads.
+PASS tb_instruction_memory: all 64 initialized instruction words
+PASS tb_ram_1kx16: 1024 address writes/readback, full reset sweep, select and bus controls
+PASS tb_ram_4kx32: 4096 address writes/readback, full reset sweep, select and bus controls
+PASS tb_ram_inout: 4096 address writes/readback, full reset sweep, select and bus controls
+PASS tb_register_file: all 32 registers, zero protection, two read ports, 1000 random cycles, reset
+ALL 5 TESTBENCHES PASSED

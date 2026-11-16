@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='utf-8'?>
+<wave_config>
+  <wave_state>
+   </wave_state>
+  <db_ref_list>
+    <db_ref path="D:/Local/Github/XJTU-Labs/Computer-Organization/lab-3/lab3-verilog/.verification/tb_alu_bus.wdb" id="1">
+      <top_modules>
+        <top_module name="tb_alu_bus" />
+      </top_modules>
+    </db_ref>
+  </db_ref_list>
+  <zoom_setting>
+    <ZoomStartTime time="0.000 ns" />
+    <ZoomEndTime time="110.000 ns" />
+    <Cursor1Time time="0.000 ns" />
+  </zoom_setting>
+  <column_width_setting>
+   </column_width_setting>
+  <WVObjectSize size="11" />
+  <wvobject fp_name="/tb_alu_bus/en" type="logic">
+    <obj_property name="ElementShortName">en</obj_property>
+    <obj_property name="ObjectShortName">en</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_alu_bus/op" type="array">
+    <obj_property name="ElementShortName">op[3:0]</obj_property>
+    <obj_property name="ObjectShortName">op[3:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_alu_bus/a" type="array">
+    <obj_property name="ElementShortName">a[31:0]</obj_property>
+    <obj_property name="ObjectShortName">a[31:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_alu_bus/b" type="array">
+    <obj_property name="ElementShortName">b[31:0]</obj_property>
+    <obj_property name="ObjectShortName">b[31:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_alu_bus/dut/select" type="array">
+    <obj_property name="ElementShortName">select[7:0]</obj_property>
+    <obj_property name="ObjectShortName">select[7:0]</obj_property>
+    <obj_property name="Radix">BINARYRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_alu_bus/f" type="array">
+    <obj_property name="ElementShortName">f[31:0]</obj_property>
+    <obj_property name="ObjectShortName">f[31:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_alu_bus/zf" type="logic">
+    <obj_property name="ElementShortName">zf</obj_property>
+    <obj_property name="ObjectShortName">zf</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_alu_bus/cf" type="logic">
+    <obj_property name="ElementShortName">cf</obj_property>
+    <obj_property name="ObjectShortName">cf</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_alu_bus/of" type="logic">
+    <obj_property name="ElementShortName">of</obj_property>
+    <obj_property name="ObjectShortName">of</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_alu_bus/sf" type="logic">
+    <obj_property name="ElementShortName">sf</obj_property>
+    <obj_property name="ObjectShortName">sf</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_alu_bus/pf" type="logic">
+    <obj_property name="ElementShortName">pf</obj_property>
+    <obj_property name="ObjectShortName">pf</obj_property>
+  </wvobject>
+</wave_config>

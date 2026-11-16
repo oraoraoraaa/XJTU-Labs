@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='utf-8'?>
+<wave_config>
+  <wave_state>
+   </wave_state>
+  <db_ref_list>
+    <db_ref path="D:/Local/Github/XJTU-Labs/Computer-Organization/lab-3/lab3-verilog/.verification/tb_adders.wdb" id="1">
+      <top_modules>
+        <top_module name="tb_adders" />
+      </top_modules>
+    </db_ref>
+  </db_ref_list>
+  <zoom_setting>
+    <ZoomStartTime time="0.000 ns" />
+    <ZoomEndTime time="40.000 ns" />
+    <Cursor1Time time="0.000 ns" />
+  </zoom_setting>
+  <column_width_setting>
+   </column_width_setting>
+  <WVObjectSize size="11" />
+  <wvobject fp_name="/tb_adders/a" type="array">
+    <obj_property name="ElementShortName">a[31:0]</obj_property>
+    <obj_property name="ObjectShortName">a[31:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_adders/b" type="array">
+    <obj_property name="ElementShortName">b[31:0]</obj_property>
+    <obj_property name="ObjectShortName">b[31:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_adders/cin" type="logic">
+    <obj_property name="ElementShortName">cin</obj_property>
+    <obj_property name="ObjectShortName">cin</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_adders/s4" type="array">
+    <obj_property name="ElementShortName">s4[3:0]</obj_property>
+    <obj_property name="ObjectShortName">s4[3:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_adders/c4" type="logic">
+    <obj_property name="ElementShortName">c4</obj_property>
+    <obj_property name="ObjectShortName">c4</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_adders/sc" type="array">
+    <obj_property name="ElementShortName">sc[3:0]</obj_property>
+    <obj_property name="ObjectShortName">sc[3:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_adders/cc" type="logic">
+    <obj_property name="ElementShortName">cc</obj_property>
+    <obj_property name="ObjectShortName">cc</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_adders/s16" type="array">
+    <obj_property name="ElementShortName">s16[15:0]</obj_property>
+    <obj_property name="ObjectShortName">s16[15:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_adders/c16" type="logic">
+    <obj_property name="ElementShortName">c16</obj_property>
+    <obj_property name="ObjectShortName">c16</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_adders/s32" type="array">
+    <obj_property name="ElementShortName">s32[31:0]</obj_property>
+    <obj_property name="ObjectShortName">s32[31:0]</obj_property>
+    <obj_property name="Radix">HEXRADIX</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_adders/c32" type="logic">
+    <obj_property name="ElementShortName">c32</obj_property>
+    <obj_property name="ObjectShortName">c32</obj_property>
+  </wvobject>
+</wave_config>

@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='utf-8'?>
+<wave_config>
+  <wave_state>
+   </wave_state>
+  <db_ref_list>
+    <db_ref path="D:/Local/Github/XJTU-Labs/Computer-Organization/lab-3/lab3-verilog/.verification/tb_full_adder.wdb" id="1">
+      <top_modules>
+        <top_module name="tb_full_adder" />
+      </top_modules>
+    </db_ref>
+  </db_ref_list>
+  <zoom_setting>
+    <ZoomStartTime time="0.000 ns" />
+    <ZoomEndTime time="80.000 ns" />
+    <Cursor1Time time="0.000 ns" />
+  </zoom_setting>
+  <column_width_setting>
+   </column_width_setting>
+  <WVObjectSize size="5" />
+  <wvobject fp_name="/tb_full_adder/a" type="logic">
+    <obj_property name="ElementShortName">a</obj_property>
+    <obj_property name="ObjectShortName">a</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_full_adder/b" type="logic">
+    <obj_property name="ElementShortName">b</obj_property>
+    <obj_property name="ObjectShortName">b</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_full_adder/cin" type="logic">
+    <obj_property name="ElementShortName">cin</obj_property>
+    <obj_property name="ObjectShortName">cin</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_full_adder/sum" type="logic">
+    <obj_property name="ElementShortName">sum</obj_property>
+    <obj_property name="ObjectShortName">sum</obj_property>
+  </wvobject>
+  <wvobject fp_name="/tb_full_adder/cout" type="logic">
+    <obj_property name="ElementShortName">cout</obj_property>
+    <obj_property name="ObjectShortName">cout</obj_property>
+  </wvobject>
+</wave_config>
