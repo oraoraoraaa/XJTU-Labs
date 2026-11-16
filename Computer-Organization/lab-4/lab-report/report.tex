@@ -183,7 +183,7 @@ ALL 5 TESTBENCHES PASSED
 \clearpage
 \section*{附录：完整源代码与运行方法}
 \addcontentsline{toc}{section}{附录：完整源代码与运行方法}
-以下直接嵌入实际使用的设计文件、测试平台和初始化数据，便于结合正文检查接口与操作时序。
+
 \subsection*{设计模块}
 \subsubsection*{\texttt{instruction\_memory.v}}
 \begin{lstlisting}
@@ -528,24 +528,4 @@ ac030000
 \end{lstlisting}
 上述每行对应一个32位字，按地址从0到63顺序装入。前八行是指令样例，后56行显式为0，因此文件覆盖整个ROM空间。
 
-\subsection*{运行方法}
-Vivado Tcl控制台中执行：
-\begin{lstlisting}[language={}]
-source D:/Local/Github/XJTU-Labs/Computer-Organization/lab-4/setup_lab4.tcl
-lab4_sim tb_register_file
-\end{lstlisting}
-第一条命令注册设计、测试平台和指令初始化文件，第二条命令运行寄存器文件测试到结束。替换测试顶层可运行其他模块。
-
-在实验目录的PowerShell中可统一运行五个测试：
-\begin{lstlisting}[language={}]
-.\run_all.ps1
-\end{lstlisting}
-脚本复制初始化文件，逐个完成编译、展开和仿真，并检查实际输出中的通过标记；任一阶段失败即停止。
-
-已保存的波形可以直接查看：
-\begin{lstlisting}[language={}]
-source D:/Local/Github/XJTU-Labs/Computer-Organization/lab-4/view_results.tcl
-lab4_view 2-tb-ram-bank-boundary
-\end{lstlisting}
-这两条命令打开记录的扩展RAM波形，并应用跨越存储组边界的信号列表和时间范围，无需重新产生激励。
 \end{document}

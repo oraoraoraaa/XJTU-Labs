@@ -167,7 +167,7 @@ ALL 4 TESTBENCHES PASSED
 \clearpage
 \section*{附录：完整源代码和运行方法}
 \addcontentsline{toc}{section}{附录：完整源代码和运行方法}
-下面直接嵌入实际仿真使用的设计文件和测试平台，便于将报告与图像一起复制后阅读。
+
 \subsection*{设计模块}
 \subsubsection*{\texttt{adders.v}}
 \begin{lstlisting}
@@ -414,24 +414,4 @@ endmodule
 \end{lstlisting}
 穷举全部八种输入，并检查完整的和与进位。
 
-\subsection*{运行方法}
-在Vivado Tcl控制台中执行：
-\begin{lstlisting}[language={}]
-source D:/Local/Github/XJTU-Labs/Computer-Organization/lab-3/setup_lab3.tcl
-lab3_sim tb_alu32
-\end{lstlisting}
-第一条命令注册设计源文件和仿真源文件，第二条选择ALU测试顶层并运行到结束。将顶层替换为其他测试平台可查看相应任务。
-
-在实验目录的PowerShell中执行以下命令，可以统一完成四个平台的编译、展开和仿真：
-\begin{lstlisting}[language={}]
-.\run_all.ps1
-\end{lstlisting}
-脚本遇到编译失败、展开失败或没有通过信息时会停止，全部测试成功后才生成完整通过汇总。
-
-查看已保存的结果可执行：
-\begin{lstlisting}[language={}]
-source D:/Local/Github/XJTU-Labs/Computer-Organization/lab-3/view_results.tcl
-lab3_view 3-tb-alu32-flags
-\end{lstlisting}
-这两条命令直接打开已记录的波形数据库，并载入标志位截图所用的信号和时间区间，无需重新产生输入激励。
 \end{document}
