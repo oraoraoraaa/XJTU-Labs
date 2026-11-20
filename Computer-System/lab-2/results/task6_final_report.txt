@@ -1,0 +1,11 @@
+task6_final (qnn) report:
+  l1d-repl      cycles         ipc  l1d_miss_rate  l1d_mshr_mpki  l2_accesses  dram_bytes
+----------  ----------  ----------  -------------  -------------  -----------  ----------
+       lru   9.054e+05       6.407          0.01%          0.001        9.000    1280.000
+    random   9.065e+05       6.399          0.04%          0.007       42.000    1280.000
+
+task6_final_x (pchase) report:
+  l1d-size      cycles         ipc  l1d_mshr_mpki     l1d_mlp  l2_accesses
+----------  ----------  ----------  -------------  ----------  -----------
+      32kB   4.429e+06       0.271        146.170       1.000    1.754e+05
+     128kB   3.759e+06       0.319         84.463       1.000    1.014e+05

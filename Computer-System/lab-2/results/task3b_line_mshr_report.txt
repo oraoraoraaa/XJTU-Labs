@@ -1,0 +1,63 @@
+line_mshr report:
+ cacheline   l1d-mshrs      cycles         ipc  l1d_mshr_mpki     l1d_mlp
+----------  ----------  ----------  ----------  -------------  ----------
+        16           4   4.985e+06       1.164          8.841       2.996
+        16          16   4.985e+06       1.164          8.841       2.996
+        16          64   4.985e+06       1.164          8.841       2.996
+        32           4   1.295e+06       4.480          4.421      15.729
+        32          16   1.295e+06       4.481          4.421      15.729
+        32          64   1.295e+06       4.481          4.421      15.729
+        64           4   1.102e+06       5.263          2.211      15.769
+        64          16   1.102e+06       5.263          2.211      15.769
+        64          64   1.102e+06       5.263          2.211      15.769
+
+no_mshrs blockedCycles:
+out/sweeps/task3b_line_mshr/p000_cacheline-16_l1d-mshrs-4/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs         8261                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p000_cacheline-16_l1d-mshrs-4/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p000_cacheline-16_l1d-mshrs-4/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs          320                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p001_cacheline-16_l1d-mshrs-16/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs          163                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p001_cacheline-16_l1d-mshrs-16/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p001_cacheline-16_l1d-mshrs-16/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p002_cacheline-16_l1d-mshrs-64/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p002_cacheline-16_l1d-mshrs-64/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p002_cacheline-16_l1d-mshrs-64/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p003_cacheline-32_l1d-mshrs-4/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs         5746                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p003_cacheline-32_l1d-mshrs-4/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p003_cacheline-32_l1d-mshrs-4/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs          284                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p004_cacheline-32_l1d-mshrs-16/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p004_cacheline-32_l1d-mshrs-16/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p004_cacheline-32_l1d-mshrs-16/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p005_cacheline-32_l1d-mshrs-64/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p005_cacheline-32_l1d-mshrs-64/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p005_cacheline-32_l1d-mshrs-64/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p006_cacheline-64_l1d-mshrs-4/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs         2432                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p006_cacheline-64_l1d-mshrs-4/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p006_cacheline-64_l1d-mshrs-4/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs          238                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p007_cacheline-64_l1d-mshrs-16/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p007_cacheline-64_l1d-mshrs-16/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p007_cacheline-64_l1d-mshrs-16/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p008_cacheline-64_l1d-mshrs-64/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p008_cacheline-64_l1d-mshrs-64/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+out/sweeps/task3b_line_mshr/p008_cacheline-64_l1d-mshrs-64/stats.txt:system.cpu.dcache.blockedCycles::no_mshrs            0                       # number of cycles access was blocked (Cycle)
+
+fetch stats (16B):
+system.cpu.numCycles                          1019107                       # Number of cpu cycles simulated (Cycle)
+system.cpu.fetch.cacheLines                    309084                       # Number of cache lines fetched (Count)
+system.cpu.fetchStats0.icacheStallCycles       631206                       # ICache total stall cycles (Cycle)
+system.cpu.numCycles                          4985034                       # Number of cpu cycles simulated (Cycle)
+system.cpu.fetch.cacheLines                   1661088                       # Number of cache lines fetched (Count)
+system.cpu.fetchStats0.icacheStallCycles      3321370                       # ICache total stall cycles (Cycle)
+system.cpu.numCycles                            49229                       # Number of cpu cycles simulated (Cycle)
+system.cpu.fetch.cacheLines                      3370                       # Number of cache lines fetched (Count)
+system.cpu.fetchStats0.icacheStallCycles        14157                       # ICache total stall cycles (Cycle)
+
+fetch stats (64B):
+system.cpu.numCycles                           757621                       # Number of cpu cycles simulated (Cycle)
+system.cpu.fetch.cacheLines                      2174                       # Number of cache lines fetched (Count)
+system.cpu.fetchStats0.icacheStallCycles         9659                       # ICache total stall cycles (Cycle)
+system.cpu.numCycles                          1102090                       # Number of cpu cycles simulated (Cycle)
+system.cpu.fetch.cacheLines                      4546                       # Number of cache lines fetched (Count)
+system.cpu.fetchStats0.icacheStallCycles         9522                       # ICache total stall cycles (Cycle)
+system.cpu.numCycles                            22154                       # Number of cpu cycles simulated (Cycle)
+system.cpu.fetch.cacheLines                      2099                       # Number of cache lines fetched (Count)
+system.cpu.fetchStats0.icacheStallCycles         8028                       # ICache total stall cycles (Cycle)
