@@ -1,0 +1,82 @@
+scons: Reading SConscript files ...
+Mkdir("/Users/rinalic/Local/Github/XJTU-Labs/Computer-System/gem5/build/RISCV/gem5.build")
+Checking for linker -Wl,--as-needed support... (cached) no
+Warning: Detected Clang version 21.0.0 is not officially supported.
+         gem5 supports Clang v14 up to v19.
+Checking for compiler -Wno-c99-designator support... (cached) yes
+Checking for compiler -Wno-defaulted-function-deleted support... (cached) yes
+Checking for compiler -gz support... (cached) yes
+Checking for linker -gz support... (cached) yes
+Info: Using Python config: /Users/rinalic/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/bin/python3.11-config
+Checking for C header file Python.h... (cached) yes
+Checking Python version... (cached) 3.11.15
+Checking for accept(0,0,0) in C++ library None... (cached) yes
+Checking for zlibVersion() in C++ library z... (cached) yes
+Checking for C library tcmalloc_minimal... (cached) no
+Checking for C library tcmalloc... (cached) no
+Warning: You can get a 12% performance improvement by installing tcmalloc
+         (libgoogle-perftools-dev package on Ubuntu or RedHat).
+Building in /Users/rinalic/Local/Github/XJTU-Labs/Computer-System/gem5/build/RISCV
+"build_tools/kconfig_base.py" "/Users/rinalic/Local/Github/XJTU-Labs/Computer-System/gem5/build/RISCV/gem5.build/Kconfig" "/Users/rinalic/Local/Github/XJTU-Labs/Computer-System/gem5/src/Kconfig"
+Warning: While checking protoc version: [Errno 2] No such file or directory:
+         'protoc'
+Warning: Protocol buffer compiler (protoc) not found.
+         Please install protobuf-compiler for tracing support.
+Checking for C header file capstone/capstone.h... (cached) no
+Warning: Header file <capstone/capstone.h> not found.
+         This host has no capstone library installed.
+Checking for C header file linux/kvm.h... (cached) no
+Warning: Info: Compatible header file <linux/kvm.h> not found, disabling KVM
+         support.
+Checking for C header file linux/if_tun.h... (cached) no
+Info: Compatible header file <linux/if_tun.h> not found.
+Checking for backtrace_symbols_fd((void *)1, 0, 0) in C library None... (cached) yes
+Checking for C header file fenv.h... (cached) yes
+Checking for C header file png.h... (cached) no
+Warning: Header file <png.h> not found.
+         This host has no libpng library.
+         Disabling support for PNG framebuffers.
+Checking for clock_nanosleep(0,0,NULL,NULL) in C library None... (cached) no
+Checking for clock_nanosleep(0,0,NULL,NULL) in C library rt... (cached) no
+Warning: Can't find library for POSIX clocks.
+Checking for C header file valgrind/valgrind.h... (cached) no
+Checking for pkg-config package hdf5-serial... (cached) no
+Checking for pkg-config package hdf5... (cached) no
+Checking for H5Fcreate("", 0, 0, 0) in C library hdf5... (cached) no
+Warning: Couldn't find HDF5 C++ libraries. Disabling HDF5 support.
+Checking for shm_open("/test", 0, 0) in C library None... (cached) yes
+Warning: Cannot enable KVM, host seems to lack KVM support
+Checking whether __i386__ is declared... (cached) no
+Checking whether __x86_64__ is declared... (cached) no
+Warning: Unrecognized architecture for systemc.
+BUILD_TLM not set, not building CHI-TLM integration
+
+scons: done reading SConscript files.
+scons: Building targets ...
+ [VER TAGS]  -> RISCV/sim/tags.cc
+ [     CXX] src/mem/cache/replacement_policies/cssys_rp.cc -> RISCV/mem/cache/replacement_policies/cssys_rp.o
+ [     CXX] src/base/date.cc -> RISCV/base/date.o
+ [    LINK]  -> RISCV/gem5.opt
+ld: warning: ignoring duplicate libraries: '-lc++', '-lz'
+ld: warning: search path 'build/RISCV/ext/googletest' not found
+scons: done building targets.
+*** Summary of Warnings ***
+Warning: Detected Clang version 21.0.0 is not officially supported.
+         gem5 supports Clang v14 up to v19.
+Warning: You can get a 12% performance improvement by installing tcmalloc
+         (libgoogle-perftools-dev package on Ubuntu or RedHat).
+Warning: While checking protoc version: [Errno 2] No such file or directory:
+         'protoc'
+Warning: Protocol buffer compiler (protoc) not found.
+         Please install protobuf-compiler for tracing support.
+Warning: Header file <capstone/capstone.h> not found.
+         This host has no capstone library installed.
+Warning: Info: Compatible header file <linux/kvm.h> not found, disabling KVM
+         support.
+Warning: Header file <png.h> not found.
+         This host has no libpng library.
+         Disabling support for PNG framebuffers.
+Warning: Can't find library for POSIX clocks.
+Warning: Couldn't find HDF5 C++ libraries. Disabling HDF5 support.
+Warning: Cannot enable KVM, host seems to lack KVM support
+scons build/RISCV/gem5.opt -j8  13.37s user 1.75s system 111% cpu 13.551 total

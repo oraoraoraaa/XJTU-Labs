@@ -1,0 +1,50 @@
+--- a/gem5/src/mem/cache/replacement_policies/ReplacementPolicies.py
++++ b/gem5/src/mem/cache/replacement_policies/ReplacementPolicies.py
+@@ -175,3 +175,14 @@
+     type = "WeightedLRURP"
+     cxx_class = "gem5::replacement_policy::WeightedLRU"
+     cxx_header = "mem/cache/replacement_policies/weighted_lru_rp.hh"
++
++
++class CssysRP(BaseReplacementPolicy):
++    type = "CssysRP"
++    cxx_class = "gem5::replacement_policy::Cssys"
++    cxx_header = "mem/cache/replacement_policies/cssys_rp.hh"
++
++    evict_mru = Param.Bool(
++        False, "True: evict the most recently used way (MRU); "
++               "False: evict the least recently used way (LRU)"
++    )
+--- a/gem5/src/mem/cache/replacement_policies/SConscript
++++ b/gem5/src/mem/cache/replacement_policies/SConscript
+@@ -29,11 +29,12 @@
+ Import('*')
+ 
+ SimObject('ReplacementPolicies.py', sim_objects=[
+-    'BaseReplacementPolicy', 'DuelingRP', 'FIFORP', 'SecondChanceRP',
++    'BaseReplacementPolicy', 'CssysRP', 'DuelingRP', 'FIFORP', 'SecondChanceRP',
+     'LFURP', 'LRURP', 'BIPRP', 'MRURP', 'RandomRP', 'BRRIPRP', 'SHiPRP',
+     'SHiPMemRP', 'SHiPPCRP', 'TreePLRURP', 'WeightedLRURP'])
+ 
+ Source('bip_rp.cc')
++Source('cssys_rp.cc')
+ Source('brrip_rp.cc')
+ Source('dueling_rp.cc')
+ Source('fifo_rp.cc')
+--- a/framework/cssys_se.py
++++ b/framework/cssys_se.py
+@@ -72,6 +72,14 @@
+     "treeplru": TreePLRURP,
+     "secondchance": SecondChanceRP,
+ }
++
++# 实验三：学生自己写进 gem5 的替换策略。只有重新编译过 gem5 的人才有这个类，
++# 所以用 try 包起来——没做实验三的人照样能跑实验一、二。
++try:
++    REPLACEMENT_POLICIES["cssys"] = CssysRP  # 自己写的，LRU 口径
++    REPLACEMENT_POLICIES["cssys_mru"] = lambda: CssysRP(evict_mru=True)
++except NameError:
++    pass
+ 
+ # 实验六：学生自己写进 gem5 的加速器。和上面的 CssysRP 同理——
+ # 没编进去的人照样能跑前五次实验，只是不能用 --accel。

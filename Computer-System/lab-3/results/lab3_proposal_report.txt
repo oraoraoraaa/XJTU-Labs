@@ -1,0 +1,11 @@
+=== Proposal Comparison: qnn (8 2799) ===
+  proposal      cycles         ipc  l1d_misses  l1d_mshr_mpki  l1d_pf_accuracy  l2_accesses  dram_bytes
+----------  ----------  ----------  ----------  -------------  ---------------  -----------  ----------
+lab2_128kB_cl128   9.054e+05       6.407     114.000          0.001            0.000        9.000    1280.000
+lab3_32kB_stride_drrip    8.91e+05       6.510    3613.000          2.227            0.256    12927.000    1088.000
+
+=== Proposal Comparison: pchase (256 200000 2799) ===
+  proposal      cycles         ipc  l1d_misses  l1d_mshr_mpki  l1d_pf_accuracy  l2_accesses  dram_bytes
+----------  ----------  ----------  ----------  -------------  ---------------  -----------  ----------
+lab2_128kB_cl128   3.759e+06       0.319   1.014e+05         84.463            0.000    1.014e+05   48000.000
+lab3_32kB_stride_drrip    4.49e+06       0.267   1.763e+05        146.935            0.000    1.763e+05   65088.000

@@ -1,0 +1,15 @@
+simInsts = 5800766.0
+simTicks = 1185634000.0
+system.cpu.numCycles = 2371268.0
+system.l2cache.overallAccesses::total = 12835.0
+system.l2cache.overallMshrMisses::total = 12827.0
+system.l2cache.replacement_policy.avgFirstTouchDelay = 45814615.028276
+system.l2cache.replacement_policy.deadFraction = 0.417521
+system.l2cache.replacement_policy.deadOnArrival = 5581.0
+system.l2cache.replacement_policy.firstTouchCount = 8311.0
+system.l2cache.replacement_policy.firstTouchDelaySum = 380765265500.0
+system.l2cache.replacement_policy.insertions = 13367.0
+system.l2cache.replacement_policy.refsPerInsertion = 0.621755
+system.l2cache.replacement_policy.touches = 8311.0
+system.l2cache.replacement_policy.victimRefSum = 7786.0
+system.l2cache.replacement_policy.victimizations = 13367.0

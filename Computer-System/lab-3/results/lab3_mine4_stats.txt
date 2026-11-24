@@ -1,0 +1,13 @@
+simInsts = 5800766.0
+simTicks = 571285500.0
+system.cpu.dcache.replacement_policy.avgFirstTouchDelay = 8624.961076
+system.cpu.dcache.replacement_policy.deadFraction = 0.000156
+system.cpu.dcache.replacement_policy.deadOnArrival = 2.0
+system.cpu.dcache.replacement_policy.firstTouchCount = 12820.0
+system.cpu.dcache.replacement_policy.firstTouchDelaySum = 110572001.0
+system.cpu.dcache.replacement_policy.insertions = 12820.0
+system.cpu.dcache.replacement_policy.refsPerInsertion = 112.272855
+system.cpu.dcache.replacement_policy.touches = 1439338.0
+system.cpu.dcache.replacement_policy.victimRefSum = 617283.0
+system.cpu.dcache.replacement_policy.victimizations = 12820.0
+system.cpu.numCycles = 1142571.0
